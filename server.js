@@ -125,7 +125,15 @@ http.createServer(async (req, res) => {
     if (typeof input.token !== 'string' || !input.token || input.token.length > 2048 || typeof input.newPassword !== 'string' || input.newPassword.length < 12 || input.newPassword.length > 128) return json(res, 400, {error:'Use a valid reset link and a password of 12–128 characters.'});
     try {
       const upstream = await neon('/reset-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:input.token,newPassword:input.newPassword})});
-      if (!upstream.ok) return json(res, 400, {error:'This reset link is invalid or expired. Request a new one.'});
+      if (!upstream.ok) {
+        const detail = await upstream.json().catch(() => ({}));
+        const reason = String(detail.code || detail.message || '');
+        console.error('Neon password reset rejected:', upstream.status, detail.code || 'no-code');
+        if (/password/i.test(reason)) return json(res, 400, {error:'Neon rejected this password. Choose a longer, less predictable password.'});
+        if (upstream.status === 429) return json(res, 429, {error:'Too many attempts. Try again later.'});
+        if (upstream.status >= 500) return json(res, 502, {error:'Reset service unavailable. Try again later.'});
+        return json(res, 400, {error:'The reset token was not accepted. Request a new link and open the newest email.'});
+      }
       return json(res, 200, {ok:true});
     } catch (error) {
       console.error('Neon password reset failed:', error.message);
