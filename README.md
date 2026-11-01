@@ -6,9 +6,9 @@
 
 Keep `.env` in the project root. It is ignored by Git and outside Render's static publish folder.
 
-The admin dashboard stores its sample data in each browser's local storage; it is not a shared database. Set `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and a random `SESSION_SECRET` of at least 32 characters before starting the server with `node server.js`. Open `http://localhost:3000/` to use the site. The Admin footer link opens the protected `/admin` route.
+The admin dashboard stores its sample data in each browser's local storage; it is not a shared database. The server defaults to the production Neon Auth URL; set `NEON_AUTH_BASE_URL` only to use a different branch. Start with `node server.js` and open `http://localhost:3000/`. The Admin footer link opens the protected `/admin` route.
 
-`render.yaml` now defines a Node web service. Set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in Render; it generates `SESSION_SECRET`. If the site was already deployed as a Render Static Site, create a new Blueprint/web service from this configuration and switch the domain to it. A Static Site cannot enforce server-side admin access.
+`render.yaml` defines a Node web service with the production Neon Auth URL. Render does not need `ADMIN_EMAIL`, `ADMIN_PASSWORD`, or `SESSION_SECRET`. If the site was already deployed as a Render Static Site, create a new Blueprint/web service from this configuration and switch the domain to it. A Static Site cannot enforce server-side admin access.
 
 ## Neon status
 
@@ -16,4 +16,4 @@ The existing `straitgate` Neon project has Managed Auth and the Data API enabled
 
 `neon.ts` declares the desired Auth and Data API configuration. Do not place Neon credentials in `public/` or commit them to source control. The Data API URL is branch-specific; use the production URL when configuring production.
 
-**Integration remains:** `server.js` still authenticates against `ADMIN_EMAIL` and `ADMIN_PASSWORD`, not Neon Auth. The catalog and dashboard still use hard-coded or browser-local data, not the new tables. The Neon account needs a password setup/sign-in flow before it can replace the current admin login. Do not remove the existing Render credentials until those flows are implemented and tested.
+`server.js` now sends sign-in and session checks to Neon Auth and allows access to `/admin` only when the Neon user has role `admin`. The catalog and dashboard still use hard-coded or browser-local data, not the new tables. The first Neon admin account needs an email/password setup flow before its owner can sign in. Verify that flow on the deployed app before considering the login migration complete.

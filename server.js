@@ -1,88 +1,104 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
-const crypto = require('node:crypto');
 
 const root = path.join(__dirname, 'public');
 const adminFile = path.join(__dirname, 'private', 'straitgate-admin.html');
-const email = process.env.ADMIN_EMAIL;
-const password = process.env.ADMIN_PASSWORD;
-const secret = process.env.SESSION_SECRET;
-if (!email || !password || !secret || secret.length < 32) {
-  console.error('Set ADMIN_EMAIL, ADMIN_PASSWORD and SESSION_SECRET (at least 32 characters).');
+const authBase = (process.env.NEON_AUTH_BASE_URL || 'https://ep-old-sea-zaqa3i6p.neonauth.c-2.eu-west-2.aws.neon.tech/neondb/auth').replace(/\/$/, '');
+if (!authBase || !(/^https:\/\//.test(authBase) || (process.env.NODE_ENV === 'test' && /^http:\/\/127\.0\.0\.1:\d+\/auth$/.test(authBase)))) {
+  console.error('Set NEON_AUTH_BASE_URL to the production Neon Auth URL.');
   process.exit(1);
 }
-
-const passwordHash = crypto.createHash('sha256').update(password).digest();
 const failed = new Map();
-const activeSessions = new Map();
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8'};
 const port = Number(process.env.PORT) || 3000;
-
 function send(res, status, body, headers = {}) {
-  res.writeHead(status, {'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff', ...headers});
+  res.writeHead(status, {'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers});
   res.end(body);
 }
-function sign(value) { return crypto.createHmac('sha256', secret).update(value).digest('base64url'); }
-function session(req) {
-  const token = /(?:^|;\s*)straitgate_session=([^;]+)/.exec(req.headers.cookie || '')?.[1];
-  if (!token) return false;
-  const [expires, mac] = token.split('.');
-  if (!/^\d+$/.test(expires) || !mac || Number(expires) < Date.now()) return false;
-  const expected = Buffer.from(sign(expires));
-  const actual = Buffer.from(mac);
-  return actual.length === expected.length && crypto.timingSafeEqual(actual, expected) && activeSessions.get(token) === Number(expires);
+function json(res, status, body, headers = {}) {
+  send(res, status, JSON.stringify(body), {'Content-Type':'application/json',...headers});
 }
-function secureCookie(req) { return req.headers['x-forwarded-proto'] === 'https' ? '; Secure' : ''; }
 function serveFile(res, file) {
   fs.readFile(file, (err, body) => {
     if (err) return send(res, err.code === 'ENOENT' ? 404 : 500, 'Page unavailable');
     send(res, 200, body, {'Content-Type':types[path.extname(file)] || 'application/octet-stream'});
   });
 }
-
-http.createServer((req, res) => {
+function authCookies(header) {
+  return (header || '').split(';').map(x => x.trim()).filter(x => /^(?:__Secure-|__Host-)?better-auth\./.test(x)).join('; ');
+}
+function responseCookies(response) {
+  return (response.headers.getSetCookie?.() || []).map(raw => {
+    const nameValue = raw.split(';')[0];
+    return `${nameValue}; Path=/; HttpOnly; SameSite=Lax${process.env.RENDER ? '; Secure' : ''}`;
+  });
+}
+async function neon(endpoint, options = {}) {
+  return fetch(authBase + endpoint, {redirect:'manual',signal:AbortSignal.timeout(10000),...options});
+}
+async function adminSession(header) {
+  const cookie = authCookies(header);
+  if (!cookie) return false;
+  const response = await neon('/get-session', {headers:{Cookie:cookie}});
+  if (!response.ok) return false;
+  const data = await response.json();
+  return data?.user?.role === 'admin' && !data.user.banned;
+}
+async function readBody(req) {
+  let body = '';
+  for await (const chunk of req) {
+    body += chunk;
+    if (body.length > 4096) throw new Error('Request too large');
+  }
+  return body;
+}
+http.createServer(async (req, res) => {
   let pathname;
   try { pathname = new URL(req.url, 'http://localhost').pathname; }
   catch { return send(res, 400, 'Bad request'); }
-
   if (req.method === 'POST' && pathname === '/api/admin/login') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk;
-      if (body.length > 4096) req.destroy();
-    });
-    req.on('end', () => {
-      const ip = req.socket.remoteAddress || 'unknown';
-      const attempt = failed.get(ip) || {count:0, until:0};
-      if (attempt.until > Date.now()) return send(res, 429, JSON.stringify({error:'Too many attempts. Try again later.'}), {'Content-Type':'application/json'});
-      let input;
-      try { input = JSON.parse(body); } catch { return send(res, 400, 'Invalid request'); }
-      const supplied = crypto.createHash('sha256').update(String(input.password || '')).digest();
-      const valid = String(input.email || '').trim().toLowerCase() === email.toLowerCase() && crypto.timingSafeEqual(supplied, passwordHash);
-      if (!valid) {
+    const ip = req.socket.remoteAddress || 'unknown';
+    const attempt = failed.get(ip) || {count:0,until:0};
+    if (attempt.until > Date.now()) return json(res, 429, {error:'Too many attempts. Try again later.'});
+    let input;
+    try { input = JSON.parse(await readBody(req)); }
+    catch { return json(res, 400, {error:'Invalid request.'}); }
+    if (typeof input.email !== 'string' || typeof input.password !== 'string') return json(res, 400, {error:'Email and password required.'});
+    try {
+      const upstream = await neon('/sign-in/email', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:input.email.trim(),password:input.password})});
+      if (!upstream.ok) {
         attempt.count++;
         attempt.until = attempt.count >= 5 ? Date.now() + 15 * 60 * 1000 : 0;
         failed.set(ip, attempt);
-        return send(res, 401, JSON.stringify({error:'Incorrect email or password.'}), {'Content-Type':'application/json'});
+        return json(res, 401, {error:'Incorrect email or password.'});
       }
+      const cookies = responseCookies(upstream);
+      const cookieHeader = cookies.map(x => x.split(';')[0]).join('; ');
+      if (!await adminSession(cookieHeader)) return json(res, 403, {error:'This account is not a Straitgate admin.'});
       failed.delete(ip);
-      const expires = String(Date.now() + 8 * 60 * 60 * 1000);
-      const token = `${expires}.${sign(expires)}`;
-      activeSessions.set(token, Number(expires));
-      send(res, 200, JSON.stringify({ok:true}), {'Content-Type':'application/json', 'Set-Cookie':`straitgate_session=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=28800${secureCookie(req)}`});
-    });
-    return;
+      return json(res, 200, {ok:true}, {'Set-Cookie':cookies});
+    } catch (error) {
+      console.error('Neon Auth login failed:', error.message);
+      return json(res, 502, {error:'Sign-in service unavailable.'});
+    }
   }
   if (req.method === 'POST' && pathname === '/api/admin/logout') {
-    const token = /(?:^|;\s*)straitgate_session=([^;]+)/.exec(req.headers.cookie || '')?.[1];
-    if (token) activeSessions.delete(token);
-    return send(res, 200, JSON.stringify({ok:true}), {'Content-Type':'application/json', 'Set-Cookie':`straitgate_session=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${secureCookie(req)}`});
+    const cookie = authCookies(req.headers.cookie);
+    try { if (cookie) await neon('/sign-out', {method:'POST',headers:{Cookie:cookie,'Content-Type':'application/json'},body:'{}'}); }
+    catch (error) { console.error('Neon Auth sign-out failed:', error.message); }
+    const expired = cookie.split('; ').filter(Boolean).map(x => `${x.split('=')[0]}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${process.env.RENDER ? '; Secure' : ''}`);
+    return json(res, 200, {ok:true}, {'Set-Cookie':expired});
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
   if (pathname === '/admin' || pathname === '/straitgate-admin.html') {
-    if (!session(req)) return send(res, 302, '', {Location:'/straitgate-admin-login.html'});
-    return serveFile(res, adminFile);
+    try {
+      if (!await adminSession(req.headers.cookie)) return send(res, 302, '', {Location:'/straitgate-admin-login.html'});
+      return serveFile(res, adminFile);
+    } catch (error) {
+      console.error('Neon Auth session check failed:', error.message);
+      return send(res, 503, 'Authentication service unavailable');
+    }
   }
   if (pathname === '/') pathname = '/straitgate-home.html';
   try { pathname = decodeURIComponent(pathname); }

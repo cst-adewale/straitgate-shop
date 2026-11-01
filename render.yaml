@@ -2,12 +2,8 @@ services:
   - type: web
     name: straitgate
     runtime: node
-    buildCommand: ""
+    buildCommand: npm ci
     startCommand: node server.js
     envVars:
-      - key: ADMIN_EMAIL
-        sync: false
-      - key: ADMIN_PASSWORD
-        sync: false
-      - key: SESSION_SECRET
-        generateValue: true
+      - key: NEON_AUTH_BASE_URL
+        value: https://ep-old-sea-zaqa3i6p.neonauth.c-2.eu-west-2.aws.neon.tech/neondb/auth
