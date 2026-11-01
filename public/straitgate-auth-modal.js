@@ -108,7 +108,11 @@
       if (m === 'signup') f += this._f(id + 'q', 'Confirm password', 'password', 'new-password');
       if (m !== 'forgot') f += '<label class="show"><input type="checkbox" id="sp"> Show password</label>';
 
-      var alt = '';
+      var alt = m === 'login'
+        ? '<button type="button" data-m="forgot">Forgot password?</button>'
+        : m === 'forgot'
+          ? '<button type="button" data-m="login">Back to sign in</button>'
+          : '';
 
       this.shadowRoot.innerHTML =
         '<style>' + CSS + '</style>' +
