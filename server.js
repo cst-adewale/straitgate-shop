@@ -5,11 +5,17 @@ const path = require('node:path');
 const root = path.join(__dirname, 'public');
 const adminFile = path.join(__dirname, 'private', 'straitgate-admin.html');
 const authBase = (process.env.NEON_AUTH_BASE_URL || 'https://ep-old-sea-zaqa3i6p.neonauth.c-2.eu-west-2.aws.neon.tech/neondb/auth').replace(/\/$/, '');
+const publicOrigin = (process.env.PUBLIC_ORIGIN || 'https://straitgate.onrender.com').replace(/\/$/, '');
 if (!authBase || !(/^https:\/\//.test(authBase) || (process.env.NODE_ENV === 'test' && /^http:\/\/127\.0\.0\.1:\d+\/auth$/.test(authBase)))) {
   console.error('Set NEON_AUTH_BASE_URL to the production Neon Auth URL.');
   process.exit(1);
 }
+if (!/^https:\/\/[^/]+$/.test(publicOrigin) && !(process.env.NODE_ENV === 'test' && /^http:\/\/127\.0\.0\.1:\d+$/.test(publicOrigin))) {
+  console.error('Set PUBLIC_ORIGIN to the deployed site origin.');
+  process.exit(1);
+}
 const failed = new Map();
+const resetAttempts = new Map();
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8'};
 const port = Number(process.env.PORT) || 3000;
 function send(res, status, body, headers = {}) {
@@ -89,6 +95,42 @@ http.createServer(async (req, res) => {
     catch (error) { console.error('Neon Auth sign-out failed:', error.message); }
     const expired = cookie.split('; ').filter(Boolean).map(x => `${x.split('=')[0]}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${process.env.RENDER ? '; Secure' : ''}`);
     return json(res, 200, {ok:true}, {'Set-Cookie':expired});
+  }
+  if (req.method === 'POST' && pathname === '/api/admin/forgot-password') {
+    const ip = req.socket.remoteAddress || 'unknown';
+    const history = (resetAttempts.get(ip) || []).filter(time => time > Date.now() - 15 * 60 * 1000);
+    if (history.length >= 5) return json(res, 429, {error:'Too many reset requests. Try again later.'});
+    let input;
+    try { input = JSON.parse(await readBody(req)); }
+    catch { return json(res, 400, {error:'Invalid request.'}); }
+    if (typeof input.email !== 'string' || !/^\S+@\S+\.\S+$/.test(input.email) || input.email.length > 254) return json(res, 400, {error:'Enter a valid email address.'});
+    history.push(Date.now());
+    resetAttempts.set(ip, history);
+    try {
+      const upstream = await neon('/request-password-reset', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:input.email.trim(),redirectTo:publicOrigin + '/straitgate-reset-password.html'})});
+      if (!upstream.ok && upstream.status !== 404) {
+        console.error('Neon reset request failed:', upstream.status);
+        return json(res, 502, {error:'Could not request a reset link. Try again later.'});
+      }
+      return json(res, 200, {ok:true,message:'If an account exists, a reset link has been sent.'});
+    } catch (error) {
+      console.error('Neon reset request failed:', error.message);
+      return json(res, 502, {error:'Could not reach the reset service.'});
+    }
+  }
+  if (req.method === 'POST' && pathname === '/api/admin/reset-password') {
+    let input;
+    try { input = JSON.parse(await readBody(req)); }
+    catch { return json(res, 400, {error:'Invalid request.'}); }
+    if (typeof input.token !== 'string' || !input.token || input.token.length > 2048 || typeof input.newPassword !== 'string' || input.newPassword.length < 12 || input.newPassword.length > 128) return json(res, 400, {error:'Use a valid reset link and a password of 12–128 characters.'});
+    try {
+      const upstream = await neon('/reset-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:input.token,newPassword:input.newPassword})});
+      if (!upstream.ok) return json(res, 400, {error:'This reset link is invalid or expired. Request a new one.'});
+      return json(res, 200, {ok:true});
+    } catch (error) {
+      console.error('Neon password reset failed:', error.message);
+      return json(res, 502, {error:'Could not reach the reset service.'});
+    }
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
   if (pathname === '/admin' || pathname === '/straitgate-admin.html') {

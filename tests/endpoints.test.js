@@ -6,8 +6,24 @@ const {setTimeout: delay} = require('node:timers/promises');
 const port = 4319;
 const base = `http://127.0.0.1:${port}`;
 const sessions = new Set();
+let resetRequest;
+let resetSubmission;
 const auth = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  if (url.pathname === '/auth/request-password-reset') {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    resetRequest = JSON.parse(body);
+    res.writeHead(200, {'Content-Type':'application/json'});
+    return res.end('{"status":true}');
+  }
+  if (url.pathname === '/auth/reset-password') {
+    let body = '';
+    for await (const chunk of req) body += chunk;
+    resetSubmission = JSON.parse(body);
+    res.writeHead(resetSubmission.token === 'valid-token' ? 200 : 400, {'Content-Type':'application/json'});
+    return res.end('{}');
+  }
   if (url.pathname === '/auth/sign-in/email') {
     let body = '';
     for await (const chunk of req) body += chunk;
@@ -40,7 +56,7 @@ async function request(url, options = {}) {
     await new Promise(resolve => auth.listen(4320, '127.0.0.1', resolve));
     child = spawn(process.execPath, ['server.js'], {
       cwd: require('node:path').join(__dirname, '..'),
-      env: {...process.env, NODE_ENV:'test', PORT:String(port), NEON_AUTH_BASE_URL:'http://127.0.0.1:4320/auth'},
+      env: {...process.env, NODE_ENV:'test', PORT:String(port), NEON_AUTH_BASE_URL:'http://127.0.0.1:4320/auth', PUBLIC_ORIGIN:base},
       stdio:'ignore'
     });
     let ready = false;
@@ -48,7 +64,7 @@ async function request(url, options = {}) {
       try { await request('/'); ready = true; break; } catch { await delay(100); }
     }
     assert.ok(ready, 'server did not start');
-    const pages = ['/', '/straitgate-home.html', '/straitgate-catalog.html', '/straitgate-product.html', '/straitgate-admin-login.html', '/straitgate-auth-modal.js', '/straitgate-theme.css', '/straitgate-theme.js', '/robots.txt', '/sitemap.xml'];
+    const pages = ['/', '/straitgate-home.html', '/straitgate-catalog.html', '/straitgate-product.html', '/straitgate-admin-login.html', '/straitgate-reset-password.html', '/straitgate-auth-modal.js', '/straitgate-theme.css', '/straitgate-theme.js', '/robots.txt', '/sitemap.xml'];
     for (const page of pages) {
       const res = await request(page);
       assert.equal(res.status, 200, page);
@@ -71,6 +87,15 @@ async function request(url, options = {}) {
     const viewer = await request('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:'viewer@example.test', password:'local-test-password'})});
     assert.equal(viewer.status, 403);
     console.log('403 non-admin account');
+    const forgot = await request('/api/admin/forgot-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'admin@example.test'})});
+    assert.equal(forgot.status, 200);
+    assert.deepEqual(resetRequest, {email:'admin@example.test',redirectTo:base + '/straitgate-reset-password.html'});
+    const reset = await request('/api/admin/reset-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'valid-token',newPassword:'a-unique-password-123'})});
+    assert.equal(reset.status, 200);
+    assert.deepEqual(resetSubmission, {token:'valid-token',newPassword:'a-unique-password-123'});
+    const invalidReset = await request('/api/admin/reset-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'expired',newPassword:'a-unique-password-123'})});
+    assert.equal(invalidReset.status, 400);
+    console.log('200 reset request + submission; 400 invalid token');
     const admin = await request('/admin', {headers:{Cookie:cookie}});
     assert.equal(admin.status, 200);
     assert.match(await admin.text(), /Admin dashboard/);
