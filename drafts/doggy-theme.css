@@ -1,0 +1,59 @@
+/* Doggy theme: light + dark tokens and base UI elements.
+   Auto follows the system. Force with <html data-theme="light"> or <html data-theme="dark">. */
+:root{
+  --bg:#161616;            /* outer page */
+  --surface:#ffffff;       /* main card */
+  --tile:#f5f5f5;          /* product tiles, panels */
+  --ink:#0a0a0a;           /* text */
+  --mute:#8a8a8a;          /* secondary text */
+  --line:#dddddd;          /* borders, dividers */
+  --field:#ffffff;         /* inputs */
+  --field-line:#9a9a9a;
+  --lime:#ccf97c;          /* brand accent */
+  --on-lime:#0a0a0a;
+  --hover:#0a0a0a;         /* button hover fill */
+  --on-hover:#ffffff;
+  --red:#e5271d; --yellow:#f5c20f; --blue:#1f5fe0; --ok:#2e7d12;
+  --pill:#e8e8e8; --pill-warn:#ffe4a3; --pill-bad:#ffc9c4;
+  --overlay:rgba(10,10,10,.74);
+  color-scheme:light;
+}
+/* Dark mode values */
+:root[data-theme="dark"]{
+  --bg:#0b0b0b; --surface:#161616; --tile:#202020; --ink:#f2f2f2; --mute:#8f8f8f;
+  --line:#2f2f2f; --field:#1d1d1d; --field-line:#4a4a4a;
+  --lime:#ccf97c; --on-lime:#0a0a0a; --hover:#f2f2f2; --on-hover:#0a0a0a;
+  --red:#ff5a4d; --yellow:#f5c20f; --blue:#5b8cff; --ok:#8fd45a;
+  --pill:#2c2c2c; --pill-warn:#4a3d12; --pill-bad:#4d1f1b; --overlay:rgba(0,0,0,.8);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0b0b; --surface:#161616; --tile:#202020; --ink:#f2f2f2; --mute:#8f8f8f;
+    --line:#2f2f2f; --field:#1d1d1d; --field-line:#4a4a4a;
+    --lime:#ccf97c; --on-lime:#0a0a0a; --hover:#f2f2f2; --on-hover:#0a0a0a;
+    --red:#ff5a4d; --yellow:#f5c20f; --blue:#5b8cff; --ok:#8fd45a;
+    --pill:#2c2c2c; --pill-warn:#4a3d12; --pill-bad:#4d1f1b; --overlay:rgba(0,0,0,.8);
+    color-scheme:dark;
+  }
+}
+
+/* Base elements */
+.d-card{background:var(--surface);color:var(--ink);border-radius:24px;padding:clamp(20px,4vw,48px)}
+.d-tile{background:var(--tile);border-radius:12px;padding:clamp(14px,1.8vw,22px)}
+.d-btn,.d-chip{border:1px solid var(--ink);background:var(--surface);color:var(--ink);border-radius:999px;height:34px;padding:0 22px;font:inherit;font-size:11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s}
+.d-btn:hover,.d-chip:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
+.d-btn.lime,.d-chip[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+.d-btn.lime:hover{background:var(--hover);color:var(--lime);border-color:var(--hover)}
+.d-btn.ghost{border-color:var(--line);color:var(--mute)}
+.d-input,.d-select,.d-textarea{width:100%;height:34px;border:1px solid var(--field-line);border-radius:999px;padding:0 14px;font:inherit;font-size:12px;background:var(--field);color:var(--ink)}
+.d-input::placeholder{color:var(--mute)}
+.d-textarea{height:70px;border-radius:14px;padding:10px 14px}
+.d-input:focus-visible,.d-select:focus-visible,.d-textarea:focus-visible,.d-btn:focus-visible,.d-chip:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+.d-label{display:block;font-size:10px;color:var(--mute);margin-bottom:5px}
+.d-pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:10px;background:var(--pill);color:var(--ink)}
+.d-pill.ok{background:var(--lime);color:var(--on-lime)}.d-pill.warn{background:var(--pill-warn)}.d-pill.bad{background:var(--pill-bad)}
+.d-table{width:100%;border-collapse:collapse;font-size:12px}
+.d-table th{font-weight:400;color:var(--mute);font-size:10px;text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line)}
+.d-table td{padding:10px 10px 10px 0;border-bottom:1px solid var(--line)}
+.d-toast{background:var(--ink);color:var(--surface);border-radius:999px;padding:10px 20px;font-size:12px}

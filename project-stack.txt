@@ -1,0 +1,261 @@
+PROJECT TECHNOLOGY STACK
+=========================
+
+Project
+-------
+- Enterprise ticketing and customer-support application
+- Delivery target: November 13, 2026
+- MVP-first implementation with customer, agent, and admin workflows
+
+Frontend
+--------
+- React
+- TypeScript recommended
+
+Styling
+-------
+- Tailwind CSS
+
+Backend
+-------
+- Go (Golang)
+- REST API documented with OpenAPI
+
+Database
+--------
+- Neon PostgreSQL
+
+Cache and Background Jobs
+-------------------------
+- Redis for caching
+- Asynq for Go background jobs, using Redis as the queue backend
+
+Search
+------
+- OpenSearch, to be added when MVP search requirements justify it
+
+File Storage
+------------
+- Cloudflare R2
+
+Authentication and Security
+---------------------------
+- Argon2id for secure password hashing
+- Secure cookie-based sessions or JWT authentication
+- Email verification and password reset
+- Role-based access control
+- MFA and enterprise SSO where required
+
+Payments
+--------
+- Stripe and/or Flutterwave, only if payments are required for the MVP
+- Use a payment-service abstraction if payments are enabled
+- Implement payment webhooks, transaction records, retries, and idempotency if payments are enabled
+
+Infrastructure
+--------------
+- Docker
+- Render as the hosting and deployment platform
+- Separate development, staging, and production environments
+- CI/CD pipeline
+- Environment-based configuration and secrets management
+
+DEVELOPMENT LAYERS AND PROCESS
+==============================
+
+1. Project Foundation
+---------------------
+- Create the repository structure
+- Configure React and Go applications
+- Configure TypeScript and Tailwind CSS
+- Add environment configuration
+- Add Docker development setup
+
+2. Database Layer
+-----------------
+- Design the PostgreSQL schema in Neon
+- Define users, roles, permissions, and organizations
+- Define application entities and relationships
+- Create migrations and seed data
+- Configure the Go database connection to Neon
+
+3. Authentication Layer
+-----------------------
+- Create registration and login flows
+- Hash passwords with Argon2id
+- Implement secure sessions or JWT authentication
+- Add email verification and password reset flows
+- Add role-based access control
+
+4. Backend API Layer
+--------------------
+- Organize the Go backend into routes, handlers, services, and repositories
+- Define request and response models
+- Add input validation
+- Implement business rules
+- Add centralized error handling
+- Define API routes and OpenAPI documentation
+
+5. Frontend Application Layer
+-----------------------------
+- Create the React application structure
+- Build layouts and reusable Tailwind components
+- Implement routing
+- Create authentication screens
+- Connect frontend services to the Go API
+- Implement forms, tables, dashboards, and user workflows
+- Add loading, empty, and error states
+
+6. Cache and Queue Layer
+------------------------
+- Connect the backend to Redis
+- Define cache keys and expiration rules
+- Add background job processing
+- Use Asynq with Redis for Go background jobs
+
+7. File Storage Layer
+---------------------
+- Connect the backend to Cloudflare R2
+- Implement secure file upload and download flows
+- Store file metadata in PostgreSQL
+- Generate signed URLs for private files
+
+8. Search Layer
+--------------
+- Add OpenSearch only if PostgreSQL search is insufficient for the MVP
+- If enabled, define indexes and mappings for tickets
+- Index relevant PostgreSQL records
+- Implement search, filtering, sorting, and pagination
+- Synchronize changes between PostgreSQL and OpenSearch
+
+9. Payment Layer
+---------------
+- Include only if payments are part of the initial ticketing release
+- Create a payment service abstraction
+- Connect Stripe and/or Flutterwave
+- Create payment and transaction records
+- Implement checkout and payment status flows
+- Implement provider webhooks and idempotency
+
+10. Container and Environment Layer
+-----------------------------------
+- Create Dockerfiles for the frontend and Go API
+- Configure local containers for the application and Redis
+- Define development environment variables
+- Configure service networking
+- Prepare separate staging and production configurations on Render
+- Deploy the React frontend and Go API as Render services
+- Configure Render environment variables and health checks
+
+11. Ticketing Application Layer
+-------------------------------
+- Create customer, support-agent, and administrator roles
+- Create ticket creation, assignment, reply, and closure workflows
+- Support open, in-progress, pending, resolved, and closed statuses
+- Support low, medium, high, and urgent priorities
+- Add categories, departments, tags, and assignment rules
+- Add internal notes for support agents
+- Add ticket history and audit records
+- Add customer and agent dashboards
+- Add ticket search, filtering, sorting, and pagination
+- Add file attachments through Cloudflare R2
+- Add notifications for ticket creation, replies, assignments, and status changes
+- Add basic administration for users, roles, categories, and departments
+
+DELIVERY SCHEDULE
+=================
+
+October 19–20: Requirements and foundation
+-------------------------------------------
+- Confirm roles, ticket statuses, priorities, categories, and workflows
+- Set up the repository, React app, Go API, Docker, and environment configuration
+- Finalize the database schema and API structure
+
+October 21–23: Database and authentication
+-------------------------------------------
+- Implement users, roles, permissions, tickets, messages, attachments, and history
+- Create migrations and seed data
+- Implement registration, login, Argon2id hashing, sessions, and access control
+
+October 24–27: Core ticket backend
+----------------------------------
+- Implement ticket creation, listing, details, replies, assignment, status, and priority APIs
+- Add validation, authorization, error handling, pagination, and OpenAPI documentation
+
+October 28–30: Customer frontend
+--------------------------------
+- Build the application layout, authentication screens, customer dashboard, ticket form,
+  ticket list, ticket details, replies, and ticket status displays
+
+October 31–November 3: Agent and admin workflows
+------------------------------------------------
+- Build the agent queue, assignment controls, internal notes, customer details,
+  admin user management, categories, departments, and basic ticket statistics
+
+November 4–5: Attachments and notifications
+---------------------------------------------
+- Implement Cloudflare R2 uploads and secure downloads
+- Add Redis-backed notification jobs and ticket activity notifications
+
+November 6–7: Search, monitoring, and deployment preparation
+--------------------------------------------------------------
+- Configure PostgreSQL ticket search first; add OpenSearch only if required
+- Configure health checks, logs, metrics, Grafana, Docker production settings,
+  and Render staging services
+
+November 8–10: Integration and release hardening
+-------------------------------------------------
+- Complete the main customer, agent, and admin workflows
+- Review permissions, error handling, backups, email, attachments, and performance
+- Prepare the production configuration
+
+November 11–12: Production preparation
+---------------------------------------
+- Run production migrations
+- Configure Render, domain settings, environment variables, and the administrator account
+- Prepare documentation and rollback procedures
+
+November 13: MVP launch
+-----------------------
+- Deploy the React frontend and Go API to Render
+- Verify login, ticket creation, replies, assignment, attachments, and status changes
+- Monitor the production release and resolve launch-blocking issues
+
+MVP SCOPE
+=========
+
+Required for the November 13 release:
+- Authentication and role-based access
+- Customer, agent, and admin workflows
+- Ticket creation, replies, assignment, status, and priority management
+- Search and filtering
+- Attachments
+- Basic notifications
+- Administration controls
+- Render deployment
+- OpenAPI documentation and Grafana monitoring
+
+Defer until after launch unless essential:
+- Enterprise SSO and MFA
+- Multi-tenant billing
+- Advanced automation rules
+- AI ticket classification
+- Mobile applications
+- Advanced analytics
+
+Recommended Architecture
+------------------------
+React Frontend
+      |
+      v
+Go API Service
+      |
+      +--> Neon PostgreSQL
+      +--> Redis
+      +--> Optional OpenSearch
+      +--> Cloudflare R2
+      +--> Stripe / Flutterwave
+      +--> Go Background Worker (Asynq)
+               |
+               +--> Redis
+

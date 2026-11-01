@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Straitgate – Admin sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f5f5f5;color:#0a0a0a;font-family:"Inter Tight",Arial,sans-serif}
+main{text-align:center;padding:24px}h1{font-size:clamp(36px,8vw,72px);font-weight:400;letter-spacing:-.05em;margin:0 0 12px}p{color:#666}a{color:inherit}
+button{border:0;border-radius:999px;background:#ccf97c;padding:12px 26px;font:inherit;cursor:pointer}
+</style>
+<link rel="stylesheet" href="/straitgate-theme.css">
+<script src="/straitgate-theme.js"></script>
+</head>
+<body>
+<button class="theme-toggle theme-floating" type="button" aria-label="Switch theme">◐ Dark</button>
+<main><h1>Straitgate Admin</h1><p>Sign in to open the dashboard.</p><button id="open" type="button">Sign in</button><p><a href="straitgate-home.html">Back to site</a></p></main>
+<straitgate-auth-modal id="auth" mode="login" brand="Straitgate" product="Admin"></straitgate-auth-modal>
+<script src="straitgate-auth-modal.js"></script>
+<script>
+const auth = document.getElementById('auth');
+document.getElementById('open').onclick = () => auth.open();
+auth.addEventListener('auth:submit', async event => {
+  try {
+    const response = await fetch('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(event.detail)});
+    if (!response.ok) {
+      const data = await response.json();
+      auth.setError(data.error || 'Sign in failed.');
+      return;
+    }
+    location.replace('/admin');
+  } catch { auth.setError('Could not reach the sign-in service.'); }
+});
+auth.open();
+</script>
+</body>
+</html>

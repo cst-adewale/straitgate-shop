@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Furnicom – Living Room</title>
+<meta name="robots" content="noindex,nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#b8a53d;--gold2:#a6942f;--dark:#3d3d3d;--ink:#333;--mute:#888;--line:#e2e2e2;--bg:#ececec;--red:#c0392b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:12px/1.5 "Open Sans",Arial,sans-serif}
+a{color:inherit;text-decoration:none}ul{list-style:none;margin:0;padding:0}
+button,input,select{font:inherit}button{cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1170px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.top{background:#fff;border-bottom:1px solid var(--line);font-size:10px;color:#555}
+.top .wrap{display:flex;justify-content:space-between;gap:16px;min-height:28px;align-items:center;flex-wrap:wrap}
+.top ul{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.top b{color:#222}
+.head{background:#fff}
+.head .wrap{display:flex;align-items:center;gap:clamp(14px,3vw,34px);padding-top:14px;padding-bottom:14px}
+.logo{display:flex;align-items:center;gap:8px;color:var(--gold);flex:none}
+.logo svg{width:44px;height:30px}
+.logo b{display:block;font-size:19px;letter-spacing:.5px;line-height:1;color:var(--gold2)}
+.logo small{display:block;font-size:9px;color:#777}
+.search{display:flex;flex:1;max-width:400px;border:1px solid var(--line);min-width:0}
+.search input{flex:1;min-width:0;border:0;padding:0 12px;height:32px;font-size:11px;background:#fff}
+.search button{background:var(--gold);color:#fff;border:0;padding:0 22px;font-weight:700;font-size:11px}
+.ship{display:flex;gap:8px;align-items:center;font-size:10px;color:#666;font-style:italic;flex:none}
+.ship b{display:block;font-size:12px;color:#333}
+.cart{background:var(--gold);color:#fff;margin-left:auto;padding:12px 18px;text-align:center;font-size:10px;font-weight:600;align-self:stretch;display:flex;flex-direction:column;justify-content:center;flex:none}
+.nav{background:#2f2f2f}
+.nav .wrap{display:flex;align-items:center;min-height:46px;gap:2px;position:relative}
+.nav a{color:#fff;font-weight:700;font-size:10.5px;padding:0 clamp(10px,1.8vw,22px);line-height:46px;white-space:nowrap;position:relative}
+.nav .home{background:var(--gold);padding:0 16px}
+.nav .hot{color:var(--gold);margin-left:auto}
+.nav .soc{display:flex;gap:6px;margin-left:16px}
+.nav .soc i{width:16px;height:16px;border-radius:50%;background:#555;display:block}
+.tag{position:absolute;top:6px;right:-2px;font-size:6px;line-height:1;background:var(--red);padding:2px 3px;border-radius:2px}
+.tag.n{background:#3ba3d8}
+.menu{display:contents}
+.burger{display:none;background:none;border:0;color:#fff;font-size:20px;padding:0 10px}
+.hero{height:clamp(150px,22vw,230px);background:linear-gradient(#c8b79c,#b9a688);position:relative;overflow:hidden;display:grid;place-items:center;text-align:center;color:#fff}
+.hero svg{position:absolute;inset:auto 0 0 0;width:100%;height:70%}
+.hero::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,.18)}
+.hero div{position:relative;z-index:1}
+.hero h1{margin:0;font-size:clamp(20px,2.6vw,26px);letter-spacing:1px}
+.hero p{margin:6px 0 0;font-size:10px}
+.main{display:grid;grid-template-columns:210px 1fr;gap:20px;padding-top:34px;padding-bottom:40px;align-items:start}
+.box{background:#fff;border:1px solid var(--line);margin-bottom:22px}
+.box>h3{background:var(--dark);color:#fff;margin:0;padding:11px 10px;font-size:13px;letter-spacing:.5px}
+.sec{padding:14px 10px;border-bottom:1px solid var(--line)}
+.sec:last-child{border:0}
+.sec h4{margin:0 0 8px;font-size:9.5px;letter-spacing:.3px}
+.sec li{font-size:9.5px;color:#555;padding:3px 0;display:flex;gap:6px;align-items:center}
+.sec li i{width:8px;height:8px;border:1px solid #999;flex:none}
+.pr{display:flex;gap:5px;margin-bottom:12px}
+.pr input{width:46px;border:1px solid var(--line);padding:4px;font-size:9px}
+.pr button{background:var(--gold);color:#fff;border:0;font-size:8px;font-weight:700;padding:0 10px}
+.rng{height:3px;background:var(--gold);position:relative;margin:6px 6px 4px;width:calc(100% - 12px)}
+.rng::before,.rng::after{content:"";position:absolute;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid #fff;box-shadow:0 0 0 1px var(--gold)}
+.rng::before{left:0}.rng::after{right:0}
+.col{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px}
+.col li{padding:0}.col i{width:11px;height:11px;border:0}
+.best{display:flex;gap:10px;padding:10px;border-bottom:1px solid var(--line);align-items:center}
+.best:last-child{border:0}
+.best svg{width:52px;height:52px;border:1px solid var(--line);flex:none}
+.best b{font-size:9px;display:block;text-transform:uppercase;line-height:1.3}
+.tb{background:#fff;border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;padding:7px 10px;font-size:9px;gap:10px;flex-wrap:wrap}
+.tb label{display:flex;gap:6px;align-items:center;margin-right:12px}
+.tb select{border:1px solid var(--line);font-size:9px;padding:2px 4px;background:#fff}
+.vw{display:flex;gap:4px}.vw span{width:16px;height:16px;background:var(--line)}.vw span:first-child{background:var(--gold)}
+.pg{display:flex}.pg a{border:1px solid var(--line);width:18px;height:18px;text-align:center;line-height:16px;margin-left:-1px}
+.pg a.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2.4vw,22px);margin:20px 0}
+.card{background:#fff;border:1px solid var(--line);position:relative;display:flex;flex-direction:column}
+.card .im{aspect-ratio:1/.92;margin:14px 14px 0;display:block}
+.card .im svg{width:100%;height:100%}
+.badge{position:absolute;top:8px;font-size:8px;font-weight:700;color:#fff;padding:3px 7px;z-index:1}
+.badge.n{right:10px;background:#3ba3d8}.badge.s{left:10px;background:#e8692b}
+.card h5{margin:14px 10px 0;text-align:center;font-size:9.5px;text-transform:uppercase}
+.price{text-align:center;font-size:10px;font-weight:700;color:var(--red);margin-top:4px}
+.price s{color:#aaa;font-weight:400;margin-left:4px}
+.st{text-align:center;color:#d4a017;font-size:10px;letter-spacing:1px;margin-bottom:10px}
+.st em{color:#ccc;font-style:normal}
+.act{display:grid;grid-template-columns:32px 1fr 32px;border-top:1px solid var(--line);margin-top:auto;background:#f5f5f5;height:34px}
+.act button{border:0;background:none;color:#777;font-size:12px}
+.act .add{color:var(--gold2);font-weight:700;font-size:8.5px;letter-spacing:.3px;border-left:1px solid var(--line);border-right:1px solid var(--line);background:#f5f5f5;transition:background .2s,color .2s}
+.card:hover .add,.card.on .add{background:var(--gold);color:#fff}
+.foot1{background:#262626 linear-gradient(90deg,#2a2a2a,#222);color:#ccc}
+.foot1 .wrap{display:grid;grid-template-columns:repeat(3,1fr) 1.25fr;gap:24px;padding-top:34px;padding-bottom:34px;font-size:9.5px}
+.foot1 h6{margin:0 0 12px;font-size:9.5px;color:#fff;letter-spacing:.5px}
+.foot1 li{padding:3px 0}.foot1 li::before{content:"\25B8  ";color:#fff}
+.contact{background:var(--gold);color:#fff;padding:18px 18px;margin:-34px 0 -34px;display:flex;flex-direction:column;gap:10px}
+.contact h6{margin:0}
+.pay{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pay i{background:#fff;width:34px;height:16px;border-radius:2px;display:block}
+.foot2{background:#333;color:#ddd;text-align:center;padding:22px 16px 16px;font-size:9.5px}
+.foot2 .r{display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:12px}
+.foot2 b{color:#fff}
+.app{background:#111;border:1px solid #666;border-radius:5px;padding:4px 14px;color:#fff;font-size:10px}
+.foot2 .s{display:inline-flex;gap:6px}.foot2 .s i{width:26px;height:24px;background:#111;display:block}
+.foot2 .s i:last-child{background:var(--gold)}
+@media (max-width:1000px){
+ .ship{display:none}
+ .nav .soc{display:none}
+ .main{grid-template-columns:1fr}
+ .side{display:grid;grid-template-columns:repeat(2,1fr);gap:0 20px}
+ .foot1 .wrap{grid-template-columns:1fr 1fr}
+ .contact{margin:0}
+}
+@media (max-width:760px){
+ .burger{display:block}
+ .nav .wrap{flex-wrap:wrap}
+ .nav .menu{display:none;width:100%;flex-direction:column}
+ .nav .menu.open{display:flex}
+ .nav .menu a{line-height:40px;border-top:1px solid #444}
+ .nav .hot{margin-left:0}
+ .search{max-width:none}
+ .head .wrap{flex-wrap:wrap}
+ .cart{margin-left:0;align-self:auto;padding:8px 14px}
+ .grid{grid-template-columns:repeat(2,1fr)}
+ .top .wrap>ul:last-child{display:none}
+}
+@media (max-width:520px){
+ .side{grid-template-columns:1fr}
+ .grid{grid-template-columns:1fr}
+ .foot1 .wrap{grid-template-columns:1fr}
+ .head .wrap{gap:12px}
+ .search{order:3;flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+ <ul><li><b>USD</b> &#9662;</li><li>English &#9662;</li><li>My Account</li><li>My Wishlist</li><li>Checkout</li></ul>
+ <ul><li>Start <b>LIVE CHAT</b></li><li>Call our customer service at: <b>096-999-8386</b></li></ul>
+</div></div>
+
+<div class="head"><div class="wrap">
+ <a class="logo" href="#"><svg viewBox="0 0 44 30" fill="currentColor"><path d="M8 8h28a4 4 0 0 1 4 4v10H4V12a4 4 0 0 1 4-4z" opacity=".55"/><rect x="0" y="12" width="9" height="14" rx="4"/><rect x="35" y="12" width="9" height="14" rx="4"/><rect x="6" y="14" width="32" height="10" rx="3"/></svg><span><b>FURNICOM</b><small>Home Furniture Store</small></span></a>
+ <div class="search"><input type="search" placeholder="Enter your keyword..." aria-label="Search"><button>Search</button></div>
+ <div class="ship"><svg width="26" height="18" viewBox="0 0 26 18" fill="none" stroke="#999" stroke-width="1.5"><rect x="1" y="2" width="15" height="10"/><path d="M16 6h5l4 4v2h-9"/><circle cx="6" cy="14" r="2"/><circle cx="20" cy="14" r="2"/></svg><span><b>Everyday Free Shipping</b>&amp; No Sales Tax</span></div>
+ <a class="cart" href="#">0 item(s) - $0.00<br><span style="font-size:11px">MY CART</span></a>
+</div></div>
+
+<div class="nav"><div class="wrap">
+ <a class="home" href="#" aria-label="Home">&#8962;</a>
+ <button class="burger" aria-label="Menu" aria-expanded="false">&#9776;</button>
+ <div class="menu">
+  <a href="#">LIVING ROOM<span class="tag">HOT</span></a><a href="#">BEDROOM</a><a href="#">DINING</a><a href="#">ACCESSORIES<span class="tag n">NEW</span></a><a href="#">BLOG</a><a href="#">CONTACT US</a><a class="hot" href="#">HOT DEALS</a>
+ </div>
+ <div class="soc"><i></i><i></i><i></i><i></i></div>
+</div></div>
+
+<section class="hero">
+ <svg viewBox="0 0 800 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><rect x="20" y="60" width="760" height="100" rx="30" fill="#4fb8a8"/><rect x="60" y="20" width="280" height="90" rx="30" fill="#c0392b"/><rect x="230" y="10" width="220" height="100" rx="30" fill="#e8b92d" transform="rotate(8 340 60)"/><rect x="40" y="80" width="720" height="70" rx="20" fill="#5ac2b2"/><ellipse cx="560" cy="60" rx="50" ry="26" fill="#7fb43a"/></svg>
+ <div><h1>LIVING ROOM</h1><p>Home &nbsp;&rsaquo;&nbsp; Listing Grid &nbsp;&rsaquo;&nbsp; Living Room</p></div>
+</section>
+
+<div class="wrap main">
+ <aside class="side">
+  <div class="box" style="grid-column:1/-1">
+   <h3>SHOP BY</h3>
+   <div class="sec"><h4>CATEGORY</h4><ul><li><i></i>Hair Accessories</li><li><i></i>Makeup</li><li><i></i>Nail Care</li><li><i></i>Therapeutic Supports</li><li><i></i>Skin Care</li></ul></div>
+   <div class="sec"><h4>PRICE</h4><div class="pr"><input value="$0" aria-label="Min"><input value="$999" aria-label="Max"><button>SEARCH</button></div><div class="rng"></div></div>
+   <div class="sec"><h4>MANUFACTURER</h4><ul><li><i></i>G Plan (4)</li><li><i></i>Duresta (2)</li><li><i></i>Parker Knoll (10)</li><li><i></i>Collins &amp; Hayes (7)</li><li><i></i>ercol (0)</li></ul></div>
+   <div class="sec"><h4>COLOR</h4><ul class="col">
+    <li><i style="background:#d9322b"></i>Red</li><li><i style="background:#6f93d6"></i>Blue</li><li><i style="background:#8cbc2e"></i>Green</li><li><i style="background:#e6d44a"></i>Yellow</li><li><i style="background:#ee9a4d"></i>Orange</li><li><i style="background:#f3a6a0"></i>Pink</li><li><i style="background:#9a6fc0"></i>Purple</li><li><i style="background:#8a7468"></i>Grey</li></ul></div>
+  </div>
+  <div class="box" style="grid-column:1/-1"><h3>BEST SELLERS</h3><div id="best"></div></div>
+ </aside>
+
+ <main>
+  <div class="tb"><div style="display:flex;flex-wrap:wrap"><label>Sort by <select><option>Position</option></select></label><label>Show <select><option>16</option></select></label></div><div class="vw"><span></span><span></span></div></div>
+  <div class="grid" id="grid"></div>
+  <div class="tb"><div style="display:flex;flex-wrap:wrap"><label>Sort by <select><option>Position</option></select></label><label>Show <select><option>9</option></select></label></div><div class="pg"><a href="#">1</a><a href="#">2</a><a href="#">3</a><a class="on" href="#">&rsaquo;</a></div></div>
+ </main>
+</div>
+
+<footer>
+ <div class="foot1"><div class="wrap">
+  <div><h6>OUR SERVICES</h6><ul><li>Delivery Information</li><li>Returns</li><li>Terms &amp; Conditions</li><li>Shipping &amp; Refund</li><li>Specials</li></ul></div>
+  <div><h6>EXTRAS</h6><ul><li>Contact us</li><li>Returns</li><li>Specials</li><li>Brands</li><li>Gift Voucher</li></ul></div>
+  <div><h6>MY ACCOUNT</h6><ul><li>My orders</li><li>My credit slips</li><li>My addresses</li><li>My personal info</li></ul></div>
+  <div class="contact"><h6>CONTACT US</h6><span>Megnar Comp Pvt Limited, Trade Centre, Udhana Darwaja</span><span>(91)-261 3023333</span><span>demo@harvest.com</span><div class="pay"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+ </div></div>
+ <div class="foot2">
+  <div class="r"><b>Download Our App</b><span class="app">App Store</span><span class="app">Google play</span><b>Follow Us</b><span class="s"><i></i><i></i><i></i><i></i><i></i></span></div>
+  SM Furnicom &copy; 2015 Demo Store. All Rights Reserved. Designed by MagenTech.Com
+ </div>
+</footer>
+
+<script>
+var S={
+lamp:'<path d="M85 40h70l16 60H69z" fill="#5fb7c0"/><ellipse cx="120" cy="150" rx="22" ry="40" fill="#2f8f9a"/><rect x="95" y="188" width="50" height="8" rx="4" fill="#2f8f9a"/>',
+swan:'<path d="M55 100q65-80 130 0l-14 52q-51 16-102 0z" fill="#8a8a2e"/><path d="M120 152v38M80 206h80" stroke="#999" stroke-width="6"/>',
+tl:'<path d="M85 50h70l10 44H75z" fill="#e7a24c"/><path d="M96 94h48l-8 98h-32z" fill="#a8672a"/>',
+arm:'<rect x="62" y="70" width="116" height="60" rx="10" fill="#2f8aa6"/><rect x="48" y="104" width="144" height="40" rx="8" fill="#3a9cba"/><rect x="42" y="96" width="26" height="56" rx="8" fill="#2a7b95"/><rect x="172" y="96" width="26" height="56" rx="8" fill="#2a7b95"/><path d="M64 152v38M176 152v38" stroke="#222" stroke-width="6"/>',
+yel:'<rect x="66" y="52" width="108" height="64" fill="#c9d02b"/><rect x="66" y="118" width="108" height="26" fill="#b9c020"/><path d="M70 144v50M170 144v50M70 168h100" stroke="#222" stroke-width="6"/>',
+mag:'<path d="M60 70h120v28H60z" fill="#8b4a2b"/><path d="M60 98l30 90M180 98l-30 90" stroke="#8b4a2b" stroke-width="8"/><path d="M92 106h56v60H92z" fill="#a8623c"/>',
+side:'<rect x="50" y="82" width="140" height="14" fill="#e0b070"/><rect x="58" y="96" width="8" height="96" fill="#d9a85f"/><rect x="174" y="96" width="8" height="96" fill="#d9a85f"/><rect x="58" y="136" width="124" height="6" fill="#d9a85f"/><rect x="100" y="64" width="22" height="18" fill="#222"/>',
+pink:'<path d="M50 120q0-70 70-70t70 70q-70 22-140 0z" fill="#b4246e"/><path d="M120 128v52M88 194h64" stroke="#aaa" stroke-width="6"/>',
+blk:'<path d="M60 92q60-52 120 0l-12 44q-48 14-96 0z" fill="#1d1d1d"/><path d="M90 136l-18 60M150 136l18 60M120 136v58" stroke="#c19a6b" stroke-width="6"/>',
+ct:'<ellipse cx="25" cy="25" rx="18" ry="6" fill="#2d9ca6"/><path d="M14 14h22v10H14z" fill="#e9753c"/>'
+};
+function svg(k,v){return '<svg viewBox="0 0 240 '+(v||220)+'" role="img" aria-label="Product">'+S[k]+'</svg>'}
+function stars(n){return '&#9733;'.repeat(n)+'<em>'+'&#9733;'.repeat(5-n)+'</em>'}
+var P=[
+['lamp','DONEC VEL VENENATIS MAURIS','$115.00','$142.00','n'],
+['swan','PELLENTESQUE HABITANT','$190.00','','s'],
+['tl','VIVAMUS FERMENTUM LUCTUS','$1300.00','$150.00',''],
+['arm','DONEC VEL VENENATIS MAURIS','$115.00','$142.00',''],
+['yel','CURABITUR TURPIS ORCI','$220.00','',''],
+['mag','CURABITUR TURPIS ORCI','$220.00','',''],
+['side','PELLENTESQUE HABITANT','$190.00','',''],
+['pink','VIVAMUS FERMENTUM LUCTUS','$1300.00','$150.00','s'],
+['blk','CURABITUR TURPIS ORCI','$220.00','','']];
+document.getElementById('grid').innerHTML=P.map(function(p,i){
+return '<article class="card'+(i==0?' on':'')+'">'+(p[4]?'<span class="badge '+p[4]+'">'+(p[4]=='n'?'NEW!':'SALE')+'</span>':'')+
+'<a class="im" href="#">'+svg(p[0])+'</a><h5>'+p[1]+'</h5><div class="price">'+p[2]+(p[3]?'<s>'+p[3]+'</s>':'')+'</div><div class="st">'+stars(3)+'</div>'+
+'<div class="act"><button aria-label="Compare">&#8644;</button><button class="add">ADD TO CART</button><button aria-label="Wishlist">&#9825;</button></div></article>'}).join('');
+var B=[['arm','ALIQUAM EGET LEO FAUCIBUS','$210.00','$335.00'],['mag','DUIS VITAE MOLIS LOREM','$115.00','$142.00'],['ct','CURABITUR BIBEN URNAET','$210.00','$335.00']];
+document.getElementById('best').innerHTML=B.map(function(b){return '<div class="best"><svg viewBox="0 0 240 220" style="background:#fff">'+S[b[0]]+'</svg><div><b>'+b[1]+'</b><span style="color:#d4a017;font-size:8px">'+stars(3)+'</span><div class="price" style="text-align:left">'+b[2]+'<s>'+b[3]+'</s></div></div></div>'}).join('');
+document.querySelector('.burger').onclick=function(){var m=document.querySelector('.menu');var o=m.classList.toggle('open');m.style.display=o?'':'';this.setAttribute('aria-expanded',o)};
+</script>
+</body>
+</html>

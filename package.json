@@ -1,0 +1,11 @@
+{
+  "name": "straitgate",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test:endpoints": "node tests/endpoints.test.js"
+  },
+  "devDependencies": {
+    "@neondatabase/config": "^1.10.0"
+  }
+}

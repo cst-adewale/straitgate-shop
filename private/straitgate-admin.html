@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Straitgate – Admin</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0a0a0a;--lime:#ccf97c;--tile:#f5f5f5;--mute:#8a8a8a;--bg:#161616;--red:#e5271d;--yel:#f5c20f;--blu:#1f5fe0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:#fff;color:var(--ink);font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;padding:0;-webkit-font-smoothing:antialiased;font-size:13px}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.page{min-height:100vh;width:100%;margin:0;background:#fff;border-radius:0;padding:clamp(20px,4.5vw,64px) clamp(20px,5.8vw,72px) clamp(24px,4vw,56px)}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{font-size:clamp(20px,2.4vw,26px);font-weight:500;letter-spacing:-.04em}
+.logo small{font-size:11px;color:var(--mute);letter-spacing:0;margin-left:8px;font-weight:400}
+.who{font-size:11px;color:var(--mute)}
+h1{font-weight:400;font-size:clamp(44px,8vw,96px);letter-spacing:-.055em;line-height:1;margin:clamp(26px,4.5vw,56px) 0 clamp(16px,2.4vw,26px)}
+h2{font-weight:400;font-size:clamp(20px,2.4vw,28px);letter-spacing:-.03em;margin:0 0 14px}
+h3{font-weight:500;font-size:13px;margin:0 0 10px}
+.tabs{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:clamp(18px,2.6vw,30px);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.chip,.btn{border:1px solid var(--ink);background:#fff;border-radius:999px;height:34px;padding:0 clamp(14px,2vw,24px);font-size:11px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s}
+.chip[aria-pressed=true],.btn.l{background:var(--lime);border-color:var(--lime)}
+.btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}.btn.l:hover{color:var(--lime)}
+.btn.sm{height:28px;padding:0 12px;font-size:10px}
+.btn.x{border-color:#ccc;color:#777}
+.grid{display:grid;gap:clamp(12px,2vw,24px)}
+.g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
+.g21{grid-template-columns:1.6fr 1fr}.gf{grid-template-columns:1fr 1.15fr}
+.tile{background:var(--tile);border-radius:12px;padding:clamp(14px,1.8vw,22px);min-width:0}
+.kpi .v{font-size:clamp(28px,3.4vw,44px);letter-spacing:-.05em;line-height:1;margin-top:10px}
+.kpi .l{font-size:11px;color:var(--mute)}
+.kpi .d{font-size:10px;margin-top:8px}.up{color:#2e7d12}.dn{color:var(--red)}
+.note{font-size:10px;color:var(--mute);margin:10px 0 0}
+svg.ch{width:100%;height:auto;display:block}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:10px;margin-top:10px}
+.leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+label{display:block;font-size:10px;color:var(--mute);margin:0 0 5px}
+input,select,textarea{width:100%;height:34px;border:1px solid #9a9a9a;border-radius:999px;padding:0 14px;font:inherit;font-size:12px;background:#fff;color:var(--ink)}
+textarea{height:70px;border-radius:14px;padding:10px 14px;resize:vertical}
+input[type=file]{padding:6px 14px;height:auto}
+.f{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.f .w{grid-column:1/-1}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{font-weight:400;color:var(--mute);font-size:10px;text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid #ddd;white-space:nowrap}
+td{padding:10px 10px 10px 0;border-bottom:1px solid #eee;vertical-align:middle}
+td.r,th.r{text-align:right}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:10px;background:#e8e8e8}
+.pill.ok{background:var(--lime)}.pill.warn{background:#ffe4a3}.pill.bad{background:#ffc9c4}
+.thumb{width:44px;height:44px;border-radius:8px;background:#e9e9e9;object-fit:cover;display:grid;place-items:center;font-size:14px;color:#888;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.pr{display:flex;align-items:center;gap:12px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.bar input,.bar select{width:auto;min-width:150px}
+.sp{margin-left:auto}
+.qi{display:grid;grid-template-columns:1fr 70px 100px 28px;gap:8px;margin-bottom:8px;align-items:center}
+.sum div{display:flex;justify-content:space-between;padding:6px 0;font-size:12px}
+.sum .t{border-top:1px solid var(--ink);margin-top:6px;padding-top:12px;font-size:20px;letter-spacing:-.03em}
+.res{font-size:clamp(26px,3vw,36px);letter-spacing:-.04em;margin:12px 0 0}
+.cv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.calc{max-width:320px}
+.disp{background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;text-align:right;font-size:30px;letter-spacing:-.03em;min-height:64px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.disp small{font-size:11px;color:#999;min-height:14px}
+.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.keys button{height:46px;border:0;border-radius:999px;background:#fff;font-size:16px}
+.keys button:hover{background:#e6e6e6}
+.keys .o{background:var(--lime)}.keys .o:hover{background:var(--ink);color:var(--lime)}
+.keys .z{grid-column:span 2}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--lime);padding:10px 20px;border-radius:999px;font-size:12px;opacity:0;pointer-events:none;transition:.3s;z-index:9}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.empty{color:var(--mute);padding:20px 0;font-size:12px}
+#pa{display:none}
+@media print{body{background:#fff;padding:0}.page,.toast{display:none!important}#pa{display:block;padding:24px;font-size:12px}#pa table{font-size:12px}}
+@media (max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g21,.gf{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.g2,.g3,.f{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}.qi{grid-template-columns:1fr 56px 80px 28px}.sp{margin-left:0}.bar input,.bar select{min-width:0;flex:1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<link rel="stylesheet" href="/straitgate-theme.css">
+<script src="/straitgate-theme.js"></script>
+</head>
+<body>
+<div class="page">
+<header><span class="logo">Straitgate<small>Admin</small></span><span class="who">Admin dashboard &middot; <span id="today"></span> &middot; <button id="logout" class="btn sm" type="button">Sign out</button></span><button class="theme-toggle" type="button" aria-label="Switch theme">◐ Dark</button></header>
+<h1 id="ttl">Dashboard</h1>
+<div class="tabs" role="tablist" id="tabs"></div>
+<div id="view"></div>
+<footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px;border-top:1px solid #ddd"><a href="straitgate-home.html">Home</a> &nbsp;·&nbsp; <a href="straitgate-catalog.html">Catalog</a></footer>
+</div>
+<div id="pa"></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var K='doggy-admin-v1',TABS=[['dashboard','Dashboard'],['products','Products'],['quotes','Quotations'],['inventory','Inventory'],['tools','Converter & calculator']];
+var CATS=['Security door','Garden gate','Driveway gate','Accessory'],COLS={Red:'#e5271d',Yellow:'#f5c20f',Blue:'#1f5fe0'};
+var ITYPES=['Machine','Tool','Product','Material'];
+function seed(){return{products:[
+{id:1,name:'Fortis Red',cat:'Security door',color:'Red',price:1450,desc:'Steel security door with 5-point lock',img:''},
+{id:2,name:'Arc Yellow',cat:'Garden gate',color:'Yellow',price:625,desc:'Curved garden gate, galvanised steel',img:''},
+{id:3,name:'Slide Blue',cat:'Driveway gate',color:'Blue',price:2400,desc:'Sliding driveway gate, motor-ready',img:''},
+{id:4,name:'Vault Yellow',cat:'Security door',color:'Yellow',price:1250,desc:'Reinforced security door, Grade 4',img:''},
+{id:5,name:'Guard Red',cat:'Driveway gate',color:'Red',price:1050,desc:'Double swing gate, heavy-duty hinges',img:''},
+{id:6,name:'Vault Blue',cat:'Security door',color:'Blue',price:1750,desc:'Security door with glazed side-light',img:''}],
+inv:[
+{id:1,name:'CNC plasma cutter',type:'Machine',sku:'MCH-001',qty:2,unit:'pcs',min:1,loc:'Workshop A',cost:18500},
+{id:2,name:'MIG welder',type:'Machine',sku:'MCH-002',qty:4,unit:'pcs',min:2,loc:'Workshop A',cost:1250},
+{id:3,name:'Press brake',type:'Machine',sku:'MCH-003',qty:1,unit:'pcs',min:1,loc:'Workshop B',cost:24000},
+{id:4,name:'Angle grinder',type:'Tool',sku:'TL-014',qty:6,unit:'pcs',min:4,loc:'Tool crib',cost:95},
+{id:5,name:'Cordless drill',type:'Tool',sku:'TL-021',qty:3,unit:'pcs',min:4,loc:'Van 1',cost:140},
+{id:6,name:'Steel tube 40x40 (6 m)',type:'Material',sku:'MT-100',qty:120,unit:'lengths',min:40,loc:'Yard',cost:28},
+{id:7,name:'Powder coat, Red',type:'Material',sku:'MT-210',qty:12,unit:'kg',min:20,loc:'Paint shop',cost:9},
+{id:8,name:'Fortis Red door',type:'Product',sku:'PR-001',qty:8,unit:'pcs',min:3,loc:'Warehouse',cost:820}],
+quotes:[
+{id:1,no:'Q-0001',cust:'Maya Okafor',email:'maya@example.com',phone:'',addr:'12 Elm Road, London',items:[{d:'Fortis Red security door',q:1,p:1450}],inst:120,disc:0,valid:'',notes:'',status:'Accepted',date:'2026-10-02'},
+{id:2,no:'Q-0002',cust:'Brightside Estates',email:'ops@brightside.test',phone:'',addr:'Unit 4, Hale Park',items:[{d:'Slide Blue driveway gate',q:2,p:2400}],inst:350,disc:5,valid:'',notes:'',status:'Sent',date:'2026-10-19'},
+{id:3,no:'Q-0003',cust:'T. Adeyemi',email:'t@example.com',phone:'',addr:'',items:[{d:'Arc Yellow garden gate',q:1,p:625}],inst:90,disc:0,valid:'',notes:'',status:'Draft',date:'2026-10-28'}]}}
+var DB;try{DB=JSON.parse(localStorage.getItem(K))}catch(e){}
+if(!DB||!DB.products)DB=seed();
+function save(){try{localStorage.setItem(K,JSON.stringify(DB))}catch(e){toast('Could not save: storage full or blocked')}}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function gbp(n){return '£'+(Math.round(n*100)/100).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},2200)}
+function nid(a){return a.reduce(function(m,x){return Math.max(m,x.id)},0)+1}
+function totals(q){var sub=q.items.reduce(function(s,i){return s+i.q*i.p},0),d=sub*(q.disc||0)/100,net=sub-d+(+q.inst||0),vat=net*.2;return{sub:sub,d:d,inst:+q.inst||0,net:net,vat:vat,total:net+vat}}
+function art(t,c){var s='',i;if(t==='Security door')s='<rect x="56" y="14" width="128" height="176" rx="6" fill="#222"/><rect x="64" y="22" width="112" height="168" fill="'+c+'"/><rect x="146" y="92" width="10" height="26" rx="5" fill="#ddd"/>';else if(t==='Garden gate'){s='<path d="M50 192V84Q120 14 190 84V192" fill="none" stroke="'+c+'" stroke-width="10"/>';for(i=0;i<7;i++)s+='<rect x="'+(66+i*18)+'" y="90" width="6" height="100" fill="'+c+'"/>'}else if(t==='Driveway gate'){s='<rect x="14" y="40" width="10" height="150" fill="#222"/><rect x="34" y="52" width="160" height="14" fill="'+c+'"/><rect x="34" y="176" width="160" height="14" fill="'+c+'"/>';for(i=0;i<9;i++)s+='<rect x="'+(40+i*17)+'" y="66" width="6" height="110" fill="'+c+'"/>'}else s='<circle cx="120" cy="100" r="50" fill="'+c+'"/>';return '<svg viewBox="0 0 240 200" class="ch">'+s+'</svg>'}
+
+/* charts */
+function barChart(l,v,hi){var m=Math.max.apply(null,v)*1.15,w=400,h=190,bw=w/l.length,s='';
+ [0,.5,1].forEach(function(f){var y=h-24-(h-40)*f;s+='<line x1="0" x2="'+w+'" y1="'+y+'" y2="'+y+'" stroke="#ddd"/>'});
+ v.forEach(function(x,i){var bh=(h-40)*x/m,y=h-24-bh;s+='<rect x="'+(i*bw+bw*.18)+'" y="'+y+'" width="'+bw*.64+'" height="'+bh+'" rx="4" fill="'+(i===hi?'#ccf97c':'#0a0a0a')+'"><title>'+l[i]+': £'+x+'k</title></rect><text x="'+(i*bw+bw/2)+'" y="'+(h-8)+'" font-size="9" text-anchor="middle" fill="#8a8a8a">'+l[i]+'</text>'});
+ return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Revenue by month">'+s+'</svg>'}
+function donut(d){var tot=d.reduce(function(s,x){return s+x[1]},0)||1,r=50,C=2*Math.PI*r,o=0,s='';
+ d.forEach(function(x){var len=C*x[1]/tot;s+='<circle cx="70" cy="70" r="'+r+'" fill="none" stroke="'+x[2]+'" stroke-width="24" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-o)+'" transform="rotate(-90 70 70)"><title>'+x[0]+': '+x[1]+'</title></circle>';o+=len});
+ return '<svg class="ch" viewBox="0 0 140 140" style="max-width:190px;margin:0 auto" role="img" aria-label="Sales by category">'+s+'<text x="70" y="75" text-anchor="middle" font-size="18" fill="#0a0a0a">'+tot+'</text></svg><div class="leg">'+d.map(function(x){return '<span><i style="background:'+x[2]+'"></i>'+x[0]+' ('+x[1]+')</span>'}).join('')+'</div>'}
+function line(l,v){var m=Math.max.apply(null,v)*1.15,w=400,h=170,p=v.map(function(x,i){return [i*(w-20)/(v.length-1)+10,h-24-(h-40)*x/m]}),s='';
+ s+='<polyline points="'+p.map(function(a){return a.join(',')}).join(' ')+'" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>';
+ p.forEach(function(a,i){s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="3.5" fill="'+(i===v.length-1?'#ccf97c':'#0a0a0a')+'" stroke="#0a0a0a"><title>'+l[i]+': '+v[i]+'</title></circle><text x="'+a[0]+'" y="'+(h-6)+'" font-size="9" text-anchor="middle" fill="#8a8a8a">'+l[i]+'</text>'});
+ return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Site visits per week">'+s+'</svg>'}
+
+/* views */
+var V={};
+V.dashboard=function(){
+ var qs=DB.quotes,open=qs.filter(function(q){return q.status!=='Accepted'&&q.status!=='Declined'}).length,low=DB.inv.filter(function(i){return i.qty<=i.min}).length,
+ val=qs.reduce(function(s,q){return q.status==='Accepted'?s+totals(q).total:s},0),
+ st=['Draft','Sent','Accepted','Declined'],stc=['#8a8a8a','#f5c20f','#ccf97c','#e5271d'];
+ var cats=CATS.map(function(c,i){return [c,[38,17,21,9][i],['#0a0a0a','#f5c20f','#1f5fe0','#ccf97c'][i]]});
+ return '<div class="grid g4">'+
+ [['Revenue, Oct','£71k','+12% vs Sep',1],['Orders, Oct','38','+5 vs Sep',1],['Open quotations',open,gbp(val)+' accepted',1],['Low-stock items',low,low?'Needs restocking':'All stocked',!low]].map(function(k){return '<div class="tile kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="d '+(k[3]?'up':'dn')+'">'+k[2]+'</div></div>'}).join('')+'</div>'+
+ '<div class="grid g21" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Revenue by month (£k)</h3>'+barChart(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'],[28,34,31,42,47,52,49,58,63,71],9)+'</div>'+
+ '<div class="tile"><h3>Orders by category</h3>'+donut(cats)+'</div></div>'+
+ '<div class="grid g2" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Site visits per week</h3>'+line(['W1','W2','W3','W4','W5','W6'],[820,910,880,1040,1180,1320])+'</div>'+
+ '<div class="tile"><h3>Quotation pipeline</h3>'+donut(st.map(function(s,i){return [s,qs.filter(function(q){return q.status===s}).length,stc[i]]}))+'</div></div>'+
+ '<p class="note">Revenue, order and visit figures are sample data until your store is connected. Quotations, products and stock are live from this page.</p>'+
+ '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h3>Recent quotations</h3>'+quoteTable(qs.slice(-4).reverse(),true)+'</div>'};
+
+V.products=function(){
+ return '<div class="grid gf"><div class="tile"><h2>Upload a product</h2><div class="f">'+
+ '<div><label for="pn">Product name</label><input id="pn" placeholder="e.g. Fortis Red"></div>'+
+ '<div><label for="pc">Category</label><select id="pc">'+CATS.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
+ '<div><label for="pk">Colour</label><select id="pk">'+Object.keys(COLS).map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
+ '<div><label for="pp">Price (£)</label><input id="pp" type="number" min="0" step="0.01" placeholder="0.00"></div>'+
+ '<div class="w"><label for="pd">Short description</label><textarea id="pd" placeholder="Shown under the product name in the catalog"></textarea></div>'+
+ '<div class="w"><label for="pi">Product image</label><input id="pi" type="file" accept="image/*"></div></div>'+
+ '<div class="bar" style="margin:14px 0 0"><button class="btn l" id="addp">Add to catalog</button><button class="btn" id="expp">Export catalog JSON</button></div>'+
+ '<textarea id="exo" style="display:none;margin-top:12px;height:120px" readonly aria-label="Catalog JSON"></textarea></div>'+
+ '<div class="tile"><h2>Catalog ('+DB.products.length+')</h2><div class="tw"><table><thead><tr><th>Product</th><th>Category</th><th class="r">Price</th><th></th></tr></thead><tbody>'+
+ DB.products.map(function(p){return '<tr><td><div class="pr"><div class="thumb">'+(p.img?'<img alt="" src="'+p.img+'">':esc(p.name[0]))+'</div><div><b style="font-weight:500">'+esc(p.name)+'</b><div style="font-size:10px;color:var(--mute)">'+esc(p.color)+' &middot; '+esc(p.desc)+'</div></div></div></td><td>'+esc(p.cat)+'</td><td class="r">'+gbp(p.price)+'</td><td class="r"><button class="btn sm x" data-del="p:'+p.id+'">Remove</button></td></tr>'}).join('')+'</tbody></table></div></div></div>'};
+
+function quoteTable(a,ro){if(!a.length)return '<div class="empty">No quotations yet.</div>';
+ return '<div class="tw"><table><thead><tr><th>No.</th><th>Customer</th><th>Date</th><th class="r">Total</th><th>Status</th>'+(ro?'':'<th></th>')+'</tr></thead><tbody>'+a.map(function(q){var c={Accepted:'ok',Sent:'warn',Declined:'bad'}[q.status]||'';
+ return '<tr><td>'+q.no+'</td><td>'+esc(q.cust)+'</td><td>'+q.date+'</td><td class="r">'+gbp(totals(q).total)+'</td><td>'+(ro?'<span class="pill '+c+'">'+q.status+'</span>':'<select data-qs="'+q.id+'" style="width:auto;height:28px;font-size:10px">'+['Draft','Sent','Accepted','Declined'].map(function(s){return '<option'+(s===q.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select>')+'</td>'+(ro?'':'<td class="r"><button class="btn sm" data-print="'+q.id+'">Print</button> <button class="btn sm x" data-del="q:'+q.id+'">Delete</button></td>')+'</tr>'}).join('')+'</tbody></table></div>'}
+
+var QI=[{d:'',q:1,p:0}];
+V.quotes=function(){
+ return '<div class="grid gf"><div class="tile"><h2>New quotation</h2><div class="f">'+
+ '<div><label for="qc">Customer name</label><input id="qc"></div><div><label for="qe">Email</label><input id="qe" type="email"></div>'+
+ '<div><label for="qt">Phone</label><input id="qt"></div><div><label for="qv">Valid until</label><input id="qv" type="date"></div>'+
+ '<div class="w"><label for="qa">Site address</label><input id="qa"></div></div>'+
+ '<h3 style="margin-top:18px">Line items</h3><div id="qi"></div>'+
+ '<div class="bar"><select id="qp" style="max-width:240px"><option value="">Add from catalog...</option>'+DB.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+' ('+gbp(p.price)+')</option>'}).join('')+'</select><button class="btn sm" id="qadd">+ Custom line</button></div>'+
+ '<div class="f"><div><label for="qin">Installation (£)</label><input id="qin" type="number" min="0" value="0"></div><div><label for="qd">Discount (%)</label><input id="qd" type="number" min="0" max="100" value="0"></div>'+
+ '<div class="w"><label for="qn">Notes and terms</label><textarea id="qn">50% deposit to confirm. Balance due on completion. Made to measure, 2 to 3 weeks.</textarea></div></div></div>'+
+ '<div><div class="tile"><h2>Summary</h2><div class="sum" id="qs"></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="qsave">Save quotation</button><button class="btn" id="qcopy">Copy as text</button></div></div></div></div>'+
+ '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h2>All quotations ('+DB.quotes.length+')</h2>'+quoteTable(DB.quotes.slice().reverse())+'</div>'};
+function qItems(){$('qi').innerHTML=QI.map(function(i,n){return '<div class="qi"><input data-qi="d:'+n+'" value="'+esc(i.d)+'" placeholder="Description" aria-label="Description"><input data-qi="q:'+n+'" type="number" min="1" value="'+i.q+'" aria-label="Qty"><input data-qi="p:'+n+'" type="number" min="0" step="0.01" value="'+i.p+'" aria-label="Unit price"><button class="btn sm x" data-qrm="'+n+'" aria-label="Remove line" style="padding:0">&times;</button></div>'}).join('');qSum()}
+function qDraft(){return{items:QI.filter(function(i){return i.d||i.p}),inst:+$('qin').value||0,disc:+$('qd').value||0}}
+function qSum(){var t=totals(qDraft());$('qs').innerHTML='<div>Subtotal<span>'+gbp(t.sub)+'</span></div><div>Discount<span>-'+gbp(t.d)+'</span></div><div>Installation<span>'+gbp(t.inst)+'</span></div><div>VAT (20%)<span>'+gbp(t.vat)+'</span></div><div class="t">Total<span>'+gbp(t.total)+'</span></div>'}
+function qText(q){var t=totals(q);return 'QUOTATION '+q.no+'\nDoggy – Gates & security doors\nDate: '+q.date+(q.valid?'   Valid until: '+q.valid:'')+'\n\nCustomer: '+q.cust+'\n'+(q.email?q.email+'\n':'')+(q.phone?q.phone+'\n':'')+(q.addr?q.addr+'\n':'')+'\n'+q.items.map(function(i){return i.q+' x '+i.d+' @ '+gbp(i.p)+' = '+gbp(i.q*i.p)}).join('\n')+'\n\nSubtotal: '+gbp(t.sub)+'\nDiscount: -'+gbp(t.d)+'\nInstallation: '+gbp(t.inst)+'\nVAT 20%: '+gbp(t.vat)+'\nTOTAL: '+gbp(t.total)+'\n\n'+(q.notes||'')}
+function qHtml(q){var t=totals(q);return '<h2 style="font-size:28px;margin:0">Doggy</h2><p>Gates &amp; security doors</p><h3>Quotation '+q.no+'</h3><p>Date: '+q.date+(q.valid?' &middot; Valid until: '+q.valid:'')+'</p><p><b>'+esc(q.cust)+'</b><br>'+esc(q.email)+' '+esc(q.phone)+'<br>'+esc(q.addr)+'</p><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr></thead><tbody>'+q.items.map(function(i){return '<tr><td>'+esc(i.d)+'</td><td class="r">'+i.q+'</td><td class="r">'+gbp(i.p)+'</td><td class="r">'+gbp(i.q*i.p)+'</td></tr>'}).join('')+'</tbody></table><p style="text-align:right">Subtotal '+gbp(t.sub)+'<br>Discount -'+gbp(t.d)+'<br>Installation '+gbp(t.inst)+'<br>VAT 20% '+gbp(t.vat)+'<br><b style="font-size:18px">Total '+gbp(t.total)+'</b></p><p>'+esc(q.notes)+'</p>'}
+
+var IF='All',IS='';
+V.inventory=function(){
+ var list=DB.inv.filter(function(i){return (IF==='All'||i.type===IF)&&(!IS||(i.name+i.sku+i.loc).toLowerCase().indexOf(IS.toLowerCase())>-1)}),
+ val=DB.inv.reduce(function(s,i){return s+i.qty*i.cost},0);
+ return '<div class="grid g3" style="margin-bottom:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Items tracked</div><div class="v">'+DB.inv.length+'</div></div><div class="tile kpi"><div class="l">Stock value (at cost)</div><div class="v">'+gbp(val)+'</div></div><div class="tile kpi"><div class="l">Low stock</div><div class="v">'+DB.inv.filter(function(i){return i.qty<=i.min}).length+'</div></div></div>'+
+ '<div class="grid gf"><div class="tile"><h2>Add inventory</h2><div class="f"><div class="w"><label for="in">Item name</label><input id="in"></div>'+
+ '<div><label for="it">Type</label><select id="it">'+ITYPES.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></div><div><label for="is">SKU</label><input id="is"></div>'+
+ '<div><label for="iq">Quantity</label><input id="iq" type="number" min="0" value="1"></div><div><label for="iu">Unit</label><input id="iu" value="pcs"></div>'+
+ '<div><label for="im">Reorder level</label><input id="im" type="number" min="0" value="1"></div><div><label for="ic">Unit cost (£)</label><input id="ic" type="number" min="0" step="0.01" value="0"></div>'+
+ '<div class="w"><label for="il">Location</label><input id="il" placeholder="Workshop, van, warehouse..."></div></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="iadd">Add item</button></div></div>'+
+ '<div class="tile"><div class="bar"><div class="tabs" style="margin:0">'+['All'].concat(ITYPES).map(function(t){return '<button class="chip" data-if="'+t+'" aria-pressed="'+(IF===t)+'">'+t+'</button>'}).join('')+'</div><input class="sp" id="isr" type="search" placeholder="Search..." value="'+esc(IS)+'" aria-label="Search inventory"></div>'+
+ (list.length?'<div class="tw"><table><thead><tr><th>Item</th><th>Type</th><th>Location</th><th>Stock</th><th></th></tr></thead><tbody>'+list.map(function(i){var lo=i.qty<=i.min;return '<tr><td><b style="font-weight:500">'+esc(i.name)+'</b><div style="font-size:10px;color:var(--mute)">'+esc(i.sku)+' &middot; '+gbp(i.cost)+'</div></td><td>'+i.type+'</td><td>'+esc(i.loc)+'</td><td><span class="pill '+(lo?'bad':'ok')+'">'+i.qty+' '+esc(i.unit)+'</span></td><td class="r" style="white-space:nowrap"><button class="btn sm" data-adj="'+i.id+':-1" aria-label="Decrease">&minus;</button> <button class="btn sm" data-adj="'+i.id+':1" aria-label="Increase">+</button> <button class="btn sm x" data-del="i:'+i.id+'">Remove</button></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Nothing matches.</div>')+'</div></div>'};
+
+var DU={mm:.001,cm:.01,m:1,km:1000,in:.0254,ft:.3048},WU={kg:1,lb:.45359237,g:.001,oz:.028349523125};
+function opts(o,s){return Object.keys(o).map(function(k){return '<option'+(k===s?' selected':'')+'>'+k+'</option>'}).join('')}
+V.tools=function(){
+ return '<div class="grid g2" style="align-items:start"><div style="display:grid;gap:clamp(12px,2vw,24px)">'+
+ '<div class="tile"><h2>Distance</h2><div class="cv"><div><label for="dv">Value</label><input id="dv" type="number" value="1" step="any"></div><div><label for="df">From</label><select id="df">'+opts(DU,'m')+'</select></div></div><div class="cv"><div><label for="dt">To</label><select id="dt">'+opts(DU,'ft')+'</select></div><div style="align-self:end"><button class="btn" id="dsw">&#8646; Swap</button></div></div><div class="res" id="dr"></div><div class="tw" style="margin-top:12px"><table><tbody id="dall"></tbody></table></div></div>'+
+ '<div class="tile"><h2>Weight</h2><div class="cv"><div><label for="wv">Value</label><input id="wv" type="number" value="1" step="any"></div><div><label for="wf">From</label><select id="wf">'+opts(WU,'kg')+'</select></div></div><div class="cv"><div><label for="wt">To</label><select id="wt">'+opts(WU,'lb')+'</select></div><div style="align-self:end"><button class="btn" id="wsw">&#8646; Swap</button></div></div><div class="res" id="wr"></div></div></div>'+
+ '<div class="tile"><h2>Calculator</h2><div class="calc" id="calc" tabindex="0" aria-label="Calculator"><div class="disp"><small id="cs"></small><span id="cd">0</span></div><div class="keys">'+
+ [['C','o'],['&plusmn;','o'],['%','o'],['&divide;','o'],['7'],['8'],['9'],['&times;','o'],['4'],['5'],['6'],['&minus;','o'],['1'],['2'],['3'],['+','o'],['0','z'],['.'],['=','o']].map(function(k){return '<button class="'+(k[1]||'')+(k[1]==='z'?'':'')+'" data-k="'+k[0]+'"'+(k[1]==='z'?' style="grid-column:span 2"':'')+'>'+k[0]+'</button>'}).join('')+'</div><div class="bar" style="margin-top:10px"><button class="btn sm" data-k="bs">&#9003; Delete</button></div></div></div></div>'};
+function cnv(){var d=+$('dv').value||0,m=d*DU[$('df').value];$('dr').textContent=fmt(m/DU[$('dt').value])+' '+$('dt').value;
+ $('dall').innerHTML=Object.keys(DU).map(function(k){return '<tr><td>'+k+'</td><td class="r">'+fmt(m/DU[k])+'</td></tr>'}).join('');
+ var w=(+$('wv').value||0)*WU[$('wf').value];$('wr').textContent=fmt(w/WU[$('wt').value])+' '+$('wt').value}
+function fmt(n){return String(+n.toPrecision(10))}
+var C={cur:'0',prev:null,op:null,fresh:true};
+function calc(a,b,o){return o==='+'?a+b:o==='−'?a-b:o==='×'?a*b:b===0?NaN:a/b}
+function ck(k){var x=C;
+ if(k==='bs'){x.cur=x.cur.length>1?x.cur.slice(0,-1):'0'}
+ else if(/^[0-9]$/.test(k)){x.cur=(x.fresh||x.cur==='0')?k:x.cur+k;x.fresh=false}
+ else if(k==='.'){if(x.fresh){x.cur='0.';x.fresh=false}else if(x.cur.indexOf('.')<0)x.cur+='.'}
+ else if(k==='C'){x.cur='0';x.prev=null;x.op=null;x.fresh=true}
+ else if(k==='±'){x.cur=x.cur[0]==='-'?x.cur.slice(1):(x.cur==='0'?'0':'-'+x.cur)}
+ else if(k==='%'){x.cur=fmt(parseFloat(x.cur)/100)}
+ else if(k==='='){if(x.op!==null){var r=calc(x.prev,parseFloat(x.cur),x.op);$('cs').textContent=fmt(x.prev)+' '+x.op+' '+x.cur+' =';x.cur=isNaN(r)?'Error':fmt(r);x.prev=null;x.op=null;x.fresh=true}}
+ else{if(x.op!==null&&!x.fresh){var r2=calc(x.prev,parseFloat(x.cur),x.op);x.prev=r2;x.cur=isNaN(r2)?'Error':fmt(r2)}else x.prev=parseFloat(x.cur)||0;x.op=k;x.fresh=true;$('cs').textContent=fmt(x.prev)+' '+k}
+ if(x.cur==='Error'){x.prev=null;x.op=null;x.fresh=true}
+ $('cd').textContent=x.cur}
+
+/* nav + events */
+var cur='dashboard';
+var want='';
+function show(){var h=want||location.hash.replace('#','');cur=V[h]?h:'dashboard';
+ $('ttl').textContent={dashboard:'Dashboard',products:'Products',quotes:'Quotations',inventory:'Inventory',tools:'Tools'}[cur];
+ $('tabs').innerHTML=TABS.map(function(t){return '<button type="button" class="chip" role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+t[1]+'</button>'}).join('');
+ $('view').innerHTML=V[cur]();
+ if(cur==='quotes')qItems();if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
+function val(i){return $(i).value.trim()}
+document.addEventListener('click',function(e){var b=e.target.closest('button,[data-k]');if(!b)return;var d=b.dataset;
+ if(d.tab){e.preventDefault();want=d.tab;show();return}
+ if(d.k){ck(d.k);return}
+ if(d.if){IF=d.if;show();return}
+ if(d.del){var p=d.del.split(':'),n=+p[1],map={p:'products',q:'quotes',i:'inv'};DB[map[p[0]]]=DB[map[p[0]]].filter(function(x){return x.id!==n});save();show();return}
+ if(d.adj){var a=d.adj.split(':');DB.inv.forEach(function(i){if(i.id==+a[0])i.qty=Math.max(0,i.qty+ +a[1])});save();show();return}
+ if(d.print){var q=DB.quotes.filter(function(x){return x.id==d.print})[0];$('pa').innerHTML=qHtml(q);try{window.print()}catch(er){toast('Printing is blocked here. Use Copy as text.')}return}
+ if(d.qrm){QI.splice(+d.qrm,1);if(!QI.length)QI.push({d:'',q:1,p:0});qItems();return}
+ var id=b.id;
+ if(id==='addp'){var n2=val('pn'),pr=parseFloat($('pp').value);if(!n2||isNaN(pr)){toast('Add a name and a price');return}
+  var f=$('pi').files[0],add=function(img){DB.products.push({id:nid(DB.products),name:n2,cat:$('pc').value,color:$('pk').value,price:pr,desc:val('pd'),img:img||''});save();show();toast(n2+' added to catalog')};
+  if(!f){add('');return}
+  var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,480/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=im.width*s;cv.height=im.height*s;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);add(cv.toDataURL('image/jpeg',.8))};im.onerror=function(){add('')};im.src=rd.result};rd.readAsDataURL(f);return}
+ if(id==='expp'){var o=$('exo');o.style.display='block';o.value=JSON.stringify(DB.products.map(function(p){return{name:p.name,category:p.cat,colour:p.color,price:p.price,description:p.desc,image:p.img?'(uploaded)':''}}),null,2);o.select();try{document.execCommand('copy');toast('Copied to clipboard')}catch(er){}return}
+ if(id==='qadd'){QI.push({d:'',q:1,p:0});qItems();return}
+ if(id==='qsave'||id==='qcopy'){var dr=qDraft();if(!val('qc')||!dr.items.length){toast('Add a customer and at least one line');return}
+  var q={id:nid(DB.quotes),no:'Q-'+('000'+nid(DB.quotes)).slice(-4),cust:val('qc'),email:val('qe'),phone:val('qt'),addr:val('qa'),items:dr.items,inst:dr.inst,disc:dr.disc,valid:$('qv').value,notes:val('qn'),status:'Draft',date:new Date().toISOString().slice(0,10)};
+  if(id==='qcopy'){var tx=qText(q);try{navigator.clipboard.writeText(tx).then(function(){toast('Quotation copied')},function(){toast('Copy blocked by the browser')})}catch(er){toast('Copy blocked by the browser')}return}
+  DB.quotes.push(q);save();QI=[{d:'',q:1,p:0}];show();toast(q.no+' saved');return}
+ if(id==='iadd'){if(!val('in')){toast('Add an item name');return}DB.inv.push({id:nid(DB.inv),name:val('in'),type:$('it').value,sku:val('is'),qty:+$('iq').value||0,unit:val('iu')||'pcs',min:+$('im').value||0,loc:val('il'),cost:+$('ic').value||0});save();show();toast('Item added');return}
+ if(id==='dsw'){var t=$('df').value;$('df').value=$('dt').value;$('dt').value=t;cnv();return}
+ if(id==='wsw'){var u=$('wf').value;$('wf').value=$('wt').value;$('wt').value=u;cnv()}
+});
+document.addEventListener('input',function(e){var t=e.target;
+ if(t.id==='isr'){IS=t.value;var p=t.selectionStart;show();var n=$('isr');n.focus();n.setSelectionRange(p,p);return}
+ if(t.dataset.qi){var a=t.dataset.qi.split(':'),r=QI[+a[1]];r[a[0]]=a[0]==='d'?t.value:(+t.value||0);qSum();return}
+ if(t.id==='qin'||t.id==='qd')qSum();
+ if(/^(dv|wv)$/.test(t.id))cnv()});
+document.addEventListener('change',function(e){var t=e.target;
+ if(/^(df|dt|wf|wt)$/.test(t.id))cnv();
+ if(t.id==='qp'&&t.value){var p=DB.products.filter(function(x){return x.id==t.value})[0];if(QI.length===1&&!QI[0].d&&!QI[0].p)QI=[];QI.push({d:p.name+' – '+p.cat.toLowerCase(),q:1,p:p.price});qItems()}
+ if(t.dataset.qs){DB.quotes.forEach(function(q){if(q.id==t.dataset.qs)q.status=t.value});save();toast('Status updated')}});
+document.addEventListener('keydown',function(e){if(cur!=='tools'||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
+ var k=e.key,m={'*':'×','/':'÷','-':'−','Enter':'=','Escape':'C','Backspace':'bs'};
+ if(/^[0-9.+%]$/.test(k)||m[k]){e.preventDefault();ck(m[k]||k)}});
+window.addEventListener('hashchange',function(){want='';show()});
+$('today').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+show();
+$('logout').onclick=async function(){await fetch('/api/admin/logout',{method:'POST'});location.replace('/straitgate-admin-login.html')};
+</script>
+</body>
+</html>

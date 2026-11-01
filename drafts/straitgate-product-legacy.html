@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Straitgate – Product</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0a0a0a;--lime:#ccf97c;--tile:#f5f5f5;--mute:#8a8a8a;--bg:#161616;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;padding:clamp(14px,5vw,80px) clamp(14px,6vw,96px);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.page{max-width:1180px;margin:0 auto;background:#fff;border-radius:clamp(16px,2.4vw,28px);padding:clamp(20px,4.5vw,64px) clamp(20px,5.8vw,72px) clamp(24px,4vw,56px)}
+header{display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:clamp(20px,2.4vw,26px);font-weight:500;letter-spacing:-.04em}
+nav{display:flex;gap:clamp(14px,2.2vw,26px);align-items:center;font-size:12px}
+nav svg{width:15px;height:15px}.bag{display:inline-flex;align-items:center;gap:8px}
+.crumb{font-size:11px;color:var(--mute);margin:clamp(34px,6vw,70px) 0 clamp(16px,2.4vw,26px)}
+.crumb a:hover{color:var(--ink)}
+.pd{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(22px,4.5vw,64px);align-items:start}
+.tile{background:var(--tile);border-radius:12px;display:grid;place-items:center;overflow:hidden}
+.main-t{aspect-ratio:1/.95}
+.tile svg{width:100%;height:100%;display:block}
+.thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1.4vw,14px);margin-top:clamp(8px,1.4vw,14px)}
+.thumbs button{background:var(--tile);border:1px solid transparent;border-radius:10px;aspect-ratio:1;padding:0;overflow:hidden}
+.thumbs button[aria-pressed=true]{border-color:var(--ink)}
+.thumbs svg{width:100%;height:100%}
+.eyebrow{font-size:11px;color:var(--mute);margin:0 0 12px}
+h1{font-weight:400;font-size:clamp(44px,7vw,84px);letter-spacing:-.055em;line-height:1;margin:0}
+.price{font-size:clamp(20px,2.4vw,26px);letter-spacing:-.03em;margin:clamp(14px,2vw,22px) 0 0}
+.desc{font-size:14px;line-height:1.5;color:#444;margin:14px 0 0;max-width:34em}
+.lbl{font-size:11px;color:var(--mute);margin:clamp(20px,3vw,30px) 0 10px;display:flex;justify-content:space-between}
+.lbl b{font-weight:400;color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chip{border:1px solid var(--ink);background:#fff;border-radius:999px;padding:0 18px;height:34px;font-size:11px;transition:background .2s}
+.chip[aria-pressed=true]{background:var(--lime);border-color:var(--lime)}
+.sw{width:26px;height:26px;border-radius:50%;border:1px solid #ddd;padding:0;box-shadow:0 0 0 3px #fff inset}
+.sw[aria-pressed=true]{outline:1px solid var(--ink);outline-offset:2px}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--ink);border-radius:999px;height:34px}
+.qty button{border:0;background:none;width:34px;height:100%;font-size:14px}
+.qty span{min-width:22px;text-align:center;font-size:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:38px;padding:0 clamp(20px,2.6vw,32px);border-radius:999px;font-size:12px;border:1px solid var(--ink);background:#fff;transition:background .2s,color .2s}
+.btn.l{background:var(--lime);border-color:var(--lime)}
+.btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}.btn.l:hover{color:var(--lime)}
+.buy{display:flex;gap:10px;flex-wrap:wrap;margin-top:clamp(20px,3vw,30px)}
+.perks{margin-top:clamp(22px,3vw,32px);border-top:1px solid #e4e4e4}
+.perks div{display:flex;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid #e4e4e4;font-size:12px}
+.perks span{color:var(--mute);text-align:right}
+h2{font-weight:400;font-size:clamp(34px,5.4vw,64px);letter-spacing:-.05em;line-height:1;margin:0}
+.sec{margin-top:clamp(60px,10vw,120px)}
+.spec{display:grid;grid-template-columns:1fr 1fr;gap:0 clamp(20px,5vw,70px);margin-top:clamp(22px,3vw,36px)}
+.spec div{display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-top:1px solid #e4e4e4;font-size:13px}
+.spec span{color:var(--mute);text-align:right}
+.rel{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,2.4vw,30px);margin-top:clamp(22px,3vw,36px)}
+.rel .tile{aspect-ratio:1/.84}
+.rel .r{display:flex;justify-content:space-between;margin-top:12px;font-size:clamp(13px,1.35vw,15px)}
+.rel p{font-size:9.5px;color:var(--mute);margin:8px 0 0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--lime);padding:10px 20px;border-radius:999px;font-size:12px;opacity:0;pointer-events:none;transition:.3s}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.news{margin-top:clamp(70px,13vw,160px);font-size:clamp(13px,1.4vw,15px);line-height:1.25}
+.news p{margin:0 0 14px}
+.sign{display:flex;gap:6px;max-width:300px}
+.sign input{flex:1;min-width:0;height:34px;border:1px solid #9a9a9a;border-radius:999px;padding:0 16px;font:inherit;font-size:10px}
+.sign button{border:0;background:var(--lime);border-radius:999px;height:34px;padding:0 28px;font-size:11px}
+footer{display:grid;grid-template-columns:1fr auto auto;align-items:end;gap:24px;margin-top:clamp(20px,3vw,34px)}
+.fbig{font-size:clamp(64px,13vw,150px);font-weight:400;letter-spacing:-.06em;line-height:.9;margin:0;overflow:hidden;padding-bottom:.08em}
+.flinks{display:flex;gap:clamp(16px,2.4vw,30px);font-size:10px;padding-bottom:10px}
+.soc{display:flex;gap:26px;padding-bottom:10px;font-size:10px}
+@media (max-width:860px){.pd{grid-template-columns:1fr}.spec{grid-template-columns:1fr}.rel{grid-template-columns:repeat(2,1fr)}.rel>*:nth-child(3){display:none}}
+@media (max-width:620px){footer{grid-template-columns:1fr;gap:16px}.soc,.flinks{padding:0}nav{gap:14px}.rel{grid-template-columns:1fr}.rel>*:nth-child(3){display:block}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="page">
+<header>
+ <a class="logo" href="#">Straitgate</a>
+ <nav aria-label="Main"><a href="https://claude.ai/artifact/XWrEe8MumnXRSF4cKSEBCo">Home</a><a href="https://claude.ai/artifact/UKWnBgCKbJMsNPZAc9MJLe">Catalog</a><a href="https://claude.ai/artifact/XWrEe8MumnXRSF4cKSEBCo#about">About</a>
+ <a class="bag" href="#">Bag <span id="bagn">0</span> <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1.5" y="4.5" width="13" height="9.5" rx="1.5"/><path d="M5.5 4.5V3.5a2.5 2.5 0 0 1 5 0v1"/></svg></a></nav>
+</header>
+
+<div class="crumb"><a href="https://claude.ai/artifact/UKWnBgCKbJMsNPZAc9MJLe">Catalog</a> &nbsp;/&nbsp; <span id="bc"></span></div>
+
+<div class="pd">
+ <div>
+  <div class="tile main-t" id="main" role="img"></div>
+  <div class="thumbs" id="thumbs"></div>
+ </div>
+ <div>
+  <p class="eyebrow" id="cat"></p>
+  <h1 id="name"></h1>
+  <p class="price" id="price"></p>
+  <p class="desc" id="desc"></p>
+  <div class="lbl">Colour <b id="cn"></b></div>
+  <div class="row" id="cols"></div>
+  <div class="lbl">Size <b id="sn"></b></div>
+  <div class="row" id="sizes"></div>
+  <div class="buy">
+   <div class="qty"><button id="m" aria-label="Less">&minus;</button><span id="q">1</span><button id="p" aria-label="More">+</button></div>
+   <button class="btn l" id="add">Add to bag</button>
+   <a class="btn" href="#">Book a free survey</a>
+  </div>
+  <div class="perks"><div>Delivery <span>2 to 3 weeks, made to order</span></div><div>Installation <span>Professional fitting from £120</span></div><div>Guarantee <span id="g"></span></div></div>
+ </div>
+</div>
+
+<section class="sec"><h2>Specifications</h2><div class="spec" id="spec"></div></section>
+<section class="sec"><h2>You may also like</h2><div class="rel" id="rel"></div></section>
+
+<section class="news" aria-label="Newsletter">
+ <p>Subscribe to the newsletter<br>and stay up to date</p>
+ <div class="sign"><input type="email" placeholder="Email" aria-label="Email"><button>Send</button></div>
+</section>
+<footer>
+ <p class="fbig">Straitgate</p>
+ <div class="flinks"><a href="https://claude.ai/artifact/XWrEe8MumnXRSF4cKSEBCo">Home</a><a href="https://claude.ai/artifact/UKWnBgCKbJMsNPZAc9MJLe">Catalog</a><a href="https://claude.ai/artifact/XWrEe8MumnXRSF4cKSEBCo#about">About</a><a href="#">Bag</a></div>
+ <div class="soc"><a href="#" aria-label="Twitter">&#120143;</a><a href="#" aria-label="Google">G</a><a href="#" aria-label="Facebook">f</a></div>
+</footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+var COL={Red:'#e5271d',Yellow:'#f5c20f',Blue:'#1f5fe0'};
+function art(t,c,v){
+ var s='',d='rgba(0,0,0,.18)',i;
+ if(v==='lock'){return '<svg viewBox="0 0 240 200"><rect x="70" y="20" width="100" height="160" rx="8" fill="'+c+'"/><rect x="104" y="62" width="32" height="48" rx="6" fill="#141414"/><circle cx="120" cy="82" r="9" fill="#bdbdbd"/><rect x="116" y="88" width="8" height="14" fill="#bdbdbd"/><rect x="82" y="124" width="76" height="10" rx="5" fill="#bdbdbd"/></svg>'}
+ if(v==='side'){return '<svg viewBox="0 0 240 200"><path d="M20 190L120 30L220 190Z" fill="'+c+'" opacity=".25"/><rect x="40" y="30" width="160" height="150" fill="none" stroke="'+c+'" stroke-width="10"/><path d="M40 180L200 30" stroke="'+c+'" stroke-width="6"/></svg>'}
+ if(v==='hinge'){return '<svg viewBox="0 0 240 200"><rect x="30" y="20" width="60" height="160" fill="'+c+'"/><rect x="82" y="50" width="40" height="26" rx="4" fill="#bdbdbd"/><rect x="82" y="124" width="40" height="26" rx="4" fill="#bdbdbd"/><circle cx="102" cy="63" r="5" fill="#555"/><circle cx="102" cy="137" r="5" fill="#555"/></svg>'}
+ if(t==='door'){
+  s='<rect x="56" y="14" width="128" height="176" rx="6" fill="#222"/><rect x="64" y="22" width="112" height="168" rx="3" fill="'+c+'"/><rect x="78" y="36" width="84" height="56" rx="3" fill="'+d+'"/><rect x="78" y="104" width="84" height="70" rx="3" fill="'+d+'"/><rect x="146" y="92" width="10" height="26" rx="5" fill="#d8d8d8"/><circle cx="151" cy="132" r="5" fill="#141414"/>';
+ }else if(t==='gate'){
+  s='<path d="M50 192V84Q120 14 190 84V192" fill="none" stroke="'+c+'" stroke-width="10"/><path d="M50 150H190" stroke="'+c+'" stroke-width="8"/>';
+  for(i=0;i<7;i++)s+='<rect x="'+(66+i*18)+'" y="'+(i<3?82-i*8:i>3?58+(i-3)*8+0:48)+'" width="6" height="'+(150-(i<3?82-i*8:i>3?58+(i-3)*8:48)+40)+'" fill="'+c+'"/>';
+  s+='<rect x="168" y="112" width="14" height="10" rx="3" fill="#141414"/>';
+ }else{
+  s='<rect x="14" y="40" width="10" height="150" fill="#222"/><rect x="216" y="40" width="10" height="150" fill="#222"/><rect x="34" y="52" width="160" height="14" fill="'+c+'"/><rect x="34" y="176" width="160" height="14" fill="'+c+'"/>';
+  for(i=0;i<9;i++)s+='<rect x="'+(40+i*17)+'" y="66" width="6" height="110" fill="'+c+'"/>';
+  s+='<circle cx="60" cy="196" r="6" fill="#999"/><circle cx="170" cy="196" r="6" fill="#999"/>';
+ }
+ return '<svg viewBox="0 0 240 200">'+s+'</svg>';
+}
+var P={
+'fortis-red':{n:'Fortis Red',t:'door',c:'Red',p:1450,cat:'Security door',d:'A solid steel front door with five-point locking, a concealed hinge bar and a smooth powder-coated finish. Built to stay shut and look sharp for decades.'},
+'arc-yellow':{n:'Arc Yellow',t:'gate',c:'Yellow',p:625,cat:'Garden gate',d:'A curved pedestrian gate in galvanised steel tube, with anti-lift hinges and a keyed latch. A confident way to close off the front garden.'},
+'slide-blue':{n:'Slide Blue',t:'slide',c:'Blue',p:2400,cat:'Driveway gate',d:'A sliding driveway gate on a quiet roller track, motor-ready and ready to take a keypad, fob or phone control when you are.'},
+'vault-yellow':{n:'Vault Yellow',t:'door',c:'Yellow',p:1250,cat:'Security door',d:'Our everyday security door: a reinforced steel leaf, a Grade 4 cylinder and a deep frame that resists forced entry without looking like a fortress.'},
+'guard-red':{n:'Guard Red',t:'gate',c:'Red',p:1050,cat:'Driveway gate',d:'A double-leaf swing gate with reinforced posts, heavy-duty hinges and a built-in lock. Wide enough for a family car, strong enough for anything else.'},
+'vault-blue':{n:'Vault Blue',t:'door',c:'Blue',p:1750,cat:'Security door',d:'The Vault with a glazed side-light and full-height steel frame. Same locking and strength, with more daylight in the hallway.'}};
+var SZ={'Security door':[['Standard',0],['Wide',180],['Double',620]],'Garden gate':[['0.9 m',0],['1.2 m',90],['1.8 m',210]],'Driveway gate':[['3 m',0],['4 m',350],['5 m',680]]};
+var SP={'Security door':[['Material','3 mm galvanised steel'],['Locking','5-point multipoint'],['Security rating','PAS 24 / Grade 4'],['Door size','914 x 2032 mm'],['Finish','Powder-coated'],['Hinges','Concealed, anti-lever'],['Glazing','Optional side-light'],['Guarantee','25 years']],
+'Garden gate':[['Material','Galvanised steel tube'],['Height','1.2 m or 1.8 m'],['Hinges','Anti-lift, adjustable'],['Latch','Keyed, self-closing'],['Finish','Powder-coated'],['Posts','Included, 75 mm'],['Opening','Inward or outward'],['Guarantee','15 years']],
+'Driveway gate':[['Material','Galvanised steel'],['Width','3 m to 5 m'],['Operation','Sliding or swing'],['Automation','Motor-ready'],['Finish','Powder-coated'],['Access','Keypad, fob or app'],['Safety','Edge sensors fitted'],['Guarantee','15 years']]};
+var G={'Security door':'25 years','Garden gate':'15 years','Driveway gate':'15 years'};
+var cur,col,si=0,qty=1,bag=0,view='main';
+function $(i){return document.getElementById(i)}
+function gbp(n){return '£'+n.toLocaleString('en-GB')}
+function slugFor(t,c,cat){for(var k in P)if(P[k].t===t&&P[k].c===c)return k;return null}
+function render(){
+ var h=location.hash.replace('#',''),p;
+ if(!P[h])h='fortis-red';
+ if(h!==cur){cur=h;p=P[h];col=p.c;si=0;qty=1;$('q').textContent=1;view='main'}
+ p=P[cur];var c=COL[col],sz=SZ[p.cat],price=p.p+sz[si][1];
+ document.title='Straitgate – '+p.n;
+ $('bc').textContent=p.n;$('cat').textContent=p.cat;$('name').textContent=p.n.split(' ')[0]+' '+col;
+ $('price').textContent=gbp(price*qty);$('desc').textContent=p.d;$('cn').textContent=col;$('sn').textContent=sz[si][0];$('g').textContent=G[p.cat];
+ $('main').innerHTML=art(p.t,c,view==='main'?0:view);$('main').setAttribute('aria-label',p.n+' '+col);
+ var tv=[['main','Main'],['lock','Lock detail'],['hinge','Hinge detail'],['side','Frame']];
+ $('thumbs').innerHTML=tv.map(function(v){return '<button data-v="'+v[0]+'" aria-label="'+v[1]+'" aria-pressed="'+(view===v[0])+'">'+art(p.t,c,v[0]==='main'?0:v[0])+'</button>'}).join('');
+ $('cols').innerHTML=Object.keys(COL).map(function(k){return '<button class="sw" data-c="'+k+'" aria-label="'+k+'" aria-pressed="'+(k===col)+'" style="background:'+COL[k]+'"></button>'}).join('');
+ $('sizes').innerHTML=sz.map(function(s,i){return '<button class="chip" data-s="'+i+'" aria-pressed="'+(i===si)+'">'+s[0]+'</button>'}).join('');
+ $('spec').innerHTML=SP[p.cat].map(function(r){return '<div>'+r[0]+'<span>'+r[1]+'</span></div>'}).join('');
+ var o=Object.keys(P).filter(function(k){return k!==cur}).slice(0,3);
+ $('rel').innerHTML=o.map(function(k){var q=P[k];return '<a href="#'+k+'"><div class="tile">'+art(q.t,COL[q.c])+'</div><div class="r"><span>'+q.n+'</span><span>'+gbp(q.p)+'</span></div><p>'+q.cat+'</p></a>'}).join('');
+}
+document.addEventListener('click',function(e){
+ var b=e.target.closest('[data-v],[data-c],[data-s]');
+ if(b){if(b.dataset.v)view=b.dataset.v;if(b.dataset.c)col=b.dataset.c;if(b.dataset.s)si=+b.dataset.s;render()}
+});
+$('m').onclick=function(){qty=Math.max(1,qty-1);$('q').textContent=qty;render()};
+$('p').onclick=function(){qty=Math.min(9,qty+1);$('q').textContent=qty;render()};
+$('add').onclick=function(){bag+=qty;$('bagn').textContent=bag;var t=$('toast');t.textContent=qty+' × '+P[cur].n.split(' ')[0]+' '+col+' added to bag';t.classList.add('on');setTimeout(function(){t.classList.remove('on')},2200)};
+window.addEventListener('hashchange',function(){render();window.scrollTo(0,0)});
+render();
+</script>
+</body>
+</html>
