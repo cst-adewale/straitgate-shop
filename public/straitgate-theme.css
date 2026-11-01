@@ -28,9 +28,11 @@ input,select,textarea,.sign input{background:var(--field);border-color:var(--fie
 .disp{color:var(--on-ink)}
 .keys button:hover{background:var(--tile)}
 .toast{background:var(--ink);color:var(--surface)}
-.theme-toggle{display:inline-grid;place-items:center;flex:none;width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:50%;background:none;color:var(--ink);font:inherit;font-size:16px;line-height:1;cursor:pointer}
+.header-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px}
+.theme-toggle{display:inline-grid;place-items:center;flex:none;width:30px;height:30px;padding:0;border:1px solid var(--line);border-radius:50%;background:none;color:var(--ink);font-family:inherit;font-size:16px;font-weight:400;line-height:1;cursor:pointer}
 .theme-toggle:hover{background:var(--tile)}
 .theme-toggle:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
 .theme-floating{position:fixed;right:16px;top:16px;z-index:10}
 @media(max-width:620px){nav.open{background:var(--surface);border-color:var(--line)}}
+@media(max-width:620px){.shop-head{grid-template-columns:minmax(0,1fr) auto auto}.shop-head .header-actions{grid-column:3;grid-row:1}.shop-head .search{grid-column:1/-1;grid-row:2}}
 @media print{:root{color-scheme:light!important}body,.page{background:#fff!important;color:#0a0a0a!important}.theme-toggle{display:none!important}}
