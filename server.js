@@ -32,7 +32,7 @@ function serveFile(res, file) {
   });
 }
 function authCookies(header) {
-  return (header || '').split(';').map(x => x.trim()).filter(x => /^(?:__Secure-|__Host-)?better-auth\./.test(x)).join('; ');
+  return (header || '').split(';').map(x => x.trim()).filter(x => /^(?:__Secure-|__Host-)?(?:neonauth|better-auth)\./.test(x)).join('; ');
 }
 function responseCookies(response) {
   return (response.headers.getSetCookie?.() || []).map(raw => {

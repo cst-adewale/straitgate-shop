@@ -33,10 +33,10 @@ const auth = http.createServer(async (req, res) => {
     if (input.password !== 'local-test-password') { res.writeHead(401); return res.end('{}'); }
     const token = input.email === 'viewer@example.test' ? 'viewer' : 'admin';
     sessions.add(token);
-    res.writeHead(200, {'Content-Type':'application/json','Set-Cookie':`better-auth.session_token=${token}; Path=/; HttpOnly`});
+    res.writeHead(200, {'Content-Type':'application/json','Set-Cookie':`__Secure-neonauth.session_token=${token}; Path=/; HttpOnly`});
     return res.end('{}');
   }
-  const token = /better-auth\.session_token=(admin|viewer)/.exec(req.headers.cookie || '')?.[1];
+  const token = /__Secure-neonauth\.session_token=(admin|viewer)/.exec(req.headers.cookie || '')?.[1];
   if (url.pathname === '/auth/get-session') {
     res.writeHead(200, {'Content-Type':'application/json'});
     return res.end(token && sessions.has(token) ? JSON.stringify({user:{role:token}}) : 'null');
@@ -84,7 +84,7 @@ async function request(url, options = {}) {
     const good = await request('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:'admin@example.test', password:'local-test-password'})});
     assert.equal(good.status, 200);
     const cookie = good.headers.get('set-cookie').split(';')[0];
-    assert.ok(cookie.startsWith('better-auth.session_token='));
+    assert.ok(cookie.startsWith('__Secure-neonauth.session_token='));
     console.log('200 correct password + session cookie');
     const viewer = await request('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:'viewer@example.test', password:'local-test-password'})});
     assert.equal(viewer.status, 403);
