@@ -45,12 +45,21 @@ async function neon(endpoint, options = {}) {
   if (options.method && options.method !== 'GET' && options.method !== 'HEAD') headers.set('Origin', publicOrigin);
   return fetch(authBase + endpoint, {redirect:'manual',signal:AbortSignal.timeout(10000),...options,headers});
 }
-async function adminSession(header) {
+async function adminSession(header, diagnose = false) {
   const cookie = authCookies(header);
-  if (!cookie) return false;
+  if (!cookie) {
+    if (diagnose) console.error('Neon admin check: no recognized session cookie');
+    return false;
+  }
   const response = await neon('/get-session', {headers:{Cookie:cookie}});
-  if (!response.ok) return false;
+  if (!response.ok) {
+    if (diagnose) console.error('Neon admin check: session endpoint status', response.status);
+    return false;
+  }
   const data = await response.json();
+  if (diagnose && (data?.user?.role !== 'admin' || data.user.banned)) {
+    console.error('Neon admin check: session user', {present:!!data?.user, role:data?.user?.role || 'none', banned:!!data?.user?.banned});
+  }
   return data?.user?.role === 'admin' && !data.user.banned;
 }
 async function readBody(req) {
@@ -83,7 +92,10 @@ http.createServer(async (req, res) => {
       }
       const cookies = responseCookies(upstream);
       const cookieHeader = cookies.map(x => x.split(';')[0]).join('; ');
-      if (!await adminSession(cookieHeader)) return json(res, 403, {error:'This account is not a Straitgate admin.'});
+      if (!await adminSession(cookieHeader, true)) {
+        console.error('Neon admin check: sign-in cookie names', cookies.map(x => x.split('=')[0]));
+        return json(res, 403, {error:'Admin session could not be verified.'});
+      }
       failed.delete(ip);
       return json(res, 200, {ok:true}, {'Set-Cookie':cookies});
     } catch (error) {
