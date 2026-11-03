@@ -41,7 +41,9 @@ function responseCookies(response) {
   });
 }
 async function neon(endpoint, options = {}) {
-  return fetch(authBase + endpoint, {redirect:'manual',signal:AbortSignal.timeout(10000),...options});
+  const headers = new Headers(options.headers || {});
+  if (options.method && options.method !== 'GET' && options.method !== 'HEAD') headers.set('Origin', publicOrigin);
+  return fetch(authBase + endpoint, {redirect:'manual',signal:AbortSignal.timeout(10000),...options,headers});
 }
 async function adminSession(header) {
   const cookie = authCookies(header);

@@ -8,8 +8,10 @@ const base = `http://127.0.0.1:${port}`;
 const sessions = new Set();
 let resetRequest;
 let resetSubmission;
+const authOrigins = {};
 const auth = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  if (req.method === 'POST') authOrigins[url.pathname] = req.headers.origin;
   if (url.pathname === '/auth/request-password-reset') {
     let body = '';
     for await (const chunk of req) body += chunk;
@@ -93,6 +95,9 @@ async function request(url, options = {}) {
     const reset = await request('/api/admin/reset-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'valid-token',newPassword:'a-unique-password-123'})});
     assert.equal(reset.status, 200);
     assert.deepEqual(resetSubmission, {token:'valid-token',newPassword:'a-unique-password-123'});
+    for (const endpoint of ['/auth/sign-in/email', '/auth/request-password-reset', '/auth/reset-password']) {
+      assert.equal(authOrigins[endpoint], base, `${endpoint} origin`);
+    }
     const invalidReset = await request('/api/admin/reset-password', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:'expired',newPassword:'a-unique-password-123'})});
     assert.equal(invalidReset.status, 400);
     console.log('200 reset request + submission; 400 invalid token');
