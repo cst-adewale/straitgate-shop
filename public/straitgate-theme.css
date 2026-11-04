@@ -8,7 +8,12 @@ input,select,textarea,.sign input{background:var(--field);border-color:var(--fie
 .btn,.chip,.menu-toggle,.thumbs button,.keys button{background:var(--surface);color:var(--ink)}
 .btn:hover,.chip:hover{background:var(--hover);border-color:var(--hover);color:var(--on-hover)}
 .btn.l,.chip[aria-pressed="true"]{background:var(--lime);border-color:var(--lime);color:#0a0a0a}
-.btn.l:hover{background:var(--hover);color:var(--lime)}
+.btn.l:hover{background:var(--hover);color:var(--on-hover)}
+.keys .o{background:var(--lime);color:#0a0a0a}
+.keys .o:hover{background:var(--hover);color:var(--on-hover)}
+:root[data-theme="dark"] .up{color:#a7df77}
+:root[data-theme="dark"] .btn.x{color:var(--mute);border-color:var(--line)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .up{color:#a7df77}:root:not([data-theme="light"]) .btn.x{color:var(--mute);border-color:var(--line)}}
 .hero .lead,.cols p,.pc p,.desc{color:var(--body-copy)}
 .pc.dark{background:var(--bg);color:#f2f2f2}
 .pc.dark p{color:#bbb}

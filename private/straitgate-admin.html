@@ -46,7 +46,7 @@ input,select,textarea{width:100%;height:34px;border:1px solid #9a9a9a;border-rad
 textarea{height:70px;border-radius:14px;padding:10px 14px;resize:vertical}
 input[type=file]{padding:6px 14px;height:auto}
 .f{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.f .w{grid-column:1/-1}
-.tw{overflow-x:auto}
+.tw{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{font-weight:400;color:var(--mute);font-size:10px;text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid #ddd;white-space:nowrap}
 td{padding:10px 10px 10px 0;border-bottom:1px solid #eee;vertical-align:middle}
@@ -79,6 +79,8 @@ td.r,th.r{text-align:right}
 @media print{body{background:#fff;padding:0}.page,.toast{display:none!important}#pa{display:block;padding:24px;font-size:12px}#pa table{font-size:12px}}
 @media (max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g21,.gf{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
 @media (max-width:620px){.g2,.g3,.f{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}.qi{grid-template-columns:1fr 56px 80px 28px}.sp{margin-left:0}.bar input,.bar select{min-width:0;flex:1}}
+@media (max-width:620px){.page{padding:20px 14px 32px}header{align-items:flex-start}.logo small{display:block;margin:2px 0 0}.who{order:3;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}.theme-toggle{margin-left:auto}h1{font-size:clamp(40px,12vw,64px);margin:28px 0 18px}#tabs{margin-left:-14px;margin-right:-14px;padding:0 14px 8px;scrollbar-width:auto;scroll-snap-type:x proximity}#tabs .chip{scroll-snap-align:start}.tile{padding:16px}.tw table:has(thead){min-width:560px}.bar{align-items:stretch}.bar input,.bar select{width:100%;flex-basis:100%}.bar .btn{justify-content:center}.qi{grid-template-columns:minmax(0,1fr) 52px 72px 28px;gap:5px}.qi input{min-width:0;padding:0 7px}.toast{width:max-content;max-width:calc(100vw - 28px);text-align:center}}
+@media (max-width:380px){.g4{grid-template-columns:1fr}.qi{grid-template-columns:minmax(0,1fr) 46px 64px 28px}.qi input{font-size:11px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <link rel="stylesheet" href="/straitgate-theme.css">
@@ -132,15 +134,15 @@ function art(t,c){var s='',i;if(t==='Security door')s='<rect x="56" y="14" width
 
 /* charts */
 function barChart(l,v,hi){var m=Math.max.apply(null,v)*1.15,w=400,h=190,bw=w/l.length,s='';
- [0,.5,1].forEach(function(f){var y=h-24-(h-40)*f;s+='<line x1="0" x2="'+w+'" y1="'+y+'" y2="'+y+'" stroke="#ddd"/>'});
- v.forEach(function(x,i){var bh=(h-40)*x/m,y=h-24-bh;s+='<rect x="'+(i*bw+bw*.18)+'" y="'+y+'" width="'+bw*.64+'" height="'+bh+'" rx="4" fill="'+(i===hi?'#ccf97c':'#0a0a0a')+'"><title>'+l[i]+': £'+x+'k</title></rect><text x="'+(i*bw+bw/2)+'" y="'+(h-8)+'" font-size="9" text-anchor="middle" fill="#8a8a8a">'+l[i]+'</text>'});
+ [0,.5,1].forEach(function(f){var y=h-24-(h-40)*f;s+='<line x1="0" x2="'+w+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/>'});
+ v.forEach(function(x,i){var bh=(h-40)*x/m,y=h-24-bh;s+='<rect x="'+(i*bw+bw*.18)+'" y="'+y+'" width="'+bw*.64+'" height="'+bh+'" rx="4" fill="'+(i===hi?'#ccf97c':'var(--ink)')+'"><title>'+l[i]+': £'+x+'k</title></rect><text x="'+(i*bw+bw/2)+'" y="'+(h-8)+'" font-size="9" text-anchor="middle" fill="var(--mute)">'+l[i]+'</text>'});
  return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Revenue by month">'+s+'</svg>'}
 function donut(d){var tot=d.reduce(function(s,x){return s+x[1]},0)||1,r=50,C=2*Math.PI*r,o=0,s='';
  d.forEach(function(x){var len=C*x[1]/tot;s+='<circle cx="70" cy="70" r="'+r+'" fill="none" stroke="'+x[2]+'" stroke-width="24" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-o)+'" transform="rotate(-90 70 70)"><title>'+x[0]+': '+x[1]+'</title></circle>';o+=len});
- return '<svg class="ch" viewBox="0 0 140 140" style="max-width:190px;margin:0 auto" role="img" aria-label="Sales by category">'+s+'<text x="70" y="75" text-anchor="middle" font-size="18" fill="#0a0a0a">'+tot+'</text></svg><div class="leg">'+d.map(function(x){return '<span><i style="background:'+x[2]+'"></i>'+x[0]+' ('+x[1]+')</span>'}).join('')+'</div>'}
+ return '<svg class="ch" viewBox="0 0 140 140" style="max-width:190px;margin:0 auto" role="img" aria-label="Sales by category">'+s+'<text x="70" y="75" text-anchor="middle" font-size="18" fill="var(--ink)">'+tot+'</text></svg><div class="leg">'+d.map(function(x){return '<span><i style="background:'+x[2]+'"></i>'+x[0]+' ('+x[1]+')</span>'}).join('')+'</div>'}
 function line(l,v){var m=Math.max.apply(null,v)*1.15,w=400,h=170,p=v.map(function(x,i){return [i*(w-20)/(v.length-1)+10,h-24-(h-40)*x/m]}),s='';
- s+='<polyline points="'+p.map(function(a){return a.join(',')}).join(' ')+'" fill="none" stroke="#0a0a0a" stroke-width="2.5" stroke-linejoin="round"/>';
- p.forEach(function(a,i){s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="3.5" fill="'+(i===v.length-1?'#ccf97c':'#0a0a0a')+'" stroke="#0a0a0a"><title>'+l[i]+': '+v[i]+'</title></circle><text x="'+a[0]+'" y="'+(h-6)+'" font-size="9" text-anchor="middle" fill="#8a8a8a">'+l[i]+'</text>'});
+ s+='<polyline points="'+p.map(function(a){return a.join(',')}).join(' ')+'" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>';
+ p.forEach(function(a,i){s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="3.5" fill="'+(i===v.length-1?'#ccf97c':'var(--ink)')+'" stroke="var(--ink)"><title>'+l[i]+': '+v[i]+'</title></circle><text x="'+a[0]+'" y="'+(h-6)+'" font-size="9" text-anchor="middle" fill="var(--mute)">'+l[i]+'</text>'});
  return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Site visits per week">'+s+'</svg>'}
 
 /* views */
@@ -149,7 +151,7 @@ V.dashboard=function(){
  var qs=DB.quotes,open=qs.filter(function(q){return q.status!=='Accepted'&&q.status!=='Declined'}).length,low=DB.inv.filter(function(i){return i.qty<=i.min}).length,
  val=qs.reduce(function(s,q){return q.status==='Accepted'?s+totals(q).total:s},0),
  st=['Draft','Sent','Accepted','Declined'],stc=['#8a8a8a','#f5c20f','#ccf97c','#e5271d'];
- var cats=CATS.map(function(c,i){return [c,[38,17,21,9][i],['#0a0a0a','#f5c20f','#1f5fe0','#ccf97c'][i]]});
+ var cats=CATS.map(function(c,i){return [c,[38,17,21,9][i],['var(--ink)','#f5c20f','#1f5fe0','#ccf97c'][i]]});
  return '<div class="grid g4">'+
  [['Revenue, Oct','£71k','+12% vs Sep',1],['Orders, Oct','38','+5 vs Sep',1],['Open quotations',open,gbp(val)+' accepted',1],['Low-stock items',low,low?'Needs restocking':'All stocked',!low]].map(function(k){return '<div class="tile kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="d '+(k[3]?'up':'dn')+'">'+k[2]+'</div></div>'}).join('')+'</div>'+
  '<div class="grid g21" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Revenue by month (£k)</h3>'+barChart(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'],[28,34,31,42,47,52,49,58,63,71],9)+'</div>'+
