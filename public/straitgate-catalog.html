@@ -96,69 +96,24 @@ footer{display:grid;grid-template-columns:1fr auto auto;align-items:end;gap:24px
 <div class="commerce" id="catalog">
  <aside class="sidebar" aria-label="Product filters"><button class="mobile-sidebar-close" type="button">Close filters</button>
   <div class="panel"><h2>Shop by</h2>
-   <div class="filter"><h3>Category</h3><label><span>Security doors</span><input type="checkbox"></label><label><span>Sliding gates</span><input type="checkbox"></label><label><span>Pedestrian gates</span><input type="checkbox"></label><label><span>Estate gates</span><input type="checkbox"></label></div>
+   <div class="filter"><h3>Category</h3></div>
    <div class="filter"><h3>Project budget</h3><div class="price-fields"><input placeholder="Min" aria-label="Minimum budget"><input placeholder="Max" aria-label="Maximum budget"></div></div>
-   <div class="filter"><h3>Finish</h3><div class="swatches"><span class="swatch"><i style="background:#171717"></i>Matte black</span><span class="swatch"><i style="background:#343434"></i>Charcoal</span><span class="swatch"><i style="background:#96724b"></i>Bronze</span><span class="swatch"><i style="background:#6e766f"></i>Forest</span></div></div>
-   <div class="filter"><h3>Operation</h3><label><span>Pivot</span><input type="checkbox"></label><label><span>Hinged</span><input type="checkbox"></label><label><span>Sliding</span><input type="checkbox"></label><label><span>Automated</span><input type="checkbox"></label></div>
+   <div class="filter"><h3>Finish</h3></div>
+   <div class="filter"><h3>Operation</h3></div>
   </div>
-  <div class="panel"><h2>Best sellers</h2><div class="best-item"><span class="best-thumb"></span><div><b>Monolith P·01</b><span>Security door</span></div></div><div class="best-item"><span class="best-thumb"></span><div><b>Linear G·04</b><span>Sliding gate</span></div></div><div class="best-item"><span class="best-thumb"></span><div><b>Meridian E·03</b><span>Estate gate</span></div></div></div>
+  <div class="panel"><h2>New arrivals</h2></div>
  </aside>
  <main class="catalog-area">
 
 <div class="bar">
  <div class="chips" role="group" aria-label="Filter">
-  <button class="chip" data-filter="doors" aria-pressed="false">Security doors</button>
-  <button class="chip" data-filter="gates" aria-pressed="false">Sliding gates</button>
-  <button class="chip" data-filter="pedestrian" aria-pressed="false">Pedestrian gates</button>
-  <button class="chip" data-filter="estate" aria-pressed="false">Estate gates</button>
+  <button class="chip" data-category="" aria-pressed="true">All</button>
  </div>
- <div class="meta"><button class="mobile-filter-button" type="button">Filters</button><span id="resultCount">Showing 6 products</span><label>Sort by&nbsp;&nbsp;<select class="sort-select" id="sortSelect"><option value="featured">Featured</option><option value="name">Name</option><option value="category">Category</option></select></label><span class="view-controls"><button id="gridView" class="active" aria-label="Grid view">▦</button><button id="listView" aria-label="List view">☰</button></span></div>
+ <div class="meta"><button class="mobile-filter-button" type="button">Filters</button><span id="resultCount">Loading products…</span><label>Sort by&nbsp;&nbsp;<select class="sort-select" id="sortSelect"><option value="featured">Featured</option><option value="name">Name</option><option value="category">Category</option></select></label><span class="view-controls"><button id="gridView" class="active" aria-label="Grid view">▦</button><button id="listView" aria-label="List view">☰</button></span></div>
 </div>
 <div class="active-filters" id="activeFilters"></div>
 
-<div class="grid">
- <article data-category="doors"><div class="tile"><svg viewBox="0 0 240 200" role="img" aria-label="Matte black pivot security door">
-  <g fill="none" stroke="#e5271d" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"><path d="M120 40 L84 66 L98 150 L120 128 L142 150 L156 66 Z"/><path d="M84 66 L156 66M98 150 L142 150"/></g>
-  <circle cx="120" cy="30" r="9" fill="none" stroke="#b9b9b9" stroke-width="4"/><rect x="108" y="86" width="24" height="12" rx="3" fill="#111"/><rect x="76" y="62" width="14" height="9" rx="2" fill="#111"/><rect x="150" y="62" width="14" height="9" rx="2" fill="#111"/></svg></div>
-  <div class="row"><span>Monolith P·01</span><span>Quote</span></div><p class="sub">Made-to-measure pivot security door</p></article>
-
- <article data-category="gates"><div class="tile"><svg viewBox="0 0 240 200" role="img" aria-label="Charcoal black sliding gate">
-  <path d="M50 70 Q120 52 190 70 L190 120 Q120 138 50 120 Z" fill="#f5c20f"/>
-  <path d="M60 96 Q120 88 180 96" stroke="#222" stroke-width="3" stroke-dasharray="3 5" fill="none"/>
-  <rect x="150" y="68" width="30" height="54" rx="5" fill="#141414"/><circle cx="46" cy="96" r="15" fill="none" stroke="#bcbcbc" stroke-width="5"/></svg></div>
-  <div class="row"><span>Linear G·04</span><span>Quote</span></div><p class="sub">Quiet sliding gate with vertical fins</p></article>
-
- <article data-category="pedestrian"><div class="tile"><svg viewBox="0 0 240 200" role="img" aria-label="Black pedestrian security gate">
-  <path d="M28 66 C80 76 110 60 150 92" fill="none" stroke="#1e4fd6" stroke-width="12" stroke-linecap="round"/>
-  <path d="M28 66 C60 40 40 36 30 52" fill="none" stroke="#1a1a1a" stroke-width="8" stroke-linecap="round"/>
-  <ellipse cx="170" cy="112" rx="40" ry="22" fill="none" stroke="#2a6bf2" stroke-width="12" transform="rotate(28 170 112)"/>
-  <ellipse cx="170" cy="112" rx="18" ry="8" fill="none" stroke="#1e4fd6" stroke-width="6" transform="rotate(28 170 112)"/>
-  <rect x="140" y="82" width="22" height="9" rx="2" fill="#cfcfcf" transform="rotate(28 150 86)"/></svg></div>
-  <div class="row"><span>Veil D·02</span><span>Quote</span></div><p class="sub">Ventilated steel pedestrian gate</p></article>
-
- <article data-category="doors"><div class="tile"><svg viewBox="0 0 240 200" role="img" aria-label="Charcoal steel entrance door">
-  <path d="M0 70 L120 40 L150 150 L10 190 Z" fill="#f5c20f"/>
-  <path d="M10 96 L110 70" stroke="#222" stroke-width="5" stroke-dasharray="4 6"/>
-  <path d="M110 20 Q150 -6 190 20 L196 90 Q150 112 118 96 Z" fill="#171717"/>
-  <circle cx="150" cy="86" r="30" fill="none" stroke="#bdbdbd" stroke-width="12"/>
-  <path d="M170 110 L214 150 L200 190 L160 176 Z" fill="#171717"/>
-  <path d="M130 120 Q150 150 180 140" fill="none" stroke="#8d8d8d" stroke-width="10"/></svg></div>
-  <div class="row"><span>Frame D·08</span><span>Quote</span></div><p class="sub">Full-height architectural entrance door</p></article>
-
- <article data-category="estate"><div class="tile"><svg viewBox="0 0 240 200" role="img" aria-label="Matte black estate gate">
-  <path d="M36 52 C56 40 90 48 110 62 L170 110" fill="none" stroke="#141414" stroke-width="9" stroke-linecap="round"/>
-  <path d="M110 62 C120 74 130 80 150 84" fill="none" stroke="#d94a2a" stroke-width="9" stroke-linecap="round"/>
-  <path d="M60 132 Q100 100 160 118 Q205 128 205 148 Q195 168 150 152 Q96 134 60 132Z" fill="none" stroke="#e5421f" stroke-width="12" stroke-linejoin="round"/>
-  <circle cx="108" cy="64" r="7" fill="none" stroke="#bbb" stroke-width="3"/></svg></div>
-  <div class="row"><span>Meridian E·03</span><span>Quote</span></div><p class="sub">Made-to-measure estate gate system</p></article>
-
- <article data-category="gates"><div class="tile"><svg viewBox="0 0 240 200" role="img" aria-label="Charcoal slatted driveway gate">
-  <ellipse cx="120" cy="100" rx="60" ry="40" fill="none" stroke="#1f63dc" stroke-width="26"/>
-  <ellipse cx="120" cy="100" rx="60" ry="40" fill="none" stroke="#7fb0ff" stroke-width="5" stroke-dasharray="14 10"/>
-  <path d="M58 118 Q70 150 120 142" fill="none" stroke="#143f9c" stroke-width="10" opacity=".5"/>
-  <rect x="62" y="96" width="30" height="24" rx="6" fill="#d4d4d4"/><circle cx="76" cy="108" r="6" fill="#444"/></svg></div>
-  <div class="row"><span>Slatline G·07</span><span>Quote</span></div><p class="sub">Horizontal slat driveway gate</p></article>
-</div>
+<div class="grid" aria-live="polite"></div>
 
  <button class="more" id="moreButton">See more</button>
  <div class="pagination"><span>Showing available products</span><div class="pages"><button aria-current="page">1</button><button>2</button><button>›</button></div></div>
@@ -178,7 +133,7 @@ footer{display:grid;grid-template-columns:1fr auto auto;align-items:end;gap:24px
 </footer>
 </div>
 
-<script>
+<script type="application/x-straitgate-legacy">
 const productData=[
  {name:'Monolith P·01',category:'doors',finish:'matte black',operation:'pivot',budget:1800000},
  {name:'Linear G·04',category:'gates',finish:'charcoal',operation:'sliding',budget:2400000},
@@ -216,5 +171,6 @@ document.getElementById('moreButton').addEventListener('click',function(){this.t
 document.querySelector('.sign button').addEventListener('click',()=>{const input=document.querySelector('.sign input');if(input.validity.valid&&input.value){toast('Thank you for subscribing');input.value=''}else{input.focus();toast('Enter a valid email address')}});
 updateCartCount();apply();
 </script>
+<script src="/straitgate-catalog-data.js"></script>
 </body>
 </html>

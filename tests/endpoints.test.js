@@ -58,7 +58,7 @@ async function request(url, options = {}) {
     await new Promise(resolve => auth.listen(4320, '127.0.0.1', resolve));
     child = spawn(process.execPath, ['server.js'], {
       cwd: require('node:path').join(__dirname, '..'),
-      env: {...process.env, NODE_ENV:'test', PORT:String(port), NEON_AUTH_BASE_URL:'http://127.0.0.1:4320/auth', PUBLIC_ORIGIN:base},
+      env: {...process.env, NODE_ENV:'test', PORT:String(port), DATABASE_URL:'', NEON_AUTH_BASE_URL:'http://127.0.0.1:4320/auth', PUBLIC_ORIGIN:base},
       stdio:'ignore'
     });
     let ready = false;
@@ -66,7 +66,7 @@ async function request(url, options = {}) {
       try { await request('/'); ready = true; break; } catch { await delay(100); }
     }
     assert.ok(ready, 'server did not start');
-    const pages = ['/', '/straitgate-home.html', '/straitgate-catalog.html', '/straitgate-product.html', '/straitgate-admin-login.html', '/straitgate-reset-password.html', '/straitgate-auth-modal.js', '/straitgate-theme.css', '/straitgate-theme.js', '/robots.txt', '/sitemap.xml'];
+    const pages = ['/', '/straitgate-home.html', '/straitgate-catalog.html', '/straitgate-product.html', '/straitgate-catalog-data.js', '/straitgate-product-data.js', '/straitgate-admin-login.html', '/straitgate-reset-password.html', '/straitgate-auth-modal.js', '/straitgate-theme.css', '/straitgate-theme.js', '/robots.txt', '/sitemap.xml'];
     for (const page of pages) {
       const res = await request(page);
       assert.equal(res.status, 200, page);
@@ -78,6 +78,10 @@ async function request(url, options = {}) {
       assert.equal(res.headers.get('location'), '/straitgate-admin-login.html');
       console.log(`302 ${page} without session`);
     }
+    const deniedData = await request('/api/admin/data');
+    assert.equal(deniedData.status, 401);
+    const unavailableShop = await request('/api/products');
+    assert.equal(unavailableShop.status, 503);
     const bad = await request('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:'admin@example.test', password:'wrong'})});
     assert.equal(bad.status, 401);
     console.log('401 wrong password');
@@ -86,6 +90,8 @@ async function request(url, options = {}) {
     const cookie = good.headers.get('set-cookie').split(';')[0];
     assert.ok(cookie.startsWith('__Secure-neon-auth.session_token='));
     console.log('200 correct password + session cookie');
+    const missingDatabase = await request('/api/admin/data', {headers:{Cookie:cookie}});
+    assert.equal(missingDatabase.status, 503);
     const viewer = await request('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:'viewer@example.test', password:'local-test-password'})});
     assert.equal(viewer.status, 403);
     console.log('403 non-admin account');

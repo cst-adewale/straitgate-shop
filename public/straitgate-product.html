@@ -133,7 +133,7 @@ footer{display:grid;grid-template-columns:1fr auto auto;align-items:end;gap:24px
 </div>
 <div class="toast" id="toast" role="status"></div>
 
-<script>
+<script type="application/x-straitgate-legacy">
 var COL={'Matte Black':'#141414','Charcoal Black':'#2b2b29','Lush Green':'#315844'};
 function art(t,c,v){
  var s='',d='rgba(0,0,0,.18)',i;
@@ -207,5 +207,6 @@ $('add').onclick=function(){cart[P[cur].n]=(cart[P[cur].n]||0)+qty;localStorage.
 window.addEventListener('hashchange',function(){render();window.scrollTo(0,0)});
 updateCartCount();render();
 </script>
+<script src="/straitgate-product-data.js"></script>
 </body>
 </html>

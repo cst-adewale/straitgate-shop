@@ -1,6 +1,7 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const adminData = require('./admin-data');
 
 const root = path.join(__dirname, 'public');
 const adminFile = path.join(__dirname, 'private', 'straitgate-admin.html');
@@ -62,18 +63,43 @@ async function adminSession(header, diagnose = false) {
   }
   return data?.user?.role === 'admin' && !data.user.banned;
 }
-async function readBody(req) {
+async function readBody(req, limit = 4096) {
   let body = '';
   for await (const chunk of req) {
     body += chunk;
-    if (body.length > 4096) throw new Error('Request too large');
+    if (body.length > limit) throw new Error('Request too large');
   }
   return body;
+}
+async function handleAdminData(req, res, pathname) {
+  try {
+    if (!await adminSession(req.headers.cookie)) return json(res, 401, {error:'Sign in as an admin.'});
+    if (!adminData.configured) return json(res, 503, {error:'DATABASE_URL is not configured on the server.'});
+    if (req.method === 'GET' && pathname === '/api/admin/data') return json(res, 200, await adminData.list());
+    if (req.method !== 'POST' || pathname !== '/api/admin/data') return json(res, 405, {error:'Method not allowed.'});
+    if (req.headers.origin !== publicOrigin) return json(res, 403, {error:'Request origin not allowed.'});
+    let input;
+    try { input = JSON.parse(await readBody(req, 350000)); }
+    catch { return json(res, 400, {error:'Invalid request.'}); }
+    await adminData.mutate(input.kind, input.action, input.data || {});
+    return json(res, 200, await adminData.list());
+  } catch (error) {
+    if (error instanceof TypeError) return json(res, 400, {error:error.message});
+    console.error('Admin data operation failed:', error.code || error.message);
+    return json(res, 503, {error:'Database operation failed.'});
+  }
 }
 http.createServer(async (req, res) => {
   let pathname;
   try { pathname = new URL(req.url, 'http://localhost').pathname; }
   catch { return send(res, 400, 'Bad request'); }
+  if (pathname === '/api/admin/data') return handleAdminData(req, res, pathname);
+  if (pathname === '/api/products') {
+    if (req.method !== 'GET') return json(res, 405, {error:'Method not allowed.'});
+    if (!adminData.configured) return json(res, 503, {error:'Shop database is not configured.'});
+    try { return json(res, 200, {products:await adminData.publishedProducts()}); }
+    catch (error) { console.error('Shop products failed:', error.code || error.message); return json(res, 503, {error:'Products are temporarily unavailable.'}); }
+  }
   if (req.method === 'POST' && pathname === '/api/admin/login') {
     const ip = req.socket.remoteAddress || 'unknown';
     const attempt = failed.get(ip) || {count:0,until:0};
@@ -152,6 +178,16 @@ http.createServer(async (req, res) => {
     } catch (error) {
       console.error('Neon password reset failed:', error.message);
       return json(res, 502, {error:'Could not reach the reset service.'});
+    }
+  }
+  if (req.method === 'GET' && /^\/api\/product-image\/\d+$/.test(pathname)) {
+    if (!adminData.configured) return send(res, 503, 'Image service unavailable');
+    try {
+      const image = await adminData.productImage(pathname.split('/').pop());
+      return image ? send(res, 200, image, {'Content-Type':'image/jpeg'}) : send(res, 404, 'Image not found');
+    } catch (error) {
+      console.error('Product image failed:', error.code || error.message);
+      return send(res, 503, 'Image service unavailable');
     }
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');

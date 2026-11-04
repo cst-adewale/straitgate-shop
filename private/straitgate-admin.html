@@ -98,38 +98,18 @@ td.r,th.r{text-align:right}
 <div class="toast" id="toast" role="status"></div>
 
 <script>
-var K='doggy-admin-v1',TABS=[['dashboard','Dashboard'],['products','Products'],['quotes','Quotations'],['inventory','Inventory'],['tools','Converter & calculator']];
-var CATS=['Security door','Garden gate','Driveway gate','Accessory'],COLS={Red:'#e5271d',Yellow:'#f5c20f',Blue:'#1f5fe0'};
+var TABS=[['dashboard','Dashboard'],['products','Products'],['quotes','Quotations'],['inventory','Inventory'],['tools','Converter & calculator']];
+var CATS=['Security door','Sliding gate','Pedestrian gate','Estate gate','Garden gate','Driveway gate','Accessory'],COLS={'Matte black':'#171717',Charcoal:'#343434',Bronze:'#96724b',Forest:'#6e766f',Red:'#e5271d',Yellow:'#f5c20f',Blue:'#1f5fe0'};
 var ITYPES=['Machine','Tool','Product','Material'];
-function seed(){return{products:[
-{id:1,name:'Fortis Red',cat:'Security door',color:'Red',price:1450,desc:'Steel security door with 5-point lock',img:''},
-{id:2,name:'Arc Yellow',cat:'Garden gate',color:'Yellow',price:625,desc:'Curved garden gate, galvanised steel',img:''},
-{id:3,name:'Slide Blue',cat:'Driveway gate',color:'Blue',price:2400,desc:'Sliding driveway gate, motor-ready',img:''},
-{id:4,name:'Vault Yellow',cat:'Security door',color:'Yellow',price:1250,desc:'Reinforced security door, Grade 4',img:''},
-{id:5,name:'Guard Red',cat:'Driveway gate',color:'Red',price:1050,desc:'Double swing gate, heavy-duty hinges',img:''},
-{id:6,name:'Vault Blue',cat:'Security door',color:'Blue',price:1750,desc:'Security door with glazed side-light',img:''}],
-inv:[
-{id:1,name:'CNC plasma cutter',type:'Machine',sku:'MCH-001',qty:2,unit:'pcs',min:1,loc:'Workshop A',cost:18500},
-{id:2,name:'MIG welder',type:'Machine',sku:'MCH-002',qty:4,unit:'pcs',min:2,loc:'Workshop A',cost:1250},
-{id:3,name:'Press brake',type:'Machine',sku:'MCH-003',qty:1,unit:'pcs',min:1,loc:'Workshop B',cost:24000},
-{id:4,name:'Angle grinder',type:'Tool',sku:'TL-014',qty:6,unit:'pcs',min:4,loc:'Tool crib',cost:95},
-{id:5,name:'Cordless drill',type:'Tool',sku:'TL-021',qty:3,unit:'pcs',min:4,loc:'Van 1',cost:140},
-{id:6,name:'Steel tube 40x40 (6 m)',type:'Material',sku:'MT-100',qty:120,unit:'lengths',min:40,loc:'Yard',cost:28},
-{id:7,name:'Powder coat, Red',type:'Material',sku:'MT-210',qty:12,unit:'kg',min:20,loc:'Paint shop',cost:9},
-{id:8,name:'Fortis Red door',type:'Product',sku:'PR-001',qty:8,unit:'pcs',min:3,loc:'Warehouse',cost:820}],
-quotes:[
-{id:1,no:'Q-0001',cust:'Maya Okafor',email:'maya@example.com',phone:'',addr:'12 Elm Road, London',items:[{d:'Fortis Red security door',q:1,p:1450}],inst:120,disc:0,valid:'',notes:'',status:'Accepted',date:'2026-10-02'},
-{id:2,no:'Q-0002',cust:'Brightside Estates',email:'ops@brightside.test',phone:'',addr:'Unit 4, Hale Park',items:[{d:'Slide Blue driveway gate',q:2,p:2400}],inst:350,disc:5,valid:'',notes:'',status:'Sent',date:'2026-10-19'},
-{id:3,no:'Q-0003',cust:'T. Adeyemi',email:'t@example.com',phone:'',addr:'',items:[{d:'Arc Yellow garden gate',q:1,p:625}],inst:90,disc:0,valid:'',notes:'',status:'Draft',date:'2026-10-28'}]}}
-var DB;try{DB=JSON.parse(localStorage.getItem(K))}catch(e){}
-if(!DB||!DB.products)DB=seed();
-function save(){try{localStorage.setItem(K,JSON.stringify(DB))}catch(e){toast('Could not save: storage full or blocked')}}
+var DB={products:[],inv:[],quotes:[]};
+async function refresh(){var r=await fetch('/api/admin/data');var data=await r.json();if(!r.ok)throw Error(data.error||'Could not load dashboard data');DB=data;show()}
+async function change(kind,action,data){try{var r=await fetch('/api/admin/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:kind,action:action,data:data})});var result=await r.json();if(!r.ok)throw Error(result.error||'Could not save');DB=result;show();return true}catch(e){toast(e.message);return false}}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function gbp(n){return '£'+(Math.round(n*100)/100).toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function gbp(n){return '₦'+(Math.round(n*100)/100).toLocaleString('en-NG',{minimumFractionDigits:0,maximumFractionDigits:2})}
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},2200)}
 function nid(a){return a.reduce(function(m,x){return Math.max(m,x.id)},0)+1}
-function totals(q){var sub=q.items.reduce(function(s,i){return s+i.q*i.p},0),d=sub*(q.disc||0)/100,net=sub-d+(+q.inst||0),vat=net*.2;return{sub:sub,d:d,inst:+q.inst||0,net:net,vat:vat,total:net+vat}}
+function totals(q){var sub=q.items.reduce(function(s,i){return s+i.q*i.p},0),d=sub*(q.disc||0)/100,net=sub-d+(+q.inst||0);return{sub:sub,d:d,inst:+q.inst||0,net:net,total:net}}
 function art(t,c){var s='',i;if(t==='Security door')s='<rect x="56" y="14" width="128" height="176" rx="6" fill="#222"/><rect x="64" y="22" width="112" height="168" fill="'+c+'"/><rect x="146" y="92" width="10" height="26" rx="5" fill="#ddd"/>';else if(t==='Garden gate'){s='<path d="M50 192V84Q120 14 190 84V192" fill="none" stroke="'+c+'" stroke-width="10"/>';for(i=0;i<7;i++)s+='<rect x="'+(66+i*18)+'" y="90" width="6" height="100" fill="'+c+'"/>'}else if(t==='Driveway gate'){s='<rect x="14" y="40" width="10" height="150" fill="#222"/><rect x="34" y="52" width="160" height="14" fill="'+c+'"/><rect x="34" y="176" width="160" height="14" fill="'+c+'"/>';for(i=0;i<9;i++)s+='<rect x="'+(40+i*17)+'" y="66" width="6" height="110" fill="'+c+'"/>'}else s='<circle cx="120" cy="100" r="50" fill="'+c+'"/>';return '<svg viewBox="0 0 240 200" class="ch">'+s+'</svg>'}
 
 /* charts */
@@ -151,14 +131,9 @@ V.dashboard=function(){
  var qs=DB.quotes,open=qs.filter(function(q){return q.status!=='Accepted'&&q.status!=='Declined'}).length,low=DB.inv.filter(function(i){return i.qty<=i.min}).length,
  val=qs.reduce(function(s,q){return q.status==='Accepted'?s+totals(q).total:s},0),
  st=['Draft','Sent','Accepted','Declined'],stc=['#8a8a8a','#f5c20f','#ccf97c','#e5271d'];
- var cats=CATS.map(function(c,i){return [c,[38,17,21,9][i],['var(--ink)','#f5c20f','#1f5fe0','#ccf97c'][i]]});
  return '<div class="grid g4">'+
- [['Revenue, Oct','£71k','+12% vs Sep',1],['Orders, Oct','38','+5 vs Sep',1],['Open quotations',open,gbp(val)+' accepted',1],['Low-stock items',low,low?'Needs restocking':'All stocked',!low]].map(function(k){return '<div class="tile kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="d '+(k[3]?'up':'dn')+'">'+k[2]+'</div></div>'}).join('')+'</div>'+
- '<div class="grid g21" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Revenue by month (£k)</h3>'+barChart(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct'],[28,34,31,42,47,52,49,58,63,71],9)+'</div>'+
- '<div class="tile"><h3>Orders by category</h3>'+donut(cats)+'</div></div>'+
- '<div class="grid g2" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Site visits per week</h3>'+line(['W1','W2','W3','W4','W5','W6'],[820,910,880,1040,1180,1320])+'</div>'+
- '<div class="tile"><h3>Quotation pipeline</h3>'+donut(st.map(function(s,i){return [s,qs.filter(function(q){return q.status===s}).length,stc[i]]}))+'</div></div>'+
- '<p class="note">Revenue, order and visit figures are sample data until your store is connected. Quotations, products and stock are live from this page.</p>'+
+ [['Products',DB.products.length,'In database',1],['Accepted quotations',gbp(val),qs.filter(function(q){return q.status==='Accepted'}).length+' accepted',1],['Open quotations',open,'Draft or sent',1],['Low-stock items',low,low?'Needs restocking':'All stocked',!low]].map(function(k){return '<div class="tile kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="d '+(k[3]?'up':'dn')+'">'+k[2]+'</div></div>'}).join('')+'</div>'+
+ '<div class="grid g2" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Quotation pipeline</h3>'+donut(st.map(function(s,i){return [s,qs.filter(function(q){return q.status===s}).length,stc[i]]}))+'</div><div class="tile"><h3>Inventory</h3><p>'+DB.inv.length+' items tracked</p><p>'+gbp(DB.inv.reduce(function(s,i){return s+i.qty*i.cost},0))+' stock value at cost</p></div></div>'+
  '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h3>Recent quotations</h3>'+quoteTable(qs.slice(-4).reverse(),true)+'</div>'};
 
 V.products=function(){
@@ -166,10 +141,11 @@ V.products=function(){
  '<div><label for="pn">Product name</label><input id="pn" placeholder="e.g. Fortis Red"></div>'+
  '<div><label for="pc">Category</label><select id="pc">'+CATS.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
  '<div><label for="pk">Colour</label><select id="pk">'+Object.keys(COLS).map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
- '<div><label for="pp">Price (£)</label><input id="pp" type="number" min="0" step="0.01" placeholder="0.00"></div>'+
+ '<div><label for="po">Operation</label><select id="po"><option value="">Not specified</option><option>Pivot</option><option>Hinged</option><option>Sliding</option><option>Automated</option></select></div>'+
+ '<div><label for="pp">Price (₦)</label><input id="pp" type="number" min="0" step="0.01" placeholder="0.00"></div>'+
  '<div class="w"><label for="pd">Short description</label><textarea id="pd" placeholder="Shown under the product name in the catalog"></textarea></div>'+
  '<div class="w"><label for="pi">Product image</label><input id="pi" type="file" accept="image/*"></div></div>'+
- '<div class="bar" style="margin:14px 0 0"><button class="btn l" id="addp">Add to catalog</button><button class="btn" id="expp">Export catalog JSON</button></div>'+
+ '<div class="bar" style="margin:14px 0 0"><button class="btn l" id="addp">Save product</button><button class="btn" id="expp">Export products JSON</button></div>'+
  '<textarea id="exo" style="display:none;margin-top:12px;height:120px" readonly aria-label="Catalog JSON"></textarea></div>'+
  '<div class="tile"><h2>Catalog ('+DB.products.length+')</h2><div class="tw"><table><thead><tr><th>Product</th><th>Category</th><th class="r">Price</th><th></th></tr></thead><tbody>'+
  DB.products.map(function(p){return '<tr><td><div class="pr"><div class="thumb">'+(p.img?'<img alt="" src="'+p.img+'">':esc(p.name[0]))+'</div><div><b style="font-weight:500">'+esc(p.name)+'</b><div style="font-size:10px;color:var(--mute)">'+esc(p.color)+' &middot; '+esc(p.desc)+'</div></div></div></td><td>'+esc(p.cat)+'</td><td class="r">'+gbp(p.price)+'</td><td class="r"><button class="btn sm x" data-del="p:'+p.id+'">Remove</button></td></tr>'}).join('')+'</tbody></table></div></div></div>'};
@@ -186,15 +162,15 @@ V.quotes=function(){
  '<div class="w"><label for="qa">Site address</label><input id="qa"></div></div>'+
  '<h3 style="margin-top:18px">Line items</h3><div id="qi"></div>'+
  '<div class="bar"><select id="qp" style="max-width:240px"><option value="">Add from catalog...</option>'+DB.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+' ('+gbp(p.price)+')</option>'}).join('')+'</select><button class="btn sm" id="qadd">+ Custom line</button></div>'+
- '<div class="f"><div><label for="qin">Installation (£)</label><input id="qin" type="number" min="0" value="0"></div><div><label for="qd">Discount (%)</label><input id="qd" type="number" min="0" max="100" value="0"></div>'+
- '<div class="w"><label for="qn">Notes and terms</label><textarea id="qn">50% deposit to confirm. Balance due on completion. Made to measure, 2 to 3 weeks.</textarea></div></div></div>'+
+ '<div class="f"><div><label for="qin">Installation (₦)</label><input id="qin" type="number" min="0" value="0"></div><div><label for="qd">Discount (%)</label><input id="qd" type="number" min="0" max="100" value="0"></div>'+
+ '<div class="w"><label for="qn">Notes and terms</label><textarea id="qn" placeholder="Enter your terms"></textarea></div></div></div>'+
  '<div><div class="tile"><h2>Summary</h2><div class="sum" id="qs"></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="qsave">Save quotation</button><button class="btn" id="qcopy">Copy as text</button></div></div></div></div>'+
  '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h2>All quotations ('+DB.quotes.length+')</h2>'+quoteTable(DB.quotes.slice().reverse())+'</div>'};
 function qItems(){$('qi').innerHTML=QI.map(function(i,n){return '<div class="qi"><input data-qi="d:'+n+'" value="'+esc(i.d)+'" placeholder="Description" aria-label="Description"><input data-qi="q:'+n+'" type="number" min="1" value="'+i.q+'" aria-label="Qty"><input data-qi="p:'+n+'" type="number" min="0" step="0.01" value="'+i.p+'" aria-label="Unit price"><button class="btn sm x" data-qrm="'+n+'" aria-label="Remove line" style="padding:0">&times;</button></div>'}).join('');qSum()}
 function qDraft(){return{items:QI.filter(function(i){return i.d||i.p}),inst:+$('qin').value||0,disc:+$('qd').value||0}}
-function qSum(){var t=totals(qDraft());$('qs').innerHTML='<div>Subtotal<span>'+gbp(t.sub)+'</span></div><div>Discount<span>-'+gbp(t.d)+'</span></div><div>Installation<span>'+gbp(t.inst)+'</span></div><div>VAT (20%)<span>'+gbp(t.vat)+'</span></div><div class="t">Total<span>'+gbp(t.total)+'</span></div>'}
-function qText(q){var t=totals(q);return 'QUOTATION '+q.no+'\nDoggy – Gates & security doors\nDate: '+q.date+(q.valid?'   Valid until: '+q.valid:'')+'\n\nCustomer: '+q.cust+'\n'+(q.email?q.email+'\n':'')+(q.phone?q.phone+'\n':'')+(q.addr?q.addr+'\n':'')+'\n'+q.items.map(function(i){return i.q+' x '+i.d+' @ '+gbp(i.p)+' = '+gbp(i.q*i.p)}).join('\n')+'\n\nSubtotal: '+gbp(t.sub)+'\nDiscount: -'+gbp(t.d)+'\nInstallation: '+gbp(t.inst)+'\nVAT 20%: '+gbp(t.vat)+'\nTOTAL: '+gbp(t.total)+'\n\n'+(q.notes||'')}
-function qHtml(q){var t=totals(q);return '<h2 style="font-size:28px;margin:0">Doggy</h2><p>Gates &amp; security doors</p><h3>Quotation '+q.no+'</h3><p>Date: '+q.date+(q.valid?' &middot; Valid until: '+q.valid:'')+'</p><p><b>'+esc(q.cust)+'</b><br>'+esc(q.email)+' '+esc(q.phone)+'<br>'+esc(q.addr)+'</p><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr></thead><tbody>'+q.items.map(function(i){return '<tr><td>'+esc(i.d)+'</td><td class="r">'+i.q+'</td><td class="r">'+gbp(i.p)+'</td><td class="r">'+gbp(i.q*i.p)+'</td></tr>'}).join('')+'</tbody></table><p style="text-align:right">Subtotal '+gbp(t.sub)+'<br>Discount -'+gbp(t.d)+'<br>Installation '+gbp(t.inst)+'<br>VAT 20% '+gbp(t.vat)+'<br><b style="font-size:18px">Total '+gbp(t.total)+'</b></p><p>'+esc(q.notes)+'</p>'}
+function qSum(){var t=totals(qDraft());$('qs').innerHTML='<div>Subtotal<span>'+gbp(t.sub)+'</span></div><div>Discount<span>-'+gbp(t.d)+'</span></div><div>Installation<span>'+gbp(t.inst)+'</span></div><div class="t">Total<span>'+gbp(t.total)+'</span></div>'}
+function qText(q){var t=totals(q);return 'QUOTATION '+q.no+'\nStraitgate – Gates & security doors\nDate: '+q.date+(q.valid?'   Valid until: '+q.valid:'')+'\n\nCustomer: '+q.cust+'\n'+(q.email?q.email+'\n':'')+(q.phone?q.phone+'\n':'')+(q.addr?q.addr+'\n':'')+'\n'+q.items.map(function(i){return i.q+' x '+i.d+' @ '+gbp(i.p)+' = '+gbp(i.q*i.p)}).join('\n')+'\n\nSubtotal: '+gbp(t.sub)+'\nDiscount: -'+gbp(t.d)+'\nInstallation: '+gbp(t.inst)+'\nTOTAL: '+gbp(t.total)+'\n\n'+(q.notes||'')}
+function qHtml(q){var t=totals(q);return '<h2 style="font-size:28px;margin:0">Straitgate</h2><p>Gates &amp; security doors</p><h3>Quotation '+q.no+'</h3><p>Date: '+q.date+(q.valid?' &middot; Valid until: '+q.valid:'')+'</p><p><b>'+esc(q.cust)+'</b><br>'+esc(q.email)+' '+esc(q.phone)+'<br>'+esc(q.addr)+'</p><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr></thead><tbody>'+q.items.map(function(i){return '<tr><td>'+esc(i.d)+'</td><td class="r">'+i.q+'</td><td class="r">'+gbp(i.p)+'</td><td class="r">'+gbp(i.q*i.p)+'</td></tr>'}).join('')+'</tbody></table><p style="text-align:right">Subtotal '+gbp(t.sub)+'<br>Discount -'+gbp(t.d)+'<br>Installation '+gbp(t.inst)+'<br><b style="font-size:18px">Total '+gbp(t.total)+'</b></p><p>'+esc(q.notes)+'</p>'}
 
 var IF='All',IS='';
 V.inventory=function(){
@@ -204,7 +180,7 @@ V.inventory=function(){
  '<div class="grid gf"><div class="tile"><h2>Add inventory</h2><div class="f"><div class="w"><label for="in">Item name</label><input id="in"></div>'+
  '<div><label for="it">Type</label><select id="it">'+ITYPES.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></div><div><label for="is">SKU</label><input id="is"></div>'+
  '<div><label for="iq">Quantity</label><input id="iq" type="number" min="0" value="1"></div><div><label for="iu">Unit</label><input id="iu" value="pcs"></div>'+
- '<div><label for="im">Reorder level</label><input id="im" type="number" min="0" value="1"></div><div><label for="ic">Unit cost (£)</label><input id="ic" type="number" min="0" step="0.01" value="0"></div>'+
+ '<div><label for="im">Reorder level</label><input id="im" type="number" min="0" value="1"></div><div><label for="ic">Unit cost (₦)</label><input id="ic" type="number" min="0" step="0.01" value="0"></div>'+
  '<div class="w"><label for="il">Location</label><input id="il" placeholder="Workshop, van, warehouse..."></div></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="iadd">Add item</button></div></div>'+
  '<div class="tile"><div class="bar"><div class="tabs" style="margin:0">'+['All'].concat(ITYPES).map(function(t){return '<button class="chip" data-if="'+t+'" aria-pressed="'+(IF===t)+'">'+t+'</button>'}).join('')+'</div><input class="sp" id="isr" type="search" placeholder="Search..." value="'+esc(IS)+'" aria-label="Search inventory"></div>'+
  (list.length?'<div class="tw"><table><thead><tr><th>Item</th><th>Type</th><th>Location</th><th>Stock</th><th></th></tr></thead><tbody>'+list.map(function(i){var lo=i.qty<=i.min;return '<tr><td><b style="font-weight:500">'+esc(i.name)+'</b><div style="font-size:10px;color:var(--mute)">'+esc(i.sku)+' &middot; '+gbp(i.cost)+'</div></td><td>'+i.type+'</td><td>'+esc(i.loc)+'</td><td><span class="pill '+(lo?'bad':'ok')+'">'+i.qty+' '+esc(i.unit)+'</span></td><td class="r" style="white-space:nowrap"><button class="btn sm" data-adj="'+i.id+':-1" aria-label="Decrease">&minus;</button> <button class="btn sm" data-adj="'+i.id+':1" aria-label="Increase">+</button> <button class="btn sm x" data-del="i:'+i.id+'">Remove</button></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Nothing matches.</div>')+'</div></div>'};
@@ -248,13 +224,13 @@ document.addEventListener('click',function(e){var b=e.target.closest('button,[da
  if(d.tab){e.preventDefault();want=d.tab;show();return}
  if(d.k){ck(d.k);return}
  if(d.if){IF=d.if;show();return}
- if(d.del){var p=d.del.split(':'),n=+p[1],map={p:'products',q:'quotes',i:'inv'};DB[map[p[0]]]=DB[map[p[0]]].filter(function(x){return x.id!==n});save();show();return}
- if(d.adj){var a=d.adj.split(':');DB.inv.forEach(function(i){if(i.id==+a[0])i.qty=Math.max(0,i.qty+ +a[1])});save();show();return}
+ if(d.del){var p=d.del.split(':'),map={p:'products',q:'quotes',i:'inventory'};if(confirm('Remove this item?'))change(map[p[0]],'remove',{id:+p[1]});return}
+ if(d.adj){var a=d.adj.split(':');change('inventory','adjust',{id:+a[0],delta:+a[1]});return}
  if(d.print){var q=DB.quotes.filter(function(x){return x.id==d.print})[0];$('pa').innerHTML=qHtml(q);try{window.print()}catch(er){toast('Printing is blocked here. Use Copy as text.')}return}
  if(d.qrm){QI.splice(+d.qrm,1);if(!QI.length)QI.push({d:'',q:1,p:0});qItems();return}
  var id=b.id;
  if(id==='addp'){var n2=val('pn'),pr=parseFloat($('pp').value);if(!n2||isNaN(pr)){toast('Add a name and a price');return}
-  var f=$('pi').files[0],add=function(img){DB.products.push({id:nid(DB.products),name:n2,cat:$('pc').value,color:$('pk').value,price:pr,desc:val('pd'),img:img||''});save();show();toast(n2+' added to catalog')};
+  var f=$('pi').files[0],add=async function(img){if(await change('products','add',{name:n2,cat:$('pc').value,color:$('pk').value,operation:$('po').value,price:pr,desc:val('pd'),img:img||''}))toast(n2+' added to shop')};
   if(!f){add('');return}
   var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,480/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=im.width*s;cv.height=im.height*s;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);add(cv.toDataURL('image/jpeg',.8))};im.onerror=function(){add('')};im.src=rd.result};rd.readAsDataURL(f);return}
  if(id==='expp'){var o=$('exo');o.style.display='block';o.value=JSON.stringify(DB.products.map(function(p){return{name:p.name,category:p.cat,colour:p.color,price:p.price,description:p.desc,image:p.img?'(uploaded)':''}}),null,2);o.select();try{document.execCommand('copy');toast('Copied to clipboard')}catch(er){}return}
@@ -262,8 +238,8 @@ document.addEventListener('click',function(e){var b=e.target.closest('button,[da
  if(id==='qsave'||id==='qcopy'){var dr=qDraft();if(!val('qc')||!dr.items.length){toast('Add a customer and at least one line');return}
   var q={id:nid(DB.quotes),no:'Q-'+('000'+nid(DB.quotes)).slice(-4),cust:val('qc'),email:val('qe'),phone:val('qt'),addr:val('qa'),items:dr.items,inst:dr.inst,disc:dr.disc,valid:$('qv').value,notes:val('qn'),status:'Draft',date:new Date().toISOString().slice(0,10)};
   if(id==='qcopy'){var tx=qText(q);try{navigator.clipboard.writeText(tx).then(function(){toast('Quotation copied')},function(){toast('Copy blocked by the browser')})}catch(er){toast('Copy blocked by the browser')}return}
-  DB.quotes.push(q);save();QI=[{d:'',q:1,p:0}];show();toast(q.no+' saved');return}
- if(id==='iadd'){if(!val('in')){toast('Add an item name');return}DB.inv.push({id:nid(DB.inv),name:val('in'),type:$('it').value,sku:val('is'),qty:+$('iq').value||0,unit:val('iu')||'pcs',min:+$('im').value||0,loc:val('il'),cost:+$('ic').value||0});save();show();toast('Item added');return}
+  change('quotes','add',q).then(function(ok){if(ok){QI=[{d:'',q:1,p:0}];toast('Quotation saved')}});return}
+ if(id==='iadd'){if(!val('in')){toast('Add an item name');return}change('inventory','add',{name:val('in'),type:$('it').value,sku:val('is'),qty:+$('iq').value||0,unit:val('iu')||'pcs',min:+$('im').value||0,loc:val('il'),cost:+$('ic').value||0}).then(function(ok){if(ok)toast('Item added')});return}
  if(id==='dsw'){var t=$('df').value;$('df').value=$('dt').value;$('dt').value=t;cnv();return}
  if(id==='wsw'){var u=$('wf').value;$('wf').value=$('wt').value;$('wt').value=u;cnv()}
 });
@@ -275,13 +251,13 @@ document.addEventListener('input',function(e){var t=e.target;
 document.addEventListener('change',function(e){var t=e.target;
  if(/^(df|dt|wf|wt)$/.test(t.id))cnv();
  if(t.id==='qp'&&t.value){var p=DB.products.filter(function(x){return x.id==t.value})[0];if(QI.length===1&&!QI[0].d&&!QI[0].p)QI=[];QI.push({d:p.name+' – '+p.cat.toLowerCase(),q:1,p:p.price});qItems()}
- if(t.dataset.qs){DB.quotes.forEach(function(q){if(q.id==t.dataset.qs)q.status=t.value});save();toast('Status updated')}});
+ if(t.dataset.qs){change('quotes','status',{id:+t.dataset.qs,status:t.value}).then(function(ok){if(ok)toast('Status updated')})}});
 document.addEventListener('keydown',function(e){if(cur!=='tools'||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
  var k=e.key,m={'*':'×','/':'÷','-':'−','Enter':'=','Escape':'C','Backspace':'bs'};
  if(/^[0-9.+%]$/.test(k)||m[k]){e.preventDefault();ck(m[k]||k)}});
 window.addEventListener('hashchange',function(){want='';show()});
 $('today').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-show();
+refresh().catch(function(e){$('view').innerHTML='<div class="tile"><h2>Dashboard unavailable</h2><p>'+esc(e.message)+'</p></div>'});
 $('logout').onclick=async function(){await fetch('/api/admin/logout',{method:'POST'});location.replace('/straitgate-admin-login.html')};
 </script>
 </body>
