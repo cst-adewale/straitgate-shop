@@ -1,6 +1,8 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const localEnv = path.join(__dirname, '.env.local');
+if (fs.existsSync(localEnv)) process.loadEnvFile(localEnv);
 const adminData = require('./admin-data');
 
 const root = path.join(__dirname, 'public');
