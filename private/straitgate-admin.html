@@ -53,9 +53,6 @@ td{padding:10px 10px 10px 0;border-bottom:1px solid #eee;vertical-align:middle}
 td.r,th.r{text-align:right}
 .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:10px;background:#e8e8e8}
 .pill.ok{background:var(--lime)}.pill.warn{background:#ffe4a3}.pill.bad{background:#ffc9c4}
-.health-pill{border:1px solid var(--ink);border-radius:999px;background:var(--tile);padding:7px 12px;font-size:11px;white-space:nowrap}
-.health-pill[data-state=ok]{background:var(--lime);color:#0a0a0a}.health-pill[data-state=bad]{background:var(--pill-bad);color:var(--ink)}
-.budget-pill{border:1px solid var(--ink);border-radius:999px;background:var(--lime);color:#0a0a0a;padding:7px 12px;font-size:11px;white-space:nowrap}
 .budget-panel{margin:0 0 clamp(18px,2.6vw,30px)}
 .budget-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
 .budget-metrics div{background:var(--tile);border-radius:10px;padding:12px}
@@ -106,22 +103,9 @@ td.r,th.r{text-align:right}
 </head>
 <body>
 <div class="page">
-<header><span class="logo">Straitgate<small>Admin</small></span><span class="who">Admin dashboard &middot; <span id="today"></span> &middot; <button id="logout" class="btn sm" type="button">Sign out</button></span><button id="budgetPill" class="budget-pill" type="button" aria-controls="budgetPanel" aria-expanded="false">Budget · ₦0</button><button id="healthPill" class="health-pill" type="button" data-state="checking" aria-controls="healthPanel" aria-expanded="true">● Checking backend</button><button class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark mode">☾</button></header>
+<header><span class="logo">Straitgate<small>Admin</small></span><span class="who">Admin dashboard &middot; <span id="today"></span> &middot; <button id="logout" class="btn sm" type="button">Sign out</button></span><button class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark mode">☾</button></header>
 <h1 id="ttl">Dashboard</h1>
 <div class="tabs" role="tablist" id="tabs"></div>
-<section class="tile budget-panel" id="budgetPanel" aria-label="Sales-based budget calculator" hidden>
- <h2>Sales-based budget</h2>
- <p class="note">Uses accepted quotations as an estimate of sales. This is not confirmed cash received or profit.</p>
- <div class="budget-rate"><label for="budgetPercent">Allocate from net quotation value</label><input id="budgetPercent" type="number" min="0" max="100" step="0.1" value="20"><span>%</span></div>
- <div class="budget-metrics"><div><span class="note">Accepted quotations</span><b id="budgetSales">₦0</b></div><div><span class="note">Budget allocation</span><b id="budgetAmount">₦0</b></div><div><span class="note">Accepted quotes counted</span><b id="budgetCount">0</b></div></div>
- <p class="note">Budget = accepted quotation totals after discounts × allocation percentage. The percentage is a calculator setting for this open tab.</p>
-</section>
-<section class="tile health-panel" id="healthPanel" aria-label="Backend health">
- <div class="health-head"><div><h2 style="margin-bottom:4px">Backend health</h2><span class="note" id="healthStatus">Checking Neon database and server…</span></div><button class="btn sm" id="healthRefresh" type="button">Check now</button></div>
- <div class="health-metrics"><div><span class="note">Response time</span><b id="healthResponse">—</b></div><div><span class="note">Neon database</span><b id="healthDatabase">—</b></div><div><span class="note">Server uptime</span><b id="healthUptime">—</b></div></div>
- <div class="note">Response time history (this open tab)</div><div class="health-chart" id="healthChart" role="img" aria-label="No health samples yet"></div>
- <p class="note" id="pingStatus">Random-signal ping every 14 minutes while this admin tab stays open. It cannot prevent sleep after the tab closes.</p>
-</section>
 <div id="view"></div>
 <footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px;border-top:1px solid #ddd"><a href="straitgate-home.html">Home</a> &nbsp;·&nbsp; <a href="straitgate-catalog.html">Catalog</a></footer>
 </div>
@@ -129,7 +113,7 @@ td.r,th.r{text-align:right}
 <div class="toast" id="toast" role="status"></div>
 
 <script>
-var TABS=[['dashboard','Dashboard'],['products','Products'],['quotes','Quotations'],['inventory','Inventory'],['tools','Converter & calculator']];
+var TABS=[['dashboard','Dashboard'],['products','Products'],['quotes','Quotations'],['inventory','Inventory'],['budget','Budget'],['health','Backend health'],['tools','Converter & calculator']];
 var CATS=['Security door','Sliding gate','Pedestrian gate','Estate gate','Garden gate','Driveway gate','Accessory'],COLS={'Matte black':'#171717',Charcoal:'#343434',Bronze:'#96724b',Forest:'#6e766f',Red:'#e5271d',Yellow:'#f5c20f',Blue:'#1f5fe0'};
 var ITYPES=['Machine','Tool','Product','Material'];
 var DB={products:[],inv:[],quotes:[]};
@@ -141,7 +125,8 @@ function gbp(n){return '₦'+(Math.round(n*100)/100).toLocaleString('en-NG',{min
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},2200)}
 function nid(a){return a.reduce(function(m,x){return Math.max(m,x.id)},0)+1}
 function totals(q){var sub=q.items.reduce(function(s,i){return s+i.q*i.p},0),d=sub*(q.disc||0)/100,net=sub-d+(+q.inst||0);return{sub:sub,d:d,inst:+q.inst||0,net:net,total:net}}
-function updateBudget(){var accepted=DB.quotes.filter(function(q){return q.status==='Accepted'}),sales=accepted.reduce(function(sum,q){return sum+totals(q).total},0),rate=Number($('budgetPercent').value);if(!Number.isFinite(rate)||rate<0||rate>100)return;$('budgetSales').textContent=gbp(sales);$('budgetAmount').textContent=gbp(sales*rate/100);$('budgetCount').textContent=accepted.length;$('budgetPill').textContent='Budget · '+gbp(sales*rate/100)}
+var budgetPercent=20;
+function updateBudget(){if(cur!=='budget')return;var accepted=DB.quotes.filter(function(q){return q.status==='Accepted'}),sales=accepted.reduce(function(sum,q){return sum+totals(q).total},0);$('budgetSales').textContent=gbp(sales);$('budgetAmount').textContent=gbp(sales*budgetPercent/100);$('budgetCount').textContent=accepted.length}
 function art(t,c){var s='',i;if(t==='Security door')s='<rect x="56" y="14" width="128" height="176" rx="6" fill="#222"/><rect x="64" y="22" width="112" height="168" fill="'+c+'"/><rect x="146" y="92" width="10" height="26" rx="5" fill="#ddd"/>';else if(t==='Garden gate'){s='<path d="M50 192V84Q120 14 190 84V192" fill="none" stroke="'+c+'" stroke-width="10"/>';for(i=0;i<7;i++)s+='<rect x="'+(66+i*18)+'" y="90" width="6" height="100" fill="'+c+'"/>'}else if(t==='Driveway gate'){s='<rect x="14" y="40" width="10" height="150" fill="#222"/><rect x="34" y="52" width="160" height="14" fill="'+c+'"/><rect x="34" y="176" width="160" height="14" fill="'+c+'"/>';for(i=0;i<9;i++)s+='<rect x="'+(40+i*17)+'" y="66" width="6" height="110" fill="'+c+'"/>'}else s='<circle cx="120" cy="100" r="50" fill="'+c+'"/>';return '<svg viewBox="0 0 240 200" class="ch">'+s+'</svg>'}
 
 /* charts */
@@ -161,6 +146,8 @@ function line(l,v){var m=Math.max.apply(null,v)*1.15,w=400,h=170,p=v.map(functio
 var V={};
 function inventoryRows(){return DB.inv.concat(DB.products.map(function(p){return {id:p.id,product:true,name:p.name,type:'Product',sku:'',qty:p.stockQuantity,unit:'units',min:2,loc:'Catalog',cost:0}}))}
 function isLowStock(i){return i.qty!==null&&i.qty<=Math.max(i.min,2)}
+V.budget=function(){return '<section class="tile budget-panel" aria-label="Sales-based budget calculator"><h2>Sales-based budget</h2><p class="note">Uses accepted quotations as an estimate of sales. This is not confirmed cash received or profit.</p><div class="budget-rate"><label for="budgetPercent">Allocate from net quotation value</label><input id="budgetPercent" type="number" min="0" max="100" step="0.1" value="'+budgetPercent+'"><span>%</span></div><div class="budget-metrics"><div><span class="note">Accepted quotations</span><b id="budgetSales">₦0</b></div><div><span class="note">Budget allocation</span><b id="budgetAmount">₦0</b></div><div><span class="note">Accepted quotes counted</span><b id="budgetCount">0</b></div></div><p class="note">Budget = accepted quotation totals after discounts × allocation percentage. The percentage is a calculator setting for this open tab.</p></section>'}
+V.health=function(){return '<section class="tile health-panel" aria-label="Backend health"><div class="health-head"><div><h2 style="margin-bottom:4px">Backend health</h2><span class="note" id="healthStatus">Checking Neon database and server…</span></div><button class="btn sm" id="healthRefresh" type="button">Check now</button></div><div class="health-metrics"><div><span class="note">Response time</span><b id="healthResponse">—</b></div><div><span class="note">Neon database</span><b id="healthDatabase">—</b></div><div><span class="note">Server uptime</span><b id="healthUptime">—</b></div></div><div class="note">Response time history (this open tab)</div><div class="health-chart" id="healthChart" role="img" aria-label="No health samples yet"></div><p class="note" id="pingStatus">Random-signal ping every 14 minutes while this admin tab stays open. It cannot prevent sleep after the tab closes.</p></section>'}
 V.dashboard=function(){
  var qs=DB.quotes,inventory=inventoryRows(),low=inventory.filter(isLowStock).length,
  revenue=qs.reduce(function(s,q){if(q.status!=='Accepted')return s;var t=totals(q);s.gross+=t.sub+t.inst;s.net+=t.total;return s},{gross:0,net:0}),
@@ -252,15 +239,13 @@ function ck(k){var x=C;
 var cur='dashboard';
 var want='';
 function show(){var h=want||location.hash.replace('#','');cur=V[h]?h:'dashboard';
- $('ttl').textContent={dashboard:'Dashboard',products:'Products',quotes:'Quotations',inventory:'Inventory',tools:'Tools'}[cur];
+ $('ttl').textContent={dashboard:'Dashboard',products:'Products',quotes:'Quotations',inventory:'Inventory',budget:'Budget',health:'Backend health',tools:'Tools'}[cur];
  $('tabs').innerHTML=TABS.map(function(t){return '<button type="button" class="chip" role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+t[1]+'</button>'}).join('');
  $('view').innerHTML=V[cur]();
- updateBudget();
+ if(cur==='budget')updateBudget();if(cur==='health')renderHealth();
  if(cur==='quotes')qItems();if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
 function val(i){return $(i).value.trim()}
 document.addEventListener('change',function(e){if(e.target.id==='pi'){var files=Array.from(e.target.files),select=$('pm');if(files.length>5){toast('Choose at most five images');e.target.value='';files=[]}select.innerHTML=files.length?files.map(function(f,i){return '<option value="'+i+'">Image '+(i+1)+' — '+esc(f.name)+'</option>'}).join(''):'<option value="0">Image 1</option>'}});
-document.getElementById('budgetPill').addEventListener('click',function(){var panel=$('budgetPanel');panel.hidden=!panel.hidden;this.setAttribute('aria-expanded',String(!panel.hidden))});
-document.getElementById('budgetPercent').addEventListener('input',function(){var rate=Number(this.value);if(this.value!==''&&Number.isFinite(rate)&&rate>=0&&rate<=100)updateBudget()});
 document.addEventListener('click',async function(e){var b=e.target.closest('button,[data-k]');if(!b)return;var d=b.dataset;
  if(d.tab){e.preventDefault();want=d.tab;show();return}
  if(d.k){ck(d.k);return}
@@ -272,6 +257,7 @@ document.addEventListener('click',async function(e){var b=e.target.closest('butt
  if(d.print){var q=DB.quotes.filter(function(x){return x.id==d.print})[0];$('pa').innerHTML=qHtml(q);try{window.print()}catch(er){toast('Printing is blocked here. Use Copy as text.')}return}
  if(d.qrm){QI.splice(+d.qrm,1);if(!QI.length)QI.push({d:'',q:1,p:0});qItems();return}
  var id=b.id;
+ if(id==='healthRefresh'){checkHealth();return}
  if(id==='addp'){var n2=val('pn'),pr=parseFloat($('pp').value),stockValue=$('ps').value;if(!n2||isNaN(pr)||!/^\d+$/.test(stockValue)){toast('Add a name, price and whole-number stock quantity');return}
   var files=Array.from($('pi').files),mainIndex=+$('pm').value;
   if(files.length>5||files.some(function(f){return !['image/png','image/jpeg'].includes(f.type)})){toast('Choose up to five PNG or JPG images');return}
@@ -288,6 +274,7 @@ document.addEventListener('click',async function(e){var b=e.target.closest('butt
  if(id==='wsw'){var u=$('wf').value;$('wf').value=$('wt').value;$('wt').value=u;cnv()}
 });
 document.addEventListener('input',function(e){var t=e.target;
+ if(t.id==='budgetPercent'){var rate=Number(t.value);if(t.value!==''&&Number.isFinite(rate)&&rate>=0&&rate<=100){budgetPercent=rate;updateBudget()}return}
  if(t.id==='isr'){IS=t.value;var p=t.selectionStart;show();var n=$('isr');n.focus();n.setSelectionRange(p,p);return}
  if(t.dataset.qi){var a=t.dataset.qi.split(':'),r=QI[+a[1]];r[a[0]]=a[0]==='d'?t.value:(+t.value||0);qSum();return}
  if(t.id==='qin'||t.id==='qd')qSum();
@@ -302,11 +289,10 @@ document.addEventListener('keydown',function(e){if(cur!=='tools'||/INPUT|SELECT|
 window.addEventListener('hashchange',function(){want='';show()});
 $('today').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
 var healthSamples=[];
-function healthChart(){var max=Math.max(300,...healthSamples.map(function(s){return s.ms||0}));$('healthChart').innerHTML=healthSamples.map(function(s){return '<span class="'+(s.ok?'':'bad')+'" style="height:'+Math.max(8,Math.round((s.ms||max)/max*100))+'%" title="'+(s.ok?s.ms+' ms':'Unavailable')+'"></span>'}).join('');$('healthChart').setAttribute('aria-label',healthSamples.length?healthSamples.map(function(s){return s.ok?s.ms+' milliseconds':'unavailable'}).join(', '):'No health samples yet')}
-async function checkHealth(){var started=performance.now(),pill=$('healthPill');try{var r=await fetch('/api/admin/health',{cache:'no-store'}),data=await r.json(),ms=Math.round(performance.now()-started),ok=r.ok&&data.ok;healthSamples.push({ok:ok,ms:ms});if(healthSamples.length>12)healthSamples.shift();pill.dataset.state=ok?'ok':'bad';pill.textContent=ok?'● Backend healthy':'● Backend needs attention';$('healthStatus').textContent=ok?'Checked '+new Date().toLocaleTimeString():'Backend or Neon database unavailable';$('healthResponse').textContent=ms+' ms';$('healthDatabase').textContent=data.database?.ok?data.database.latencyMs+' ms':'Unavailable';$('healthUptime').textContent=data.server?Math.floor(data.server.uptimeSeconds/60)+' min':'—';healthChart()}catch(e){healthSamples.push({ok:false,ms:0});if(healthSamples.length>12)healthSamples.shift();pill.dataset.state='bad';pill.textContent='● Backend unavailable';$('healthStatus').textContent='Could not reach the server';$('healthResponse').textContent='—';$('healthDatabase').textContent='—';$('healthUptime').textContent='—';healthChart()}}
-async function pingBackend(){try{var r=await fetch('/api/admin/ping?signal='+encodeURIComponent(crypto.randomUUID()),{cache:'no-store'});if(!r.ok)throw Error('Ping failed');$('pingStatus').textContent='Last random-signal ping: '+new Date().toLocaleTimeString()+'. Next in about 14 minutes while this tab stays open.'}catch(e){$('pingStatus').textContent='Ping failed at '+new Date().toLocaleTimeString()+'. The tab must stay open, and browser timers may be delayed.'}checkHealth()}
-$('healthPill').onclick=function(){var panel=$('healthPanel'),open=panel.hidden;panel.hidden=!open;this.setAttribute('aria-expanded',String(open))};
-$('healthRefresh').onclick=checkHealth;
+var healthState={status:'Checking Neon database and server…',response:'—',database:'—',uptime:'—',ping:'Random-signal ping every 14 minutes while this admin tab stays open. It cannot prevent sleep after the tab closes.'};
+function renderHealth(){if(cur!=='health')return;$('healthStatus').textContent=healthState.status;$('healthResponse').textContent=healthState.response;$('healthDatabase').textContent=healthState.database;$('healthUptime').textContent=healthState.uptime;$('pingStatus').textContent=healthState.ping;var max=Math.max(300,...healthSamples.map(function(s){return s.ms||0}));$('healthChart').innerHTML=healthSamples.map(function(s){return '<span class="'+(s.ok?'':'bad')+'" style="height:'+Math.max(8,Math.round((s.ms||max)/max*100))+'%" title="'+(s.ok?s.ms+' ms':'Unavailable')+'"></span>'}).join('');$('healthChart').setAttribute('aria-label',healthSamples.length?healthSamples.map(function(s){return s.ok?s.ms+' milliseconds':'unavailable'}).join(', '):'No health samples yet')}
+async function checkHealth(){var started=performance.now();try{var r=await fetch('/api/admin/health',{cache:'no-store'}),data=await r.json(),ms=Math.round(performance.now()-started),ok=r.ok&&data.ok;healthSamples.push({ok:ok,ms:ms});if(healthSamples.length>12)healthSamples.shift();healthState.status=ok?'Checked '+new Date().toLocaleTimeString():'Backend or Neon database unavailable';healthState.response=ms+' ms';healthState.database=data.database?.ok?data.database.latencyMs+' ms':'Unavailable';healthState.uptime=data.server?Math.floor(data.server.uptimeSeconds/60)+' min':'—'}catch(e){healthSamples.push({ok:false,ms:0});if(healthSamples.length>12)healthSamples.shift();healthState.status='Could not reach the server';healthState.response='—';healthState.database='—';healthState.uptime='—'}renderHealth()}
+async function pingBackend(){try{var r=await fetch('/api/admin/ping?signal='+encodeURIComponent(crypto.randomUUID()),{cache:'no-store'});if(!r.ok)throw Error('Ping failed');healthState.ping='Last random-signal ping: '+new Date().toLocaleTimeString()+'. Next in about 14 minutes while this tab stays open.'}catch(e){healthState.ping='Ping failed at '+new Date().toLocaleTimeString()+'. The tab must stay open, and browser timers may be delayed.'}checkHealth()}
 checkHealth();setInterval(pingBackend,14*60*1000);
 refresh().catch(function(e){$('view').innerHTML='<div class="tile"><h2>Dashboard unavailable</h2><p>'+esc(e.message)+'</p></div>'});
 $('logout').onclick=async function(){await fetch('/api/admin/logout',{method:'POST'});location.replace('/straitgate-admin-login.html')};
