@@ -27,7 +27,7 @@ function productPage(template, product, origin) {
 }
 
 function sitemap(origin, products) {
-  const urls = [`${origin}/straitgate-home.html`,`${origin}/straitgate-catalog.html`,...products.map(p => productUrl(origin,p))];
+  const urls = [`${origin}/straitgate-home.html`,`${origin}/straitgate-catalog.html`,`${origin}/metal-doors-furniture.html`,...products.map(p => productUrl(origin,p))];
   return '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + urls.map(url => `  <url><loc>${html(url)}</loc></url>`).join('\n') + '\n</urlset>\n';
 }
 

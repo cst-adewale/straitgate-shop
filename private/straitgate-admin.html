@@ -12,7 +12,7 @@
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:#fff;color:var(--ink);font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;padding:0;-webkit-font-smoothing:antialiased;font-size:13px}
+body{margin:0;background:#fff;color:var(--ink);font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;padding:0;-webkit-font-smoothing:antialiased;font-size:13px;overflow-x:hidden}
 a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
 .page{min-height:100vh;width:100%;margin:0;background:#fff;border-radius:0;padding:clamp(20px,4.5vw,64px) clamp(20px,5.8vw,72px) clamp(24px,4vw,56px)}
@@ -46,7 +46,7 @@ input,select,textarea{width:100%;height:34px;border:1px solid #9a9a9a;border-rad
 textarea{height:70px;border-radius:14px;padding:10px 14px;resize:vertical}
 input[type=file]{padding:6px 14px;height:auto}
 .f{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.f .w{grid-column:1/-1}
-.tw{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch}
+.tw{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain}
 table{width:100%;border-collapse:collapse;font-size:12px}
 th{font-weight:400;color:var(--mute);font-size:10px;text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid #ddd;white-space:nowrap}
 td{padding:10px 10px 10px 0;border-bottom:1px solid #eee;vertical-align:middle}
@@ -95,7 +95,8 @@ td.r,th.r{text-align:right}
 @media (max-width:620px){.health-metrics{grid-template-columns:1fr 1fr}}
 @media (max-width:620px){.budget-metrics{grid-template-columns:1fr}}
 @media (max-width:620px){.page{padding:20px 14px 32px}header{align-items:flex-start}.logo small{display:block;margin:2px 0 0}.who{order:3;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}.theme-toggle{margin-left:auto}h1{font-size:clamp(40px,12vw,64px);margin:28px 0 18px}#tabs{margin-left:-14px;margin-right:-14px;padding:0 14px 8px;scrollbar-width:auto;scroll-snap-type:x proximity}#tabs .chip{scroll-snap-align:start}.tile{padding:16px}.tw table:has(thead){min-width:560px}.bar{align-items:stretch}.bar input,.bar select{width:100%;flex-basis:100%}.bar .btn{justify-content:center}.qi{grid-template-columns:minmax(0,1fr) 52px 72px 28px;gap:5px}.qi input{min-width:0;padding:0 7px}.toast{width:max-content;max-width:calc(100vw - 28px);text-align:center}}
-@media (max-width:380px){.g4{grid-template-columns:1fr}.qi{grid-template-columns:minmax(0,1fr) 46px 64px 28px}.qi input{font-size:11px}}
+@media (max-width:480px){.cv{grid-template-columns:1fr}.budget-rate{align-items:stretch}.budget-rate input{width:100%}.health-head .btn{width:100%;justify-content:center}.health-metrics{gap:8px}.health-metrics div,.budget-metrics div{padding:10px}.health-metrics b{font-size:16px}.disp{font-size:26px}.keys{gap:6px}.keys button{height:42px}.f{gap:10px}}
+@media (max-width:380px){.g4{grid-template-columns:1fr}.qi{grid-template-columns:minmax(0,1fr) 46px 64px 28px}.qi input{font-size:11px}.who{font-size:10px}.who .btn{padding:0 9px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 <link rel="stylesheet" href="/straitgate-theme.css">
@@ -244,7 +245,7 @@ function show(){var h=want||location.hash.replace('#','');cur=V[h]?h:'dashboard'
  $('tabs').innerHTML=TABS.map(function(t){return '<button type="button" class="chip" role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+t[1]+'</button>'}).join('');
  if(cur!=='health'&&cur!=='tools'&&!dataLoaded){$('view').innerHTML='<div class="tile" role="status"><h2>'+(dataIssue?'Database data unavailable':'Loading dashboard data…')+'</h2><p>'+(dataIssue?esc(dataIssue):'Connecting to Neon…')+'</p>'+(dataIssue?'<button class="btn" id="dataRetry" type="button">Retry connection</button>':'')+'</div>';return}
  $('view').innerHTML=(dataIssue&&cur!=='health'&&cur!=='tools'?'<div class="tile" role="status" style="margin-bottom:16px"><h3>Showing previously loaded data</h3><p class="note">The database is currently unavailable. Figures may be outdated; saving is paused.</p><button class="btn sm" id="dataRetry" type="button">Retry connection</button></div>':'')+V[cur]();
- if(cur==='budget')updateBudget();if(cur==='health')renderHealth();
+ if(cur==='budget')updateBudget();if(cur==='health'){renderHealth();if(!healthSamples.length)checkHealth();}
  if(cur==='quotes')qItems();if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
 function val(i){return $(i).value.trim()}
 document.addEventListener('change',function(e){if(e.target.id==='pi'){var files=Array.from(e.target.files),select=$('pm');if(files.length>5){toast('Choose at most five images');e.target.value='';files=[]}select.innerHTML=files.length?files.map(function(f,i){return '<option value="'+i+'">Image '+(i+1)+' — '+esc(f.name)+'</option>'}).join(''):'<option value="0">Image 1</option>'}});
@@ -291,13 +292,13 @@ document.addEventListener('keydown',function(e){if(cur!=='tools'||/INPUT|SELECT|
  if(/^[0-9.+%]$/.test(k)||m[k]){e.preventDefault();ck(m[k]||k)}});
 window.addEventListener('hashchange',function(){want='';show()});
 $('today').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-var healthSamples=[];
+var healthSamples=[],healthPending=false;
 var healthState={status:'Checking Neon database and server…',response:'—',database:'—',uptime:'—',ping:'Random-signal ping every 14 minutes while this admin tab stays open. It cannot prevent sleep after the tab closes.'};
 function renderHealth(){if(cur!=='health')return;$('healthStatus').textContent=healthState.status;$('healthResponse').textContent=healthState.response;$('healthDatabase').textContent=healthState.database;$('healthUptime').textContent=healthState.uptime;$('pingStatus').textContent=healthState.ping;var max=Math.max(300,...healthSamples.map(function(s){return s.ms||0}));$('healthChart').innerHTML=healthSamples.map(function(s){return '<span class="'+(s.ok?'':'bad')+'" style="height:'+Math.max(8,Math.round((s.ms||max)/max*100))+'%" title="'+(s.ok?s.ms+' ms':'Unavailable')+'"></span>'}).join('');$('healthChart').setAttribute('aria-label',healthSamples.length?healthSamples.map(function(s){return s.ok?s.ms+' milliseconds':'unavailable'}).join(', '):'No health samples yet')}
-async function checkHealth(){var started=performance.now();try{var r=await fetch('/api/admin/health',{cache:'no-store'}),data=await r.json(),ms=Math.round(performance.now()-started),ok=r.ok&&data.ok;healthSamples.push({ok:ok,ms:ms});if(healthSamples.length>12)healthSamples.shift();healthState.status=ok?'Checked '+new Date().toLocaleTimeString():'Backend or Neon database unavailable';healthState.response=ms+' ms';healthState.database=data.database?.ok?data.database.latencyMs+' ms':'Unavailable';healthState.uptime=data.server?Math.floor(data.server.uptimeSeconds/60)+' min':'—'}catch(e){healthSamples.push({ok:false,ms:0});if(healthSamples.length>12)healthSamples.shift();healthState.status='Could not reach the server';healthState.response='—';healthState.database='—';healthState.uptime='—'}renderHealth()}
+async function checkHealth(){if(healthPending)return;healthPending=true;var started=performance.now();try{var r=await fetch('/api/admin/health',{cache:'no-store'}),data=await r.json(),ms=Math.round(performance.now()-started),ok=r.ok&&data.ok;healthSamples.push({ok:ok,ms:ms});if(healthSamples.length>12)healthSamples.shift();healthState.status=ok?'Checked '+new Date().toLocaleTimeString():'Backend or Neon database unavailable';healthState.response=ms+' ms';healthState.database=data.database?.ok?data.database.latencyMs+' ms':'Unavailable';healthState.uptime=data.server?Math.floor(data.server.uptimeSeconds/60)+' min':'—'}catch(e){healthSamples.push({ok:false,ms:0});if(healthSamples.length>12)healthSamples.shift();healthState.status='Could not reach the server';healthState.response='—';healthState.database='—';healthState.uptime='—'}healthPending=false;renderHealth()}
 async function pingBackend(){try{var r=await fetch('/api/admin/ping?signal='+encodeURIComponent(crypto.randomUUID()),{cache:'no-store'});if(!r.ok)throw Error('Ping failed');healthState.ping='Last random-signal ping: '+new Date().toLocaleTimeString()+'. Next in about 14 minutes while this tab stays open.'}catch(e){healthState.ping='Ping failed at '+new Date().toLocaleTimeString()+'. The tab must stay open, and browser timers may be delayed.'}checkHealth()}
 show();
-checkHealth();setInterval(pingBackend,14*60*1000);
+setInterval(pingBackend,14*60*1000);
 refresh();
 $('logout').onclick=async function(){await fetch('/api/admin/logout',{method:'POST'});location.replace('/straitgate-admin-login.html')};
 </script>

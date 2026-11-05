@@ -1,8 +1,10 @@
 /* Shared palette from the updated UI guide. Layout remains page-owned. */
+:root{--site-font:"Batica Sans","Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif}
 :root{--surface:#fff;--field:#fff;--field-line:#9a9a9a;--line:#ddd;--body-copy:#444;--on-ink:#fff;--pill:#e8e8e8;--pill-warn:#ffe4a3;--pill-bad:#ffc9c4;--hover:#0a0a0a;--on-hover:#fff;color-scheme:light}
 :root[data-theme="dark"]{--bg:#0b0b0b;--surface:#161616;--tile:#202020;--ink:#f2f2f2;--mute:#a7a7a7;--line:#383838;--field:#1d1d1d;--field-line:#666;--body-copy:#c4c4c4;--on-ink:#0a0a0a;--pill:#2c2c2c;--pill-warn:#4a3d12;--pill-bad:#4d1f1b;--hover:#f2f2f2;--on-hover:#0a0a0a;color-scheme:dark}
 @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b0b0b;--surface:#161616;--tile:#202020;--ink:#f2f2f2;--mute:#a7a7a7;--line:#383838;--field:#1d1d1d;--field-line:#666;--body-copy:#c4c4c4;--on-ink:#0a0a0a;--pill:#2c2c2c;--pill-warn:#4a3d12;--pill-bad:#4d1f1b;--hover:#f2f2f2;--on-hover:#0a0a0a;color-scheme:dark}}
 body,.page{background:var(--surface);color:var(--ink)}
+body,button,input,select,textarea{font-family:var(--site-font)}
 button,input,select,textarea{color:var(--ink)}
 input,select,textarea,.sign input{background:var(--field);border-color:var(--field-line);color:var(--ink)}
 .btn,.chip,.menu-toggle,.thumbs button,.keys button{background:var(--surface);color:var(--ink)}

@@ -4,6 +4,8 @@ services:
     runtime: node
     buildCommand: npm ci
     startCommand: node server.js
+    numInstances: 2
+    healthCheckPath: /health
     envVars:
       - key: NEON_AUTH_BASE_URL
         value: https://ep-old-sea-zaqa3i6p.neonauth.c-2.eu-west-2.aws.neon.tech/neondb/auth

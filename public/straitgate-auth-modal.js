@@ -17,7 +17,7 @@
   var DARK = '--bg:#161616;--ink:#f2f2f2;--mute:#8f8f8f;--line:#2f2f2f;--field:#1d1d1d;--field-line:#4a4a4a;--lime:#ccf97c;--on-lime:#0a0a0a;--hover:#f2f2f2;--on-hover:#0a0a0a;--red:#ff5a4d;--overlay:rgba(0,0,0,.8);color-scheme:dark;';
 
   var CSS =
-    ':host{' + LIGHT + '--radius:22px;font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;display:contents}' +
+    ':host{' + LIGHT + '--radius:22px;font-family:"Batica Sans","Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;display:contents}' +
     ':host([theme=dark]){' + DARK + '}' +
     '@media (prefers-color-scheme:dark){:host(:not([theme=light])){' + DARK + '}}' +
     '*,*::before,*::after{box-sizing:border-box}' +

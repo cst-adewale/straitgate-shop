@@ -1,4 +1,5 @@
 const http = require('node:http');
+const crypto = require('node:crypto');
 const fs = require('node:fs');
 const path = require('node:path');
 const localEnv = path.join(__dirname, '.env.local');
@@ -25,11 +26,24 @@ const customerAttempts = new Map();
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8'};
 const port = Number(process.env.PORT) || 3000;
 function send(res, status, body, headers = {}) {
-  res.writeHead(status, {'Cache-Control':'no-store','X-Content-Type-Options':'nosniff',...headers});
+  const securityHeaders = {
+    'Cache-Control':'no-store',
+    'X-Content-Type-Options':'nosniff',
+    'X-Frame-Options':'DENY',
+    'Referrer-Policy':'strict-origin-when-cross-origin',
+    'Permissions-Policy':'camera=(), microphone=(), geolocation=(), payment=()',
+    'Cross-Origin-Opener-Policy':'same-origin'
+  };
+  if (process.env.RENDER) securityHeaders['Strict-Transport-Security']='max-age=31536000; includeSubDomains';
+  res.writeHead(status, {...securityHeaders,...headers});
   res.end(body);
 }
 function json(res, status, body, headers = {}) {
   send(res, status, JSON.stringify(body), {'Content-Type':'application/json',...headers});
+}
+function clientIp(req) {
+  const forwarded = process.env.RENDER ? req.headers['x-forwarded-for'] : '';
+  return (typeof forwarded === 'string' && forwarded ? forwarded.split(',')[0].trim() : req.socket.remoteAddress) || 'unknown';
 }
 function serveFile(res, file) {
   fs.readFile(file, (err, body) => {
@@ -110,10 +124,16 @@ async function handleAdminData(req, res, pathname) {
     return json(res, 503, {error:'Database operation failed.'});
   }
 }
-http.createServer(async (req, res) => {
+const server = http.createServer(async (req, res) => {
+  const requestId = crypto.randomUUID();
+  res.setHeader('X-Request-ID', requestId);
   let pathname;
   try { pathname = new URL(req.url, 'http://localhost').pathname; }
   catch { return send(res, 400, 'Bad request'); }
+  if (pathname === '/health') {
+    if (req.method !== 'GET') return json(res, 405, {error:'Method not allowed.'});
+    return json(res, 200, {ok:true});
+  }
   if (pathname === '/api/admin/health' || pathname === '/api/admin/ping') {
     if (req.method !== 'GET') return json(res, 405, {error:'Method not allowed.'});
     try {
@@ -162,7 +182,7 @@ http.createServer(async (req, res) => {
         return json(res,200,{ok:true});
       } catch (error) { return json(res,error.code==='23505'?409:503,{error:error.code==='23505'?'Username already taken.':'Could not save profile.'}); }
     }
-    const ip=req.socket.remoteAddress || 'unknown';
+    const ip=clientIp(req);
     const attempts=customerAttempts.get(ip) || {count:0,until:0};
     if (attempts.until>Date.now()) return json(res,429,{error:'Too many attempts. Try again later.'});
     if (pathname === '/api/account/register') {
@@ -199,7 +219,7 @@ http.createServer(async (req, res) => {
     catch (error) { console.error('Shop products failed:', error.code || error.message); return json(res, 503, {error:'Products are temporarily unavailable.'}); }
   }
   if (req.method === 'POST' && pathname === '/api/admin/login') {
-    const ip = req.socket.remoteAddress || 'unknown';
+    const ip = clientIp(req);
     const attempt = failed.get(ip) || {count:0,until:0};
     if (attempt.until > Date.now()) return json(res, 429, {error:'Too many attempts. Try again later.'});
     let input;
@@ -318,4 +338,10 @@ http.createServer(async (req, res) => {
   const file = path.resolve(root, '.' + pathname);
   if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return send(res, 404, 'Not found');
   serveFile(res, file);
-}).listen(port, () => console.log(`Straitgate listening on ${port}`));
+});
+server.requestTimeout = 30000;
+server.headersTimeout = 10000;
+server.keepAliveTimeout = 5000;
+server.maxHeadersCount = 100;
+server.maxRequestsPerSocket = 1000;
+server.listen(port, () => console.log(`Straitgate listening on ${port}`));
