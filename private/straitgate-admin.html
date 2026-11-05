@@ -34,7 +34,7 @@ h3{font-weight:500;font-size:13px;margin:0 0 10px}
 .g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
 .g21{grid-template-columns:1.6fr 1fr}.gf{grid-template-columns:1fr 1.15fr}
 .tile{background:var(--tile);border-radius:12px;padding:clamp(14px,1.8vw,22px);min-width:0}
-.kpi .v{font-size:clamp(28px,3.4vw,44px);letter-spacing:-.05em;line-height:1;margin-top:10px}
+.kpi .v{font-size:clamp(28px,3.4vw,44px);letter-spacing:-.05em;line-height:1;margin-top:10px;overflow-wrap:anywhere}
 .kpi .l{font-size:11px;color:var(--mute)}
 .kpi .d{font-size:10px;margin-top:8px}.up{color:#2e7d12}.dn{color:var(--red)}
 .note{font-size:10px;color:var(--mute);margin:10px 0 0}
@@ -53,6 +53,22 @@ td{padding:10px 10px 10px 0;border-bottom:1px solid #eee;vertical-align:middle}
 td.r,th.r{text-align:right}
 .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:10px;background:#e8e8e8}
 .pill.ok{background:var(--lime)}.pill.warn{background:#ffe4a3}.pill.bad{background:#ffc9c4}
+.health-pill{border:1px solid var(--ink);border-radius:999px;background:var(--tile);padding:7px 12px;font-size:11px;white-space:nowrap}
+.health-pill[data-state=ok]{background:var(--lime);color:#0a0a0a}.health-pill[data-state=bad]{background:var(--pill-bad);color:var(--ink)}
+.budget-pill{border:1px solid var(--ink);border-radius:999px;background:var(--lime);color:#0a0a0a;padding:7px 12px;font-size:11px;white-space:nowrap}
+.budget-panel{margin:0 0 clamp(18px,2.6vw,30px)}
+.budget-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+.budget-metrics div{background:var(--tile);border-radius:10px;padding:12px}
+.budget-metrics b{display:block;font-size:clamp(17px,2.5vw,25px);font-weight:500;margin-top:4px;overflow-wrap:anywhere}
+.budget-rate{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}.budget-rate label{margin:0}.budget-rate input{width:100px}
+.health-panel{margin:0 0 clamp(18px,2.6vw,30px)}
+.health-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.health-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+.health-metrics div{background:var(--tile);border-radius:10px;padding:12px}
+.health-metrics b{display:block;font-size:19px;font-weight:500;margin-top:4px}
+.health-chart{display:flex;align-items:end;gap:5px;height:75px;border-bottom:1px solid var(--mute);padding-top:8px}
+.health-chart span{flex:1;min-width:5px;border-radius:3px 3px 0 0;background:var(--lime)}
+.health-chart span.bad{background:var(--red)}
 .thumb{width:44px;height:44px;border-radius:8px;background:#e9e9e9;object-fit:cover;display:grid;place-items:center;font-size:14px;color:#888;overflow:hidden}
 .thumb img{width:100%;height:100%;object-fit:cover}
 .pr{display:flex;align-items:center;gap:12px}
@@ -79,6 +95,8 @@ td.r,th.r{text-align:right}
 @media print{body{background:#fff;padding:0}.page,.toast{display:none!important}#pa{display:block;padding:24px;font-size:12px}#pa table{font-size:12px}}
 @media (max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g21,.gf{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
 @media (max-width:620px){.g2,.g3,.f{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}.qi{grid-template-columns:1fr 56px 80px 28px}.sp{margin-left:0}.bar input,.bar select{min-width:0;flex:1}}
+@media (max-width:620px){.health-metrics{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.budget-metrics{grid-template-columns:1fr}}
 @media (max-width:620px){.page{padding:20px 14px 32px}header{align-items:flex-start}.logo small{display:block;margin:2px 0 0}.who{order:3;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}.theme-toggle{margin-left:auto}h1{font-size:clamp(40px,12vw,64px);margin:28px 0 18px}#tabs{margin-left:-14px;margin-right:-14px;padding:0 14px 8px;scrollbar-width:auto;scroll-snap-type:x proximity}#tabs .chip{scroll-snap-align:start}.tile{padding:16px}.tw table:has(thead){min-width:560px}.bar{align-items:stretch}.bar input,.bar select{width:100%;flex-basis:100%}.bar .btn{justify-content:center}.qi{grid-template-columns:minmax(0,1fr) 52px 72px 28px;gap:5px}.qi input{min-width:0;padding:0 7px}.toast{width:max-content;max-width:calc(100vw - 28px);text-align:center}}
 @media (max-width:380px){.g4{grid-template-columns:1fr}.qi{grid-template-columns:minmax(0,1fr) 46px 64px 28px}.qi input{font-size:11px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
@@ -88,9 +106,22 @@ td.r,th.r{text-align:right}
 </head>
 <body>
 <div class="page">
-<header><span class="logo">Straitgate<small>Admin</small></span><span class="who">Admin dashboard &middot; <span id="today"></span> &middot; <button id="logout" class="btn sm" type="button">Sign out</button></span><button class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark mode">☾</button></header>
+<header><span class="logo">Straitgate<small>Admin</small></span><span class="who">Admin dashboard &middot; <span id="today"></span> &middot; <button id="logout" class="btn sm" type="button">Sign out</button></span><button id="budgetPill" class="budget-pill" type="button" aria-controls="budgetPanel" aria-expanded="false">Budget · ₦0</button><button id="healthPill" class="health-pill" type="button" data-state="checking" aria-controls="healthPanel" aria-expanded="true">● Checking backend</button><button class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark mode">☾</button></header>
 <h1 id="ttl">Dashboard</h1>
 <div class="tabs" role="tablist" id="tabs"></div>
+<section class="tile budget-panel" id="budgetPanel" aria-label="Sales-based budget calculator" hidden>
+ <h2>Sales-based budget</h2>
+ <p class="note">Uses accepted quotations as an estimate of sales. This is not confirmed cash received or profit.</p>
+ <div class="budget-rate"><label for="budgetPercent">Allocate from net quotation value</label><input id="budgetPercent" type="number" min="0" max="100" step="0.1" value="20"><span>%</span></div>
+ <div class="budget-metrics"><div><span class="note">Accepted quotations</span><b id="budgetSales">₦0</b></div><div><span class="note">Budget allocation</span><b id="budgetAmount">₦0</b></div><div><span class="note">Accepted quotes counted</span><b id="budgetCount">0</b></div></div>
+ <p class="note">Budget = accepted quotation totals after discounts × allocation percentage. The percentage is a calculator setting for this open tab.</p>
+</section>
+<section class="tile health-panel" id="healthPanel" aria-label="Backend health">
+ <div class="health-head"><div><h2 style="margin-bottom:4px">Backend health</h2><span class="note" id="healthStatus">Checking Neon database and server…</span></div><button class="btn sm" id="healthRefresh" type="button">Check now</button></div>
+ <div class="health-metrics"><div><span class="note">Response time</span><b id="healthResponse">—</b></div><div><span class="note">Neon database</span><b id="healthDatabase">—</b></div><div><span class="note">Server uptime</span><b id="healthUptime">—</b></div></div>
+ <div class="note">Response time history (this open tab)</div><div class="health-chart" id="healthChart" role="img" aria-label="No health samples yet"></div>
+ <p class="note" id="pingStatus">Random-signal ping every 14 minutes while this admin tab stays open. It cannot prevent sleep after the tab closes.</p>
+</section>
 <div id="view"></div>
 <footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px;border-top:1px solid #ddd"><a href="straitgate-home.html">Home</a> &nbsp;·&nbsp; <a href="straitgate-catalog.html">Catalog</a></footer>
 </div>
@@ -110,6 +141,7 @@ function gbp(n){return '₦'+(Math.round(n*100)/100).toLocaleString('en-NG',{min
 function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},2200)}
 function nid(a){return a.reduce(function(m,x){return Math.max(m,x.id)},0)+1}
 function totals(q){var sub=q.items.reduce(function(s,i){return s+i.q*i.p},0),d=sub*(q.disc||0)/100,net=sub-d+(+q.inst||0);return{sub:sub,d:d,inst:+q.inst||0,net:net,total:net}}
+function updateBudget(){var accepted=DB.quotes.filter(function(q){return q.status==='Accepted'}),sales=accepted.reduce(function(sum,q){return sum+totals(q).total},0),rate=Number($('budgetPercent').value);if(!Number.isFinite(rate)||rate<0||rate>100)return;$('budgetSales').textContent=gbp(sales);$('budgetAmount').textContent=gbp(sales*rate/100);$('budgetCount').textContent=accepted.length;$('budgetPill').textContent='Budget · '+gbp(sales*rate/100)}
 function art(t,c){var s='',i;if(t==='Security door')s='<rect x="56" y="14" width="128" height="176" rx="6" fill="#222"/><rect x="64" y="22" width="112" height="168" fill="'+c+'"/><rect x="146" y="92" width="10" height="26" rx="5" fill="#ddd"/>';else if(t==='Garden gate'){s='<path d="M50 192V84Q120 14 190 84V192" fill="none" stroke="'+c+'" stroke-width="10"/>';for(i=0;i<7;i++)s+='<rect x="'+(66+i*18)+'" y="90" width="6" height="100" fill="'+c+'"/>'}else if(t==='Driveway gate'){s='<rect x="14" y="40" width="10" height="150" fill="#222"/><rect x="34" y="52" width="160" height="14" fill="'+c+'"/><rect x="34" y="176" width="160" height="14" fill="'+c+'"/>';for(i=0;i<9;i++)s+='<rect x="'+(40+i*17)+'" y="66" width="6" height="110" fill="'+c+'"/>'}else s='<circle cx="120" cy="100" r="50" fill="'+c+'"/>';return '<svg viewBox="0 0 240 200" class="ch">'+s+'</svg>'}
 
 /* charts */
@@ -127,13 +159,16 @@ function line(l,v){var m=Math.max.apply(null,v)*1.15,w=400,h=170,p=v.map(functio
 
 /* views */
 var V={};
+function inventoryRows(){return DB.inv.concat(DB.products.map(function(p){return {id:p.id,product:true,name:p.name,type:'Product',sku:'',qty:p.stockQuantity,unit:'units',min:2,loc:'Catalog',cost:0}}))}
+function isLowStock(i){return i.qty!==null&&i.qty<=Math.max(i.min,2)}
 V.dashboard=function(){
- var qs=DB.quotes,open=qs.filter(function(q){return q.status!=='Accepted'&&q.status!=='Declined'}).length,low=DB.inv.filter(function(i){return i.qty<=i.min}).length,
- val=qs.reduce(function(s,q){return q.status==='Accepted'?s+totals(q).total:s},0),
+ var qs=DB.quotes,inventory=inventoryRows(),low=inventory.filter(isLowStock).length,
+ revenue=qs.reduce(function(s,q){if(q.status!=='Accepted')return s;var t=totals(q);s.gross+=t.sub+t.inst;s.net+=t.total;return s},{gross:0,net:0}),
  st=['Draft','Sent','Accepted','Declined'],stc=['#8a8a8a','#f5c20f','#ccf97c','#e5271d'];
  return '<div class="grid g4">'+
- [['Products',DB.products.length,'In database',1],['Accepted quotations',gbp(val),qs.filter(function(q){return q.status==='Accepted'}).length+' accepted',1],['Open quotations',open,'Draft or sent',1],['Low-stock items',low,low?'Needs restocking':'All stocked',!low]].map(function(k){return '<div class="tile kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="d '+(k[3]?'up':'dn')+'">'+k[2]+'</div></div>'}).join('')+'</div>'+
- '<div class="grid g2" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Quotation pipeline</h3>'+donut(st.map(function(s,i){return [s,qs.filter(function(q){return q.status===s}).length,stc[i]]}))+'</div><div class="tile"><h3>Inventory</h3><p>'+DB.inv.length+' items tracked</p><p>'+gbp(DB.inv.reduce(function(s,i){return s+i.qty*i.cost},0))+' stock value at cost</p></div></div>'+
+ [['Products',DB.products.length,'In database',1],['Total revenue',gbp(revenue.gross),'Accepted quotes · before discounts',1],['Net revenue',gbp(revenue.net),'Accepted quotes · after discounts',1],['Low-stock items',low,low?'Needs restocking':'All stocked',!low]].map(function(k){return '<div class="tile kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="d '+(k[3]?'up':'dn')+'">'+k[2]+'</div></div>'}).join('')+'</div>'+
+ '<p class="note">Revenue figures are estimates from accepted quotations, not confirmed payments. Net revenue excludes expenses and is not profit.</p>'+
+ '<div class="grid g2" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Quotation pipeline</h3>'+donut(st.map(function(s,i){return [s,qs.filter(function(q){return q.status===s}).length,stc[i]]}))+'</div><div class="tile"><h3>Inventory</h3><p>'+inventory.length+' items tracked (including products)</p><p>'+gbp(DB.inv.reduce(function(s,i){return s+i.qty*i.cost},0))+' stock value at cost for items with recorded costs</p></div></div>'+
  '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h3>Recent quotations</h3>'+quoteTable(qs.slice(-4).reverse(),true)+'</div>'};
 
 V.products=function(){
@@ -143,12 +178,14 @@ V.products=function(){
  '<div><label for="pk">Colour</label><select id="pk">'+Object.keys(COLS).map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
  '<div><label for="po">Operation</label><select id="po"><option value="">Not specified</option><option>Pivot</option><option>Hinged</option><option>Sliding</option><option>Automated</option></select></div>'+
  '<div><label for="pp">Price (₦)</label><input id="pp" type="number" min="0" step="0.01" placeholder="0.00"></div>'+
+ '<div><label for="ps">Units in stock</label><input id="ps" type="number" min="0" step="1" placeholder="0" required></div>'+
  '<div class="w"><label for="pd">Short description</label><textarea id="pd" placeholder="Shown under the product name in the catalog"></textarea></div>'+
- '<div class="w"><label for="pi">Product image</label><input id="pi" type="file" accept="image/*"></div></div>'+
+ '<div class="w"><label for="pi">Product images (up to 5 PNG or JPG)</label><input id="pi" type="file" accept="image/png,image/jpeg" multiple><small>Images are resized and saved as JPEG.</small></div>'+
+ '<div class="w"><label for="pm">Main image</label><select id="pm"><option value="0">Image 1</option></select></div></div>'+
  '<div class="bar" style="margin:14px 0 0"><button class="btn l" id="addp">Save product</button><button class="btn" id="expp">Export products JSON</button></div>'+
  '<textarea id="exo" style="display:none;margin-top:12px;height:120px" readonly aria-label="Catalog JSON"></textarea></div>'+
- '<div class="tile"><h2>Catalog ('+DB.products.length+')</h2><div class="tw"><table><thead><tr><th>Product</th><th>Category</th><th class="r">Price</th><th></th></tr></thead><tbody>'+
- DB.products.map(function(p){return '<tr><td><div class="pr"><div class="thumb">'+(p.img?'<img alt="" src="'+p.img+'">':esc(p.name[0]))+'</div><div><b style="font-weight:500">'+esc(p.name)+'</b><div style="font-size:10px;color:var(--mute)">'+esc(p.color)+' &middot; '+esc(p.desc)+'</div></div></div></td><td>'+esc(p.cat)+'</td><td class="r">'+gbp(p.price)+'</td><td class="r"><button class="btn sm x" data-del="p:'+p.id+'">Remove</button></td></tr>'}).join('')+'</tbody></table></div></div></div>'};
+ '<div class="tile"><h2>Catalog ('+DB.products.length+')</h2><div class="tw"><table><thead><tr><th>Product</th><th>Category</th><th class="r">Price</th><th>Stock</th><th></th></tr></thead><tbody>'+
+ DB.products.map(function(p){return '<tr><td><div class="pr"><div class="thumb">'+(p.img?'<img alt="" src="'+p.img+'">':esc(p.name[0]))+'</div><div><b style="font-weight:500">'+esc(p.name)+'</b><div style="font-size:10px;color:var(--mute)">'+esc(p.color)+' &middot; '+esc(p.desc)+'</div></div></div></td><td>'+esc(p.cat)+'</td><td class="r">'+gbp(p.price)+'</td><td><div class="bar"><input id="stock-'+p.id+'" type="number" min="0" step="1" value="'+(p.stockQuantity===null?'':p.stockQuantity)+'" placeholder="Not set" aria-label="Units in stock for '+esc(p.name)+'" style="width:78px"><button class="btn sm" data-stock="'+p.id+'">Save</button></div></td><td class="r">'+(p.images||[]).map(function(src,i){return '<button class="btn sm" data-main="'+p.id+':'+i+'" aria-label="Set image '+(i+1)+' as main" title="Set as main image '+(i+1)+'"><img src="'+src+'" alt="" style="width:36px;height:36px;object-fit:cover;vertical-align:middle">'+(i===p.mainImageIndex?' Main':'')+'</button>'}).join('')+'<button class="btn sm x" data-del="p:'+p.id+'">Remove</button></td></tr>'}).join('')+'</tbody></table></div></div></div>'};
 
 function quoteTable(a,ro){if(!a.length)return '<div class="empty">No quotations yet.</div>';
  return '<div class="tw"><table><thead><tr><th>No.</th><th>Customer</th><th>Date</th><th class="r">Total</th><th>Status</th>'+(ro?'':'<th></th>')+'</tr></thead><tbody>'+a.map(function(q){var c={Accepted:'ok',Sent:'warn',Declined:'bad'}[q.status]||'';
@@ -174,16 +211,16 @@ function qHtml(q){var t=totals(q);return '<h2 style="font-size:28px;margin:0">St
 
 var IF='All',IS='';
 V.inventory=function(){
- var list=DB.inv.filter(function(i){return (IF==='All'||i.type===IF)&&(!IS||(i.name+i.sku+i.loc).toLowerCase().indexOf(IS.toLowerCase())>-1)}),
+ var inventory=inventoryRows(),list=inventory.filter(function(i){return (IF==='All'||i.type===IF)&&(!IS||(i.name+i.sku+i.loc).toLowerCase().indexOf(IS.toLowerCase())>-1)}),
  val=DB.inv.reduce(function(s,i){return s+i.qty*i.cost},0);
- return '<div class="grid g3" style="margin-bottom:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Items tracked</div><div class="v">'+DB.inv.length+'</div></div><div class="tile kpi"><div class="l">Stock value (at cost)</div><div class="v">'+gbp(val)+'</div></div><div class="tile kpi"><div class="l">Low stock</div><div class="v">'+DB.inv.filter(function(i){return i.qty<=i.min}).length+'</div></div></div>'+
+ return '<div class="grid g3" style="margin-bottom:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Items tracked</div><div class="v">'+inventory.length+'</div></div><div class="tile kpi"><div class="l">Stock value (at cost)</div><div class="v">'+gbp(val)+'</div><div class="d">Excludes products without recorded cost</div></div><div class="tile kpi"><div class="l">Low stock</div><div class="v">'+inventory.filter(isLowStock).length+'</div></div></div>'+
  '<div class="grid gf"><div class="tile"><h2>Add inventory</h2><div class="f"><div class="w"><label for="in">Item name</label><input id="in"></div>'+
  '<div><label for="it">Type</label><select id="it">'+ITYPES.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></div><div><label for="is">SKU</label><input id="is"></div>'+
  '<div><label for="iq">Quantity</label><input id="iq" type="number" min="0" value="1"></div><div><label for="iu">Unit</label><input id="iu" value="pcs"></div>'+
  '<div><label for="im">Reorder level</label><input id="im" type="number" min="0" value="1"></div><div><label for="ic">Unit cost (₦)</label><input id="ic" type="number" min="0" step="0.01" value="0"></div>'+
  '<div class="w"><label for="il">Location</label><input id="il" placeholder="Workshop, van, warehouse..."></div></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="iadd">Add item</button></div></div>'+
  '<div class="tile"><div class="bar"><div class="tabs" style="margin:0">'+['All'].concat(ITYPES).map(function(t){return '<button class="chip" data-if="'+t+'" aria-pressed="'+(IF===t)+'">'+t+'</button>'}).join('')+'</div><input class="sp" id="isr" type="search" placeholder="Search..." value="'+esc(IS)+'" aria-label="Search inventory"></div>'+
- (list.length?'<div class="tw"><table><thead><tr><th>Item</th><th>Type</th><th>Location</th><th>Stock</th><th></th></tr></thead><tbody>'+list.map(function(i){var lo=i.qty<=i.min;return '<tr><td><b style="font-weight:500">'+esc(i.name)+'</b><div style="font-size:10px;color:var(--mute)">'+esc(i.sku)+' &middot; '+gbp(i.cost)+'</div></td><td>'+i.type+'</td><td>'+esc(i.loc)+'</td><td><span class="pill '+(lo?'bad':'ok')+'">'+i.qty+' '+esc(i.unit)+'</span></td><td class="r" style="white-space:nowrap"><button class="btn sm" data-adj="'+i.id+':-1" aria-label="Decrease">&minus;</button> <button class="btn sm" data-adj="'+i.id+':1" aria-label="Increase">+</button> <button class="btn sm x" data-del="i:'+i.id+'">Remove</button></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Nothing matches.</div>')+'</div></div>'};
+ (list.length?'<div class="tw"><table><thead><tr><th>Item</th><th>Type</th><th>Location</th><th>Stock</th><th></th></tr></thead><tbody>'+list.map(function(i){var lo=isLowStock(i);return '<tr><td><b style="font-weight:500">'+esc(i.name)+'</b><div style="font-size:10px;color:var(--mute)">'+(i.product?'Shop product':esc(i.sku)+' &middot; '+gbp(i.cost))+'</div></td><td>'+esc(i.type)+'</td><td>'+esc(i.loc)+'</td><td><span class="pill '+(lo?'bad':i.qty===null?'':'ok')+'">'+(i.qty===null?'Not set':i.qty+' '+esc(i.unit))+'</span></td><td class="r" style="white-space:nowrap">'+(i.product?'<button class="btn sm" data-tab="products">Manage stock</button>':'<button class="btn sm" data-adj="'+i.id+':-1" aria-label="Decrease">&minus;</button> <button class="btn sm" data-adj="'+i.id+':1" aria-label="Increase">+</button> <button class="btn sm x" data-del="i:'+i.id+'">Remove</button>')+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">Nothing matches.</div>')+'</div></div>'};
 
 var DU={mm:.001,cm:.01,m:1,km:1000,in:.0254,ft:.3048},WU={kg:1,lb:.45359237,g:.001,oz:.028349523125};
 function opts(o,s){return Object.keys(o).map(function(k){return '<option'+(k===s?' selected':'')+'>'+k+'</option>'}).join('')}
@@ -218,21 +255,28 @@ function show(){var h=want||location.hash.replace('#','');cur=V[h]?h:'dashboard'
  $('ttl').textContent={dashboard:'Dashboard',products:'Products',quotes:'Quotations',inventory:'Inventory',tools:'Tools'}[cur];
  $('tabs').innerHTML=TABS.map(function(t){return '<button type="button" class="chip" role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+t[1]+'</button>'}).join('');
  $('view').innerHTML=V[cur]();
+ updateBudget();
  if(cur==='quotes')qItems();if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
 function val(i){return $(i).value.trim()}
-document.addEventListener('click',function(e){var b=e.target.closest('button,[data-k]');if(!b)return;var d=b.dataset;
+document.addEventListener('change',function(e){if(e.target.id==='pi'){var files=Array.from(e.target.files),select=$('pm');if(files.length>5){toast('Choose at most five images');e.target.value='';files=[]}select.innerHTML=files.length?files.map(function(f,i){return '<option value="'+i+'">Image '+(i+1)+' — '+esc(f.name)+'</option>'}).join(''):'<option value="0">Image 1</option>'}});
+document.getElementById('budgetPill').addEventListener('click',function(){var panel=$('budgetPanel');panel.hidden=!panel.hidden;this.setAttribute('aria-expanded',String(!panel.hidden))});
+document.getElementById('budgetPercent').addEventListener('input',function(){var rate=Number(this.value);if(this.value!==''&&Number.isFinite(rate)&&rate>=0&&rate<=100)updateBudget()});
+document.addEventListener('click',async function(e){var b=e.target.closest('button,[data-k]');if(!b)return;var d=b.dataset;
  if(d.tab){e.preventDefault();want=d.tab;show();return}
  if(d.k){ck(d.k);return}
  if(d.if){IF=d.if;show();return}
  if(d.del){var p=d.del.split(':'),map={p:'products',q:'quotes',i:'inventory'};if(confirm('Remove this item?'))change(map[p[0]],'remove',{id:+p[1]});return}
+ if(d.main){var parts=d.main.split(':');change('products','mainImage',{id:+parts[0],index:+parts[1]});return}
+ if(d.stock){var stockValue=$('stock-'+d.stock).value;if(!/^\d+$/.test(stockValue)){toast('Enter a whole-number stock quantity');return}change('products','setStock',{id:+d.stock,stockQuantity:+stockValue}).then(function(ok){if(ok)toast('Stock updated')});return}
  if(d.adj){var a=d.adj.split(':');change('inventory','adjust',{id:+a[0],delta:+a[1]});return}
  if(d.print){var q=DB.quotes.filter(function(x){return x.id==d.print})[0];$('pa').innerHTML=qHtml(q);try{window.print()}catch(er){toast('Printing is blocked here. Use Copy as text.')}return}
  if(d.qrm){QI.splice(+d.qrm,1);if(!QI.length)QI.push({d:'',q:1,p:0});qItems();return}
  var id=b.id;
- if(id==='addp'){var n2=val('pn'),pr=parseFloat($('pp').value);if(!n2||isNaN(pr)){toast('Add a name and a price');return}
-  var f=$('pi').files[0],add=async function(img){if(await change('products','add',{name:n2,cat:$('pc').value,color:$('pk').value,operation:$('po').value,price:pr,desc:val('pd'),img:img||''}))toast(n2+' added to shop')};
-  if(!f){add('');return}
-  var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,480/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=im.width*s;cv.height=im.height*s;cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);add(cv.toDataURL('image/jpeg',.8))};im.onerror=function(){add('')};im.src=rd.result};rd.readAsDataURL(f);return}
+ if(id==='addp'){var n2=val('pn'),pr=parseFloat($('pp').value),stockValue=$('ps').value;if(!n2||isNaN(pr)||!/^\d+$/.test(stockValue)){toast('Add a name, price and whole-number stock quantity');return}
+  var files=Array.from($('pi').files),mainIndex=+$('pm').value;
+  if(files.length>5||files.some(function(f){return !['image/png','image/jpeg'].includes(f.type)})){toast('Choose up to five PNG or JPG images');return}
+  function encode(f){return new Promise(function(resolve,reject){var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,480/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=im.width*s;cv.height=im.height*s;var cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(im,0,0,cv.width,cv.height);resolve(cv.toDataURL('image/jpeg',.8))};im.onerror=reject;im.src=rd.result};rd.onerror=reject;rd.readAsDataURL(f)})}
+  try{var images=await Promise.all(files.map(encode));if(await change('products','add',{name:n2,cat:$('pc').value,color:$('pk').value,operation:$('po').value,price:pr,stockQuantity:+stockValue,desc:val('pd'),images:images,mainImageIndex:mainIndex}))toast(n2+' added to shop')}catch(er){toast('Could not read an image. Choose another PNG or JPG.')}return}
  if(id==='expp'){var o=$('exo');o.style.display='block';o.value=JSON.stringify(DB.products.map(function(p){return{name:p.name,category:p.cat,colour:p.color,price:p.price,description:p.desc,image:p.img?'(uploaded)':''}}),null,2);o.select();try{document.execCommand('copy');toast('Copied to clipboard')}catch(er){}return}
  if(id==='qadd'){QI.push({d:'',q:1,p:0});qItems();return}
  if(id==='qsave'||id==='qcopy'){var dr=qDraft();if(!val('qc')||!dr.items.length){toast('Add a customer and at least one line');return}
@@ -257,6 +301,13 @@ document.addEventListener('keydown',function(e){if(cur!=='tools'||/INPUT|SELECT|
  if(/^[0-9.+%]$/.test(k)||m[k]){e.preventDefault();ck(m[k]||k)}});
 window.addEventListener('hashchange',function(){want='';show()});
 $('today').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+var healthSamples=[];
+function healthChart(){var max=Math.max(300,...healthSamples.map(function(s){return s.ms||0}));$('healthChart').innerHTML=healthSamples.map(function(s){return '<span class="'+(s.ok?'':'bad')+'" style="height:'+Math.max(8,Math.round((s.ms||max)/max*100))+'%" title="'+(s.ok?s.ms+' ms':'Unavailable')+'"></span>'}).join('');$('healthChart').setAttribute('aria-label',healthSamples.length?healthSamples.map(function(s){return s.ok?s.ms+' milliseconds':'unavailable'}).join(', '):'No health samples yet')}
+async function checkHealth(){var started=performance.now(),pill=$('healthPill');try{var r=await fetch('/api/admin/health',{cache:'no-store'}),data=await r.json(),ms=Math.round(performance.now()-started),ok=r.ok&&data.ok;healthSamples.push({ok:ok,ms:ms});if(healthSamples.length>12)healthSamples.shift();pill.dataset.state=ok?'ok':'bad';pill.textContent=ok?'● Backend healthy':'● Backend needs attention';$('healthStatus').textContent=ok?'Checked '+new Date().toLocaleTimeString():'Backend or Neon database unavailable';$('healthResponse').textContent=ms+' ms';$('healthDatabase').textContent=data.database?.ok?data.database.latencyMs+' ms':'Unavailable';$('healthUptime').textContent=data.server?Math.floor(data.server.uptimeSeconds/60)+' min':'—';healthChart()}catch(e){healthSamples.push({ok:false,ms:0});if(healthSamples.length>12)healthSamples.shift();pill.dataset.state='bad';pill.textContent='● Backend unavailable';$('healthStatus').textContent='Could not reach the server';$('healthResponse').textContent='—';$('healthDatabase').textContent='—';$('healthUptime').textContent='—';healthChart()}}
+async function pingBackend(){try{var r=await fetch('/api/admin/ping?signal='+encodeURIComponent(crypto.randomUUID()),{cache:'no-store'});if(!r.ok)throw Error('Ping failed');$('pingStatus').textContent='Last random-signal ping: '+new Date().toLocaleTimeString()+'. Next in about 14 minutes while this tab stays open.'}catch(e){$('pingStatus').textContent='Ping failed at '+new Date().toLocaleTimeString()+'. The tab must stay open, and browser timers may be delayed.'}checkHealth()}
+$('healthPill').onclick=function(){var panel=$('healthPanel'),open=panel.hidden;panel.hidden=!open;this.setAttribute('aria-expanded',String(open))};
+$('healthRefresh').onclick=checkHealth;
+checkHealth();setInterval(pingBackend,14*60*1000);
 refresh().catch(function(e){$('view').innerHTML='<div class="tile"><h2>Dashboard unavailable</h2><p>'+esc(e.message)+'</p></div>'});
 $('logout').onclick=async function(){await fetch('/api/admin/logout',{method:'POST'});location.replace('/straitgate-admin-login.html')};
 </script>

@@ -66,7 +66,7 @@ async function request(url, options = {}) {
       try { await request('/'); ready = true; break; } catch { await delay(100); }
     }
     assert.ok(ready, 'server did not start');
-    const pages = ['/', '/straitgate-home.html', '/straitgate-catalog.html', '/straitgate-product.html', '/straitgate-catalog-data.js', '/straitgate-product-data.js', '/straitgate-admin-login.html', '/straitgate-reset-password.html', '/straitgate-auth-modal.js', '/straitgate-theme.css', '/straitgate-theme.js', '/robots.txt', '/sitemap.xml'];
+    const pages = ['/', '/straitgate-home.html', '/straitgate-catalog.html', '/straitgate-product.html', '/straitgate-account.html', '/straitgate-account.js', '/straitgate-catalog-data.js', '/straitgate-product-data.js', '/straitgate-admin-login.html', '/straitgate-reset-password.html', '/straitgate-auth-modal.js', '/straitgate-theme.css', '/straitgate-theme.js', '/robots.txt', '/sitemap.xml'];
     for (const page of pages) {
       const res = await request(page);
       assert.equal(res.status, 200, page);
@@ -80,6 +80,11 @@ async function request(url, options = {}) {
     }
     const deniedData = await request('/api/admin/data');
     assert.equal(deniedData.status, 401);
+    assert.equal((await request('/api/account/me')).status,401);
+    assert.equal((await request('/api/account/register',{method:'POST',headers:{Origin:base,'Content-Type':'application/json'},body:JSON.stringify({email:'shopper@example.test',username:'shopper',phone:'+2348000000000',password:'a-good-password-123'})})).status,503);
+    assert.equal((await request('/api/account/login',{method:'POST',headers:{Origin:'https://wrong.example','Content-Type':'application/json'},body:'{}'})).status,403);
+    assert.equal((await request('/api/admin/health')).status, 401);
+    assert.equal((await request('/api/admin/ping?signal=123')).status, 401);
     const unavailableShop = await request('/api/products');
     assert.equal(unavailableShop.status, 503);
     const bad = await request('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:'admin@example.test', password:'wrong'})});
@@ -92,6 +97,11 @@ async function request(url, options = {}) {
     console.log('200 correct password + session cookie');
     const missingDatabase = await request('/api/admin/data', {headers:{Cookie:cookie}});
     assert.equal(missingDatabase.status, 503);
+    const health = await request('/api/admin/health', {headers:{Cookie:cookie}});
+    assert.equal(health.status, 503);
+    assert.equal((await health.json()).database.ok, false);
+    assert.equal((await request('/api/admin/ping?signal=123', {headers:{Cookie:cookie}})).status, 400);
+    assert.equal((await request('/api/admin/ping?signal=aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee', {headers:{Cookie:cookie}})).status, 200);
     const viewer = await request('/api/admin/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:'viewer@example.test', password:'local-test-password'})});
     assert.equal(viewer.status, 403);
     console.log('403 non-admin account');

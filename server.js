@@ -4,6 +4,8 @@ const path = require('node:path');
 const localEnv = path.join(__dirname, '.env.local');
 if (fs.existsSync(localEnv)) process.loadEnvFile(localEnv);
 const adminData = require('./admin-data');
+const customerData = require('./customer-data');
+const seo = require('./seo');
 
 const root = path.join(__dirname, 'public');
 const adminFile = path.join(__dirname, 'private', 'straitgate-admin.html');
@@ -19,6 +21,7 @@ if (!/^https:\/\/[^/]+$/.test(publicOrigin) && !(process.env.NODE_ENV === 'test'
 }
 const failed = new Map();
 const resetAttempts = new Map();
+const customerAttempts = new Map();
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8'};
 const port = Number(process.env.PORT) || 3000;
 function send(res, status, body, headers = {}) {
@@ -65,6 +68,22 @@ async function adminSession(header, diagnose = false) {
   }
   return data?.user?.role === 'admin' && !data.user.banned;
 }
+async function sessionUser(header) {
+  const cookie=authCookies(header);
+  if (!cookie) return null;
+  const response=await neon('/get-session',{headers:{Cookie:cookie}});
+  if (!response.ok) return null;
+  const data=await response.json();
+  return data?.user && !data.user.banned ? data.user : null;
+}
+function customerFields(input) {
+  const email=typeof input.email==='string' ? input.email.trim().toLowerCase() : '';
+  const username=typeof input.username==='string' ? input.username.trim().toLowerCase() : '';
+  const phone=typeof input.phone==='string' ? input.phone.trim().replace(/[\s()-]/g,'') : '';
+  const password=input.password;
+  if (!/^\S+@\S+\.\S+$/.test(email) || email.length>254 || !/^[a-z0-9_]{3,30}$/.test(username) || !/^\+?[0-9]{7,20}$/.test(phone) || phone.length>20 || typeof password!=='string' || password.length<12 || password.length>128) return null;
+  return {email,username,phone,password};
+}
 async function readBody(req, limit = 4096) {
   let body = '';
   for await (const chunk of req) {
@@ -81,7 +100,7 @@ async function handleAdminData(req, res, pathname) {
     if (req.method !== 'POST' || pathname !== '/api/admin/data') return json(res, 405, {error:'Method not allowed.'});
     if (req.headers.origin !== publicOrigin) return json(res, 403, {error:'Request origin not allowed.'});
     let input;
-    try { input = JSON.parse(await readBody(req, 350000)); }
+    try { input = JSON.parse(await readBody(req, 1600000)); }
     catch { return json(res, 400, {error:'Invalid request.'}); }
     await adminData.mutate(input.kind, input.action, input.data || {});
     return json(res, 200, await adminData.list());
@@ -95,7 +114,84 @@ http.createServer(async (req, res) => {
   let pathname;
   try { pathname = new URL(req.url, 'http://localhost').pathname; }
   catch { return send(res, 400, 'Bad request'); }
+  if (pathname === '/api/admin/health' || pathname === '/api/admin/ping') {
+    if (req.method !== 'GET') return json(res, 405, {error:'Method not allowed.'});
+    try {
+      if (!await adminSession(req.headers.cookie)) return json(res, 401, {error:'Sign in as an admin.'});
+      if (pathname === '/api/admin/ping') {
+        const signal=new URL(req.url,'http://localhost').searchParams.get('signal');
+        if (!signal || !/^[a-f0-9-]{36}$/i.test(signal)) return json(res,400,{error:'Invalid ping signal.'});
+        return json(res,200,{ok:true,receivedAt:new Date().toISOString()});
+      }
+      const started=performance.now();
+      const database=await adminData.checkDatabase();
+      const healthy=database.ok;
+      return json(res,healthy?200:503,{ok:healthy,checkedAt:new Date().toISOString(),database,server:{uptimeSeconds:Math.floor(process.uptime()),memoryMb:Math.round(process.memoryUsage().rss/1048576),responseMs:Math.round(performance.now()-started)}});
+    } catch (error) {
+      console.error('Admin health check failed:',error.message);
+      return json(res,503,{error:'Health check unavailable.'});
+    }
+  }
   if (pathname === '/api/admin/data') return handleAdminData(req, res, pathname);
+  if (pathname === '/api/account/me' && req.method === 'GET') {
+    try {
+      const user=await sessionUser(req.headers.cookie);
+      if (!user) return json(res,401,{error:'Sign in to continue.'});
+      if (!customerData.configured) return json(res,503,{error:'Customer database unavailable.'});
+      return json(res,200,{user:{email:user.email,name:user.name},profile:await customerData.getProfile(user.id)});
+    } catch (error) { console.error('Customer session failed:',error.message); return json(res,503,{error:'Account unavailable.'}); }
+  }
+  if (['/api/account/register','/api/account/login','/api/account/profile','/api/account/logout'].includes(pathname)) {
+    if (req.method !== 'POST') return json(res,405,{error:'Method not allowed.'});
+    if (req.headers.origin !== publicOrigin) return json(res,403,{error:'Request origin not allowed.'});
+    if (pathname === '/api/account/logout') {
+      const cookie=authCookies(req.headers.cookie);
+      try { if (cookie) await neon('/sign-out',{method:'POST',headers:{Cookie:cookie,'Content-Type':'application/json'},body:'{}'}); } catch (error) { console.error('Customer sign-out failed:',error.message); }
+      return json(res,200,{ok:true},{'Set-Cookie':cookie.split('; ').filter(Boolean).map(x=>`${x.split('=')[0]}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${process.env.RENDER?'; Secure':''}`)});
+    }
+    let input;
+    try { input=JSON.parse(await readBody(req,4096)); } catch { return json(res,400,{error:'Invalid request.'}); }
+    if (pathname === '/api/account/profile') {
+      try {
+        const user=await sessionUser(req.headers.cookie);
+        if (!user) return json(res,401,{error:'Sign in to continue.'});
+        const fields=customerFields({...input,email:user.email,password:'temporary-password-123'});
+        if (!fields) return json(res,400,{error:'Enter a valid username and phone number.'});
+        if (await customerData.getProfile(user.id)) return json(res,409,{error:'Profile already exists.'});
+        await customerData.createProfile(user.id,fields.username,fields.phone);
+        return json(res,200,{ok:true});
+      } catch (error) { return json(res,error.code==='23505'?409:503,{error:error.code==='23505'?'Username already taken.':'Could not save profile.'}); }
+    }
+    const ip=req.socket.remoteAddress || 'unknown';
+    const attempts=customerAttempts.get(ip) || {count:0,until:0};
+    if (attempts.until>Date.now()) return json(res,429,{error:'Too many attempts. Try again later.'});
+    if (pathname === '/api/account/register') {
+      const fields=customerFields(input);
+      if (!fields) return json(res,400,{error:'Email, username, phone and a password of 12–128 characters are required.'});
+      if (!customerData.configured) return json(res,503,{error:'Customer database unavailable.'});
+      attempts.count++;
+      attempts.until=attempts.count>=5?Date.now()+15*60*1000:0;
+      customerAttempts.set(ip,attempts);
+      try {
+        if (!await customerData.usernameAvailable(fields.username)) return json(res,409,{error:'Username already taken.'});
+        const upstream=await neon('/sign-up/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:fields.username,email:fields.email,password:fields.password})});
+        if (!upstream.ok) return json(res,upstream.status===429?429:409,{error:'Could not create account. The email may already be registered or the password may not meet Neon requirements.'});
+        const signup=await upstream.json();
+        if (!signup?.user?.id) return json(res,502,{error:'Account created, but the profile could not be linked. Sign in to finish your profile.'});
+        try { await customerData.createProfile(signup.user.id,fields.username,fields.phone); }
+        catch (error) { console.error('Customer profile creation failed:',error.code || error.message); return json(res,503,{error:'Account created, but the profile could not be saved. Sign in to finish your profile.'}); }
+        customerAttempts.delete(ip);
+        return json(res,201,{ok:true,user:{email:fields.email,username:fields.username},signedIn:responseCookies(upstream).length>0},{'Set-Cookie':responseCookies(upstream)});
+      } catch (error) { console.error('Customer registration failed:',error.message); return json(res,502,{error:'Registration service unavailable.'}); }
+    }
+    if (typeof input.email!=='string' || !/^\S+@\S+\.\S+$/.test(input.email) || typeof input.password!=='string') return json(res,400,{error:'Email and password required.'});
+    try {
+      const upstream=await neon('/sign-in/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:input.email.trim().toLowerCase(),password:input.password})});
+      if (!upstream.ok) { attempts.count++;attempts.until=attempts.count>=5?Date.now()+15*60*1000:0;customerAttempts.set(ip,attempts);return json(res,401,{error:'Incorrect email or password.'}); }
+      customerAttempts.delete(ip);
+      return json(res,200,{ok:true},{'Set-Cookie':responseCookies(upstream)});
+    } catch (error) { console.error('Customer sign-in failed:',error.message);return json(res,502,{error:'Sign-in service unavailable.'}); }
+  }
   if (pathname === '/api/products') {
     if (req.method !== 'GET') return json(res, 405, {error:'Method not allowed.'});
     if (!adminData.configured) return json(res, 503, {error:'Shop database is not configured.'});
@@ -182,10 +278,11 @@ http.createServer(async (req, res) => {
       return json(res, 502, {error:'Could not reach the reset service.'});
     }
   }
-  if (req.method === 'GET' && /^\/api\/product-image\/\d+$/.test(pathname)) {
+  if (req.method === 'GET' && /^\/api\/product-image\/\d+(?:\/[0-4])?$/.test(pathname)) {
     if (!adminData.configured) return send(res, 503, 'Image service unavailable');
     try {
-      const image = await adminData.productImage(pathname.split('/').pop());
+      const parts=pathname.split('/');
+      const image = await adminData.productImage(parts[3], parts[4]);
       return image ? send(res, 200, image, {'Content-Type':'image/jpeg'}) : send(res, 404, 'Image not found');
     } catch (error) {
       console.error('Product image failed:', error.code || error.message);
@@ -193,6 +290,19 @@ http.createServer(async (req, res) => {
     }
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
+  if (pathname === '/sitemap.xml') {
+    try { return send(res, 200, seo.sitemap(publicOrigin,adminData.configured ? await adminData.publishedProducts() : []), {'Content-Type':types['.xml']}); }
+    catch (error) { console.error('Sitemap failed:',error.code || error.message); return send(res,503,'Sitemap unavailable'); }
+  }
+  if (/^\/products\/[a-z0-9-]+$/.test(pathname)) {
+    if (!adminData.configured) return send(res,503,'Product unavailable');
+    try {
+      const product=(await adminData.publishedProducts(pathname.slice('/products/'.length)))[0];
+      if (!product) return send(res,404,'Product not found');
+      const template=fs.readFileSync(path.join(root,'straitgate-product.html'),'utf8');
+      return send(res,200,seo.productPage(template,product,publicOrigin),{'Content-Type':types['.html']});
+    } catch (error) { console.error('Product page failed:',error.code || error.message); return send(res,503,'Product unavailable'); }
+  }
   if (pathname === '/admin' || pathname === '/straitgate-admin.html') {
     try {
       if (!await adminSession(req.headers.cookie)) return send(res, 302, '', {Location:'/straitgate-admin-login.html'});

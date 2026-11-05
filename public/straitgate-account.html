@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Straitgate – Your account</title><meta name="robots" content="noindex,nofollow">
+<link rel="stylesheet" href="/straitgate-theme.css"><script src="/straitgate-theme.js"></script>
+<style>
+body{margin:0;background:var(--surface);color:var(--ink);font-family:"Inter Tight",Arial,sans-serif;min-height:100vh}
+*{box-sizing:border-box}
+.wrap{width:min(100% - 32px,520px);margin:0 auto;padding:28px 0 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:55px}
+a{color:inherit}.brand{text-decoration:none;font-size:24px;letter-spacing:-.04em}
+h1{font-size:clamp(38px,8vw,60px);font-weight:400;letter-spacing:-.05em;margin:0 0 12px}
+p{line-height:1.5;color:var(--mute)}.card{background:var(--tile);border-radius:16px;padding:clamp(20px,5vw,36px)}
+.tabs{display:flex;gap:8px;margin:24px 0}.tabs button,.action{border:1px solid var(--ink);border-radius:999px;padding:10px 18px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tabs button[aria-selected=true],.action{background:var(--lime);color:#0a0a0a;border-color:var(--lime)}
+label{display:block;margin:14px 0 5px;font-size:12px}input{width:100%;height:42px;border:1px solid var(--field-line);border-radius:12px;padding:8px 12px;background:var(--field);color:var(--ink);font:inherit}
+.action{margin-top:22px;width:100%;font-weight:500}.action:disabled{opacity:.55;cursor:wait}.error{color:#b92218;min-height:20px}.status{color:var(--ink)}
+[hidden]{display:none!important}footer{margin-top:45px;font-size:12px;color:var(--mute)}footer a{margin-right:16px}
+</style>
+</head>
+<body><div class="wrap">
+<header><a class="brand" href="/">Straitgate</a><button class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark mode">☾</button></header>
+<main class="card"><h1>Your account</h1><p id="intro">Create an account or sign in to Straitgate.</p>
+<div class="tabs" id="tabs"><button type="button" data-mode="register" aria-selected="true">Create account</button><button type="button" data-mode="login" aria-selected="false">Sign in</button></div>
+<form id="register"><label for="re">Email</label><input id="re" type="email" autocomplete="email" required maxlength="254"><label for="ru">Username</label><input id="ru" autocomplete="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+"><label for="rp">Phone number</label><input id="rp" type="tel" autocomplete="tel" required><label for="rw">Password (12 or more characters)</label><input id="rw" type="password" autocomplete="new-password" required minlength="12"><button class="action" type="submit">Create account</button></form>
+<form id="login" hidden><label for="le">Email</label><input id="le" type="email" autocomplete="email" required><label for="lw">Password</label><input id="lw" type="password" autocomplete="current-password" required><button class="action" type="submit">Sign in</button></form>
+<div id="signed" hidden><p class="status" id="welcome"></p><p id="profile"></p><form id="complete" hidden><label for="cu">Username</label><input id="cu" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_]+"><label for="cp">Phone number</label><input id="cp" type="tel" required><button class="action" type="submit">Finish profile</button></form><button class="action" id="logout" type="button">Sign out</button></div>
+<p class="error" id="error" role="alert"></p><p class="status" id="status" role="status"></p></main>
+<footer><a href="/straitgate-home.html">Home</a><a href="/straitgate-catalog.html">Catalog</a><a href="/admin">Admin</a></footer>
+</div><script src="/straitgate-account.js"></script></body></html>

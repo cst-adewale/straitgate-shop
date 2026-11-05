@@ -1,0 +1,12 @@
+const $=id=>document.getElementById(id);
+const error=message=>{$('error').textContent=message || ''};
+const status=message=>{$('status').textContent=message || ''};
+function mode(value){$('register').hidden=value!=='register';$('login').hidden=value!=='login';document.querySelectorAll('[data-mode]').forEach(button=>button.setAttribute('aria-selected',String(button.dataset.mode===value)));error('');status('')}
+document.querySelectorAll('[data-mode]').forEach(button=>button.onclick=()=>mode(button.dataset.mode));
+async function send(url,data,button){button.disabled=true;error('');status('');try{const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});const result=await response.json();if(!response.ok)throw Error(result.error||'Request failed.');return result}catch(e){error(e.message);return null}finally{button.disabled=false}}
+async function loadAccount(){try{const response=await fetch('/api/account/me',{cache:'no-store'});if(response.status===401){$('tabs').hidden=false;$('register').hidden=false;$('signed').hidden=true;return}const data=await response.json();if(!response.ok)throw Error(data.error||'Account unavailable.');$('tabs').hidden=true;$('register').hidden=true;$('login').hidden=true;$('signed').hidden=false;$('welcome').textContent='Signed in as '+data.user.email;$('profile').textContent=data.profile?'Username: '+data.profile.username+' · Phone: '+data.profile.phone:'Finish your profile to complete your account.';$('complete').hidden=!!data.profile}catch(e){error(e.message)}}
+$('register').onsubmit=async event=>{event.preventDefault();const data=await send('/api/account/register',{email:$('re').value,username:$('ru').value,phone:$('rp').value,password:$('rw').value},event.submitter);if(data){if(data.signedIn)await loadAccount();else{mode('login');$('le').value=$('re').value;status('Account created. Sign in to continue.')}}};
+$('login').onsubmit=async event=>{event.preventDefault();if(await send('/api/account/login',{email:$('le').value,password:$('lw').value},event.submitter))await loadAccount()};
+$('complete').onsubmit=async event=>{event.preventDefault();if(await send('/api/account/profile',{username:$('cu').value,phone:$('cp').value},event.submitter))await loadAccount()};
+$('logout').onclick=async()=>{await send('/api/account/logout',{},$('logout'));mode('login');$('tabs').hidden=false;$('signed').hidden=true};
+loadAccount();
