@@ -117,8 +117,9 @@ var TABS=[['dashboard','Dashboard'],['products','Products'],['quotes','Quotation
 var CATS=['Security door','Sliding gate','Pedestrian gate','Estate gate','Garden gate','Driveway gate','Accessory'],COLS={'Matte black':'#171717',Charcoal:'#343434',Bronze:'#96724b',Forest:'#6e766f',Red:'#e5271d',Yellow:'#f5c20f',Blue:'#1f5fe0'};
 var ITYPES=['Machine','Tool','Product','Material'];
 var DB={products:[],inv:[],quotes:[]};
-async function refresh(){var r=await fetch('/api/admin/data');var data=await r.json();if(!r.ok)throw Error(data.error||'Could not load dashboard data');DB=data;show()}
-async function change(kind,action,data){try{var r=await fetch('/api/admin/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:kind,action:action,data:data})});var result=await r.json();if(!r.ok)throw Error(result.error||'Could not save');DB=result;show();return true}catch(e){toast(e.message);return false}}
+var dataLoaded=false,dataIssue='';
+async function refresh(){try{var r=await fetch('/api/admin/data',{cache:'no-store'}),data=await r.json();if(!r.ok)throw Error(data.error||'Could not load dashboard data');if(!Array.isArray(data.products)||!Array.isArray(data.inv)||!Array.isArray(data.quotes))throw Error('Dashboard data is incomplete');DB=data;dataLoaded=true;dataIssue='';show();return true}catch(e){dataIssue=e.message||'Could not load dashboard data';show();return false}}
+async function change(kind,action,data){if(dataIssue){toast('Reconnect to the database before saving');return false}try{var r=await fetch('/api/admin/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:kind,action:action,data:data})});var result=await r.json();if(!r.ok)throw Error(result.error||'Could not save');DB=result;dataLoaded=true;show();return true}catch(e){toast(e.message);return false}}
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function gbp(n){return '₦'+(Math.round(n*100)/100).toLocaleString('en-NG',{minimumFractionDigits:0,maximumFractionDigits:2})}
@@ -241,7 +242,8 @@ var want='';
 function show(){var h=want||location.hash.replace('#','');cur=V[h]?h:'dashboard';
  $('ttl').textContent={dashboard:'Dashboard',products:'Products',quotes:'Quotations',inventory:'Inventory',budget:'Budget',health:'Backend health',tools:'Tools'}[cur];
  $('tabs').innerHTML=TABS.map(function(t){return '<button type="button" class="chip" role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+t[1]+'</button>'}).join('');
- $('view').innerHTML=V[cur]();
+ if(cur!=='health'&&cur!=='tools'&&!dataLoaded){$('view').innerHTML='<div class="tile" role="status"><h2>'+(dataIssue?'Database data unavailable':'Loading dashboard data…')+'</h2><p>'+(dataIssue?esc(dataIssue):'Connecting to Neon…')+'</p>'+(dataIssue?'<button class="btn" id="dataRetry" type="button">Retry connection</button>':'')+'</div>';return}
+ $('view').innerHTML=(dataIssue&&cur!=='health'&&cur!=='tools'?'<div class="tile" role="status" style="margin-bottom:16px"><h3>Showing previously loaded data</h3><p class="note">The database is currently unavailable. Figures may be outdated; saving is paused.</p><button class="btn sm" id="dataRetry" type="button">Retry connection</button></div>':'')+V[cur]();
  if(cur==='budget')updateBudget();if(cur==='health')renderHealth();
  if(cur==='quotes')qItems();if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
 function val(i){return $(i).value.trim()}
@@ -257,6 +259,7 @@ document.addEventListener('click',async function(e){var b=e.target.closest('butt
  if(d.print){var q=DB.quotes.filter(function(x){return x.id==d.print})[0];$('pa').innerHTML=qHtml(q);try{window.print()}catch(er){toast('Printing is blocked here. Use Copy as text.')}return}
  if(d.qrm){QI.splice(+d.qrm,1);if(!QI.length)QI.push({d:'',q:1,p:0});qItems();return}
  var id=b.id;
+ if(id==='dataRetry'){refresh();return}
  if(id==='healthRefresh'){checkHealth();return}
  if(id==='addp'){var n2=val('pn'),pr=parseFloat($('pp').value),stockValue=$('ps').value;if(!n2||isNaN(pr)||!/^\d+$/.test(stockValue)){toast('Add a name, price and whole-number stock quantity');return}
   var files=Array.from($('pi').files),mainIndex=+$('pm').value;
@@ -293,8 +296,9 @@ var healthState={status:'Checking Neon database and server…',response:'—',da
 function renderHealth(){if(cur!=='health')return;$('healthStatus').textContent=healthState.status;$('healthResponse').textContent=healthState.response;$('healthDatabase').textContent=healthState.database;$('healthUptime').textContent=healthState.uptime;$('pingStatus').textContent=healthState.ping;var max=Math.max(300,...healthSamples.map(function(s){return s.ms||0}));$('healthChart').innerHTML=healthSamples.map(function(s){return '<span class="'+(s.ok?'':'bad')+'" style="height:'+Math.max(8,Math.round((s.ms||max)/max*100))+'%" title="'+(s.ok?s.ms+' ms':'Unavailable')+'"></span>'}).join('');$('healthChart').setAttribute('aria-label',healthSamples.length?healthSamples.map(function(s){return s.ok?s.ms+' milliseconds':'unavailable'}).join(', '):'No health samples yet')}
 async function checkHealth(){var started=performance.now();try{var r=await fetch('/api/admin/health',{cache:'no-store'}),data=await r.json(),ms=Math.round(performance.now()-started),ok=r.ok&&data.ok;healthSamples.push({ok:ok,ms:ms});if(healthSamples.length>12)healthSamples.shift();healthState.status=ok?'Checked '+new Date().toLocaleTimeString():'Backend or Neon database unavailable';healthState.response=ms+' ms';healthState.database=data.database?.ok?data.database.latencyMs+' ms':'Unavailable';healthState.uptime=data.server?Math.floor(data.server.uptimeSeconds/60)+' min':'—'}catch(e){healthSamples.push({ok:false,ms:0});if(healthSamples.length>12)healthSamples.shift();healthState.status='Could not reach the server';healthState.response='—';healthState.database='—';healthState.uptime='—'}renderHealth()}
 async function pingBackend(){try{var r=await fetch('/api/admin/ping?signal='+encodeURIComponent(crypto.randomUUID()),{cache:'no-store'});if(!r.ok)throw Error('Ping failed');healthState.ping='Last random-signal ping: '+new Date().toLocaleTimeString()+'. Next in about 14 minutes while this tab stays open.'}catch(e){healthState.ping='Ping failed at '+new Date().toLocaleTimeString()+'. The tab must stay open, and browser timers may be delayed.'}checkHealth()}
+show();
 checkHealth();setInterval(pingBackend,14*60*1000);
-refresh().catch(function(e){$('view').innerHTML='<div class="tile"><h2>Dashboard unavailable</h2><p>'+esc(e.message)+'</p></div>'});
+refresh();
 $('logout').onclick=async function(){await fetch('/api/admin/logout',{method:'POST'});location.replace('/straitgate-admin-login.html')};
 </script>
 </body>
