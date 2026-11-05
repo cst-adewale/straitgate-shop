@@ -1,3 +1,4 @@
+@import url('https://fonts.cdnfonts.com/css/batica-sans');
 /* Shared palette from the updated UI guide. Layout remains page-owned. */
 :root{--site-font:"Batica Sans","Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif}
 :root{--surface:#fff;--field:#fff;--field-line:#9a9a9a;--line:#ddd;--body-copy:#444;--on-ink:#fff;--pill:#e8e8e8;--pill-warn:#ffe4a3;--pill-bad:#ffc9c4;--hover:#0a0a0a;--on-hover:#fff;color-scheme:light}
