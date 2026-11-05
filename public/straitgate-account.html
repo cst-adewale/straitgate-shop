@@ -5,14 +5,14 @@
 <title>Straitgate – Your account</title><meta name="robots" content="noindex,nofollow">
 <link rel="stylesheet" href="/straitgate-theme.css"><script src="/straitgate-theme.js"></script>
 <style>
-body{margin:0;background:var(--surface);color:var(--ink);font-family:"Inter Tight",Arial,sans-serif;min-height:100vh}
+body{margin:0;background:var(--surface);color:var(--ink);font-family:var(--site-font);min-height:100vh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 *{box-sizing:border-box}
 .wrap{width:min(100% - 32px,520px);margin:0 auto;padding:28px 0 60px}
 header{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:55px}
 a{color:inherit}.brand{text-decoration:none;font-size:24px;letter-spacing:-.04em}
 h1{font-size:clamp(38px,8vw,60px);font-weight:400;letter-spacing:-.05em;margin:0 0 12px}
 p{line-height:1.5;color:var(--mute)}.card{background:var(--tile);border-radius:16px;padding:clamp(20px,5vw,36px)}
-.tabs{display:flex;gap:8px;margin:24px 0}.tabs button,.action{border:1px solid var(--ink);border-radius:999px;padding:10px 18px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tabs button[aria-selected=true],.action{background:var(--lime);color:#0a0a0a;border-color:var(--lime)}
+.tabs{display:flex;gap:8px;margin:24px 0;flex-wrap:wrap}.tabs button,.action{border:1px solid var(--ink);border-radius:999px;padding:10px 18px;min-height:42px;background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.tabs button[aria-selected=true],.action{background:var(--lime);color:#0a0a0a;border-color:var(--lime)}
 label{display:block;margin:14px 0 5px;font-size:12px}input{width:100%;height:42px;border:1px solid var(--field-line);border-radius:12px;padding:8px 12px;background:var(--field);color:var(--ink);font:inherit}
 .action{margin-top:22px;width:100%;font-weight:500}.action:disabled{opacity:.55;cursor:wait}.error{color:#b92218;min-height:20px}.status{color:var(--ink)}
 [hidden]{display:none!important}footer{margin-top:45px;font-size:12px;color:var(--mute)}footer a{margin-right:16px}
