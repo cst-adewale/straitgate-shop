@@ -14,7 +14,7 @@ async function publishedProducts(slug) {
 }
 
 async function list() {
-  const [products, inventory, quotes, usage, traffic, signups, leaders, settings, signupSeries, visitorSeries, revenueSeries, revenueCategories] = await Promise.all([
+  const [products, inventory, quotes, usage, traffic, signups, leaders, settings, revenue] = await Promise.all([
     pool.query('SELECT id, name, category, description, finish, price_ngn, stock_quantity, image_key, image_keys, main_image_index FROM public.products ORDER BY id'),
     pool.query('SELECT id, name, item_type, sku, quantity, unit, minimum_quantity, location, unit_cost, brought_by, acquired_at, created_at FROM public.inventory_items ORDER BY id'),
     pool.query('SELECT id, quote_number, customer_name, customer_email, customer_phone, address, items, installation_cost, discount, status, notes, valid_until, created_at FROM public.quotes ORDER BY id'),
@@ -23,10 +23,7 @@ async function list() {
     pool.query("SELECT count(*) FILTER (WHERE created_at>=now()-interval '1 day') AS day,count(*) FILTER (WHERE created_at>=now()-interval '7 days') AS week,count(*) FILTER (WHERE created_at>=now()-interval '30 days') AS month FROM public.customer_profiles"),
     pool.query('SELECT p.id,p.name,count(v.product_id) AS views FROM public.products p LEFT JOIN public.site_visits v ON v.product_id=p.id GROUP BY p.id,p.name ORDER BY views DESC,p.id LIMIT 1'),
     pool.query("SELECT value FROM public.admin_settings WHERE key='letterhead'"),
-    pool.query("SELECT to_char(date_trunc('month',now())-n*interval '1 month','Mon') AS label,count(c.user_id) AS value FROM generate_series(9,0,-1) n LEFT JOIN public.customer_profiles c ON c.created_at>=date_trunc('month',now())-n*interval '1 month' AND c.created_at<date_trunc('month',now())-(n-1)*interval '1 month' GROUP BY n ORDER BY n DESC"),
-    pool.query("SELECT 'W'||(6-n) AS label,count(DISTINCT v.visitor_hash) AS value FROM generate_series(5,0,-1) n LEFT JOIN public.site_visits v ON v.visited_at>=date_trunc('week',now())-n*interval '1 week' AND v.visited_at<date_trunc('week',now())-(n-1)*interval '1 week' GROUP BY n ORDER BY n DESC"),
-    pool.query("SELECT to_char(date_trunc('month',now())-n*interval '1 month','Mon') AS label,coalesce(sum(p.amount_ngn),0) AS value FROM generate_series(9,0,-1) n LEFT JOIN public.confirmed_payments p ON p.confirmed_at>=date_trunc('month',now())-n*interval '1 month' AND p.confirmed_at<date_trunc('month',now())-(n-1)*interval '1 month' GROUP BY n ORDER BY n DESC"),
-    pool.query('SELECT p.category AS label,sum(c.amount_ngn) AS value FROM public.confirmed_payments c JOIN public.products p ON p.id=c.product_id GROUP BY p.category ORDER BY value DESC')
+    pool.query("SELECT coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '1 day'),0) AS day,coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '7 days'),0) AS week,coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '30 days'),0) AS month FROM public.confirmed_payments")
   ]);
   return {
     products:products.rows.map(p => { const keys=p.image_keys?.length ? p.image_keys : (p.image_key ? [p.image_key] : []); return {id:Number(p.id),name:p.name,cat:p.category,color:p.finish,price:Number(p.price_ngn || 0),stockQuantity:p.stock_quantity === null ? null : Number(p.stock_quantity),desc:p.description,img:keys.length ? `/api/product-image/${p.id}` : '',images:keys.map((_,i)=>`/api/product-image/${p.id}/${i}`),mainImageIndex:p.main_image_index || 0}; }),
@@ -37,11 +34,7 @@ async function list() {
     signups:Object.fromEntries(Object.entries(signups.rows[0]).map(([k,v])=>[k,Number(v)])),
     topProduct:Number(leaders.rows[0]?.views)>0 ? {name:leaders.rows[0].name,views:Number(leaders.rows[0].views)} : null,
     letterhead:settings.rows[0] ? '/api/admin/letterhead' : '',
-    confirmedRevenue:revenueCategories.rows.reduce((sum,row)=>sum+Number(row.value),0),
-    signupSeries:signupSeries.rows.map(row=>({label:row.label,value:Number(row.value)})),
-    visitorSeries:visitorSeries.rows.map(row=>({label:row.label,value:Number(row.value)})),
-    revenueSeries:revenueSeries.rows.map(row=>({label:row.label,value:Number(row.value)})),
-    revenueCategories:revenueCategories.rows.map(row=>({label:row.label,value:Number(row.value)}))
+    revenue:Object.fromEntries(Object.entries(revenue.rows[0]).map(([k,v])=>[k,Number(v)]))
   };
 }
 

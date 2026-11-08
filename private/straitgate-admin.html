@@ -8,96 +8,218 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-:root{--ink:#0a0a0a;--lime:#ccf97c;--tile:#f5f5f5;--mute:#8a8a8a;--bg:#161616;--red:#e5271d;--yel:#f5c20f;--blu:#1f5fe0;
-box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+/* ── Design-guide tokens (light defaults) ── */
+:root{
+  --bg:#161616; --surface:#ffffff; --tile:#f5f5f5; --ink:#0a0a0a; --mute:#8a8a8a;
+  --line:#dddddd; --field:#ffffff; --field-line:#9a9a9a;
+  --lime:#ccf97c; --on-lime:#0a0a0a; --hover:#0a0a0a; --on-hover:#ffffff;
+  --red:#e5271d; --yel:#f5c20f; --blu:#1f5fe0; --ok:#2e7d12;
+  --pill:#e8e8e8; --pill-warn:#ffe4a3; --pill-bad:#ffc9c4;
+  --fs-xs:10px; --fs-sm:11px; --fs-md:12px; --fs-base:13px;
+  --h-sm:28px; --h-md:34px; --h-lg:40px;
+  --r-pill:999px; --r-sm:8px; --r-md:12px; --r-lg:22px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:light;
+}
+/* Dark mode token overrides */
+:root[data-theme="dark"]{
+  --bg:#0b0b0b; --surface:#161616; --tile:#202020; --ink:#f2f2f2; --mute:#8f8f8f;
+  --line:#2f2f2f; --field:#1d1d1d; --field-line:#4a4a4a;
+  --lime:#ccf97c; --on-lime:#0a0a0a; --hover:#f2f2f2; --on-hover:#0a0a0a;
+  --red:#ff5a4d; --yel:#f5c20f; --blu:#5b8cff; --ok:#8fd45a;
+  --pill:#2c2c2c; --pill-warn:#4a3d12; --pill-bad:#4d1f1b;
+  color-scheme:dark;
+}
+@media(prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0b0b; --surface:#161616; --tile:#202020; --ink:#f2f2f2; --mute:#8f8f8f;
+    --line:#2f2f2f; --field:#1d1d1d; --field-line:#4a4a4a;
+    --lime:#ccf97c; --on-lime:#0a0a0a; --hover:#f2f2f2; --on-hover:#0a0a0a;
+    --red:#ff5a4d; --yel:#f5c20f; --blu:#5b8cff; --ok:#8fd45a;
+    --pill:#2c2c2c; --pill-warn:#4a3d12; --pill-bad:#4d1f1b;
+    color-scheme:dark;
+  }
+}
+
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:#fff;color:var(--ink);font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;padding:0;-webkit-font-smoothing:antialiased;font-size:13px;overflow-x:hidden}
-a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer}
-:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.page{min-height:100vh;width:100%;margin:0;background:#fff;border-radius:0;padding:clamp(20px,4.5vw,64px) clamp(20px,5.8vw,72px) clamp(24px,4vw,56px)}
+body{margin:0;background:var(--surface);color:var(--ink);font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;padding:0;-webkit-font-smoothing:antialiased;font-size:var(--fs-base);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+
+/* ── Page layout ── */
+.page{min-height:100vh;width:100%;margin:0;background:var(--surface);border-radius:0;padding:clamp(20px,4.5vw,64px) clamp(20px,5.8vw,72px) clamp(24px,4vw,56px)}
 header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
 .logo{font-size:clamp(20px,2.4vw,26px);font-weight:500;letter-spacing:-.04em}
-.logo small{font-size:11px;color:var(--mute);letter-spacing:0;margin-left:8px;font-weight:400}
-.who{font-size:11px;color:var(--mute)}
+.logo small{font-size:var(--fs-sm);color:var(--mute);letter-spacing:0;margin-left:8px;font-weight:400}
+.who{font-size:var(--fs-sm);color:var(--mute)}
 h1{font-weight:400;font-size:clamp(44px,8vw,96px);letter-spacing:-.055em;line-height:1;margin:clamp(26px,4.5vw,56px) 0 clamp(16px,2.4vw,26px)}
 h2{font-weight:400;font-size:clamp(20px,2.4vw,28px);letter-spacing:-.03em;margin:0 0 14px}
-h3{font-weight:500;font-size:13px;margin:0 0 10px}
+h3{font-weight:500;font-size:var(--fs-base);margin:0 0 10px}
+
+/* ── Tabs / chip bar ── */
 .tabs{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:clamp(18px,2.6vw,30px);scrollbar-width:none}
 .tabs::-webkit-scrollbar{display:none}
-.chip,.btn{border:1px solid var(--ink);background:#fff;border-radius:999px;height:34px;padding:0 clamp(14px,2vw,24px);font-size:11px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s}
-.chip[aria-pressed=true],.btn.l{background:var(--lime);border-color:var(--lime)}
-.btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}.btn.l:hover{color:var(--lime)}
-.btn.sm{height:28px;padding:0 12px;font-size:10px}
-.btn.x{border-color:#ccc;color:#777}
+
+/* ── Buttons & chips ── */
+.chip,.btn{border:1px solid var(--ink);background:var(--surface);color:var(--ink);border-radius:var(--r-pill);height:var(--h-md);padding:0 clamp(14px,2vw,24px);font-size:var(--fs-sm);white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s,border-color .2s}
+.chip[aria-pressed=true],.btn.l{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
+.btn:hover,.chip:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
+.btn.l:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
+.btn.sm{height:var(--h-sm);padding:0 12px;font-size:var(--fs-xs)}
+.btn.x{border-color:var(--line);color:var(--mute);background:transparent}
+.btn.x:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
+
+/* ── Grid system ── */
 .grid{display:grid;gap:clamp(12px,2vw,24px)}
 .g4{grid-template-columns:repeat(4,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:repeat(3,1fr)}
 .g21{grid-template-columns:1.6fr 1fr}.gf{grid-template-columns:1fr 1.15fr}
-.tile{background:var(--tile);border-radius:12px;padding:clamp(14px,1.8vw,22px);min-width:0}
+
+/* ── Tiles ── */
+.tile{background:var(--tile);border-radius:var(--r-md);padding:clamp(14px,1.8vw,22px);min-width:0}
+
+/* ── KPI cards ── */
 .kpi .v{font-size:clamp(28px,3.4vw,44px);letter-spacing:-.05em;line-height:1;margin-top:10px;overflow-wrap:anywhere}
-.kpi .l{font-size:11px;color:var(--mute)}
-.kpi .d{font-size:10px;margin-top:8px}.up{color:#2e7d12}.dn{color:var(--red)}
-.note{font-size:10px;color:var(--mute);margin:10px 0 0}
+.kpi .l{font-size:var(--fs-sm);color:var(--mute)}
+.kpi .d{font-size:var(--fs-xs);margin-top:8px}
+.up{color:var(--ok)}.dn{color:var(--red)}
+
+/* ── Notes ── */
+.note{font-size:var(--fs-xs);color:var(--mute);margin:10px 0 0}
+
+/* ── Charts ── */
 svg.ch{width:100%;height:auto;display:block}
-.leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:10px;margin-top:10px}
+.leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:var(--fs-xs);margin-top:10px}
 .leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
-label{display:block;font-size:10px;color:var(--mute);margin:0 0 5px}
-input,select,textarea{width:100%;height:34px;border:1px solid #9a9a9a;border-radius:999px;padding:0 14px;font:inherit;font-size:12px;background:#fff;color:var(--ink)}
-textarea{height:70px;border-radius:14px;padding:10px 14px;resize:vertical}
-input[type=file]{padding:6px 14px;height:auto}
+
+/* ── Forms ── */
+label{display:block;font-size:var(--fs-xs);color:var(--mute);margin:0 0 5px}
+input,select,textarea{width:100%;height:var(--h-md);border:1px solid var(--field-line);border-radius:var(--r-pill);padding:0 14px;font:inherit;font-size:var(--fs-md);background:var(--field);color:var(--ink)}
+input::placeholder,textarea::placeholder{color:var(--mute)}
+textarea{height:70px;border-radius:var(--r-md);padding:10px 14px;resize:vertical}
+input[type=file]{padding:6px 14px;height:auto;border-radius:var(--r-sm)}
 .f{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.f .w{grid-column:1/-1}
+
+/* ── Tables ── */
 .tw{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{font-weight:400;color:var(--mute);font-size:10px;text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid #ddd;white-space:nowrap}
-td{padding:10px 10px 10px 0;border-bottom:1px solid #eee;vertical-align:middle}
+table{width:100%;border-collapse:collapse;font-size:var(--fs-md)}
+th{font-weight:400;color:var(--mute);font-size:var(--fs-xs);text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 10px 10px 0;border-bottom:1px solid var(--line);vertical-align:middle}
 td.r,th.r{text-align:right}
-.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:10px;background:#e8e8e8}
-.pill.ok{background:var(--lime)}.pill.warn{background:#ffe4a3}.pill.bad{background:#ffc9c4}
+
+/* ── Status pills ── */
+.pill{display:inline-block;border-radius:var(--r-pill);padding:2px 10px;font-size:var(--fs-xs);background:var(--pill);color:var(--ink)}
+.pill.ok{background:var(--lime);color:var(--on-lime)}
+.pill.warn{background:var(--pill-warn)}
+.pill.bad{background:var(--pill-bad)}
+
+/* ── Budget panel ── */
 .budget-panel{margin:0 0 clamp(18px,2.6vw,30px)}
 .budget-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
-.budget-metrics div{background:var(--tile);border-radius:10px;padding:12px}
-.budget-metrics b{display:block;font-size:clamp(17px,2.5vw,25px);font-weight:500;margin-top:4px;overflow-wrap:anywhere}
-.budget-rate{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}.budget-rate label{margin:0}.budget-rate input{width:100px}
+.budget-metrics div{background:var(--tile);border-radius:var(--r-sm);padding:12px;border:1px solid var(--line)}
+.budget-metrics b{display:block;font-size:clamp(17px,2.5vw,25px);font-weight:500;margin-top:4px;overflow-wrap:anywhere;color:var(--ink)}
+.budget-rate{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
+.budget-rate label{margin:0}
+.budget-rate input{width:100px}
+
+/* ── Health panel ── */
 .health-panel{margin:0 0 clamp(18px,2.6vw,30px)}
 .health-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .health-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
-.health-metrics div{background:var(--tile);border-radius:10px;padding:12px}
-.health-metrics b{display:block;font-size:19px;font-weight:500;margin-top:4px}
-.health-chart{display:flex;align-items:end;gap:5px;height:75px;border-bottom:1px solid var(--mute);padding-top:8px}
+.health-metrics div{background:var(--tile);border-radius:var(--r-sm);padding:12px;border:1px solid var(--line)}
+.health-metrics b{display:block;font-size:19px;font-weight:500;margin-top:4px;color:var(--ink)}
+.health-chart{display:flex;align-items:end;gap:5px;height:75px;border-bottom:1px solid var(--line);padding-top:8px}
 .health-chart span{flex:1;min-width:5px;border-radius:3px 3px 0 0;background:var(--lime)}
 .health-chart span.bad{background:var(--red)}
-.thumb{width:44px;height:44px;border-radius:8px;background:#e9e9e9;object-fit:cover;display:grid;place-items:center;font-size:14px;color:#888;overflow:hidden}
+
+/* ── Product thumbnails ── */
+.thumb{width:44px;height:44px;border-radius:var(--r-sm);background:var(--tile);border:1px solid var(--line);object-fit:cover;display:grid;place-items:center;font-size:14px;color:var(--mute);overflow:hidden}
 .thumb img{width:100%;height:100%;object-fit:cover}
 .pr{display:flex;align-items:center;gap:12px}
+
+/* ── Bars ── */
 .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .bar input,.bar select{width:auto;min-width:150px}
 .sp{margin-left:auto}
+
+/* ── Quotation line items ── */
 .qi{display:grid;grid-template-columns:1fr 70px 100px 28px;gap:8px;margin-bottom:8px;align-items:center}
-.sum div{display:flex;justify-content:space-between;padding:6px 0;font-size:12px}
+.sum div{display:flex;justify-content:space-between;padding:6px 0;font-size:var(--fs-md)}
 .sum .t{border-top:1px solid var(--ink);margin-top:6px;padding-top:12px;font-size:20px;letter-spacing:-.03em}
-.res{font-size:clamp(26px,3vw,36px);letter-spacing:-.04em;margin:12px 0 0}
+
+/* ── Converter / calculator ── */
+.res{font-size:clamp(26px,3vw,36px);letter-spacing:-.04em;margin:12px 0 0;color:var(--ink)}
 .cv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
 .calc{max-width:320px}
-.disp{background:var(--ink);color:#fff;border-radius:14px;padding:14px 16px;text-align:right;font-size:30px;letter-spacing:-.03em;min-height:64px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
-.disp small{font-size:11px;color:#999;min-height:14px}
+.disp{background:var(--ink);color:var(--surface);border-radius:var(--r-md);padding:14px 16px;text-align:right;font-size:30px;letter-spacing:-.03em;min-height:64px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
+.disp small{font-size:var(--fs-sm);color:var(--mute);min-height:14px}
 .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.keys button{height:46px;border:0;border-radius:999px;background:#fff;font-size:16px}
-.keys button:hover{background:#e6e6e6}
-.keys .o{background:var(--lime)}.keys .o:hover{background:var(--ink);color:var(--lime)}
+.keys button{height:46px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--surface);font-size:16px;color:var(--ink)}
+.keys button:hover{background:var(--tile)}
+.keys .o{background:var(--lime);color:var(--on-lime);border-color:var(--lime)}
+.keys .o:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
 .keys .z{grid-column:span 2}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--lime);padding:10px 20px;border-radius:999px;font-size:12px;opacity:0;pointer-events:none;transition:.3s;z-index:9}
+
+/* ── Toast ── */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--surface);padding:10px 20px;border-radius:var(--r-pill);font-size:var(--fs-md);opacity:0;pointer-events:none;transition:.3s;z-index:9}
 .toast.on{opacity:1;transform:translate(-50%,0)}
-.empty{color:var(--mute);padding:20px 0;font-size:12px}
+
+/* ── Misc ── */
+.empty{color:var(--mute);padding:20px 0;font-size:var(--fs-md)}
+footer{border-top:1px solid var(--line)}
 #pa{display:none}
-@media print{body{background:#fff;padding:0}.page,.toast{display:none!important}#pa{display:block;padding:0;font-size:12px;print-color-adjust:exact;-webkit-print-color-adjust:exact}#pa table{font-size:12px}}
-@media (max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g21,.gf{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
-@media (max-width:620px){.g2,.g3,.f{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}.qi{grid-template-columns:1fr 56px 80px 28px}.sp{margin-left:0}.bar input,.bar select{min-width:0;flex:1}}
-@media (max-width:620px){.health-metrics{grid-template-columns:1fr 1fr}}
-@media (max-width:620px){.budget-metrics{grid-template-columns:1fr}}
-@media (max-width:620px){.page{padding:20px 14px 32px}header{align-items:flex-start}.logo small{display:block;margin:2px 0 0}.who{order:3;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}.theme-toggle{margin-left:auto}h1{font-size:clamp(40px,12vw,64px);margin:28px 0 18px}#tabs{margin-left:-14px;margin-right:-14px;padding:0 14px 8px;scrollbar-width:auto;scroll-snap-type:x proximity}#tabs .chip{scroll-snap-align:start}.tile{padding:16px}.tw table:has(thead){min-width:560px}.bar{align-items:stretch}.bar input,.bar select{width:100%;flex-basis:100%}.bar .btn{justify-content:center}.qi{grid-template-columns:minmax(0,1fr) 52px 72px 28px;gap:5px}.qi input{min-width:0;padding:0 7px}.toast{width:max-content;max-width:calc(100vw - 28px);text-align:center}}
-@media (max-width:480px){.cv{grid-template-columns:1fr}.budget-rate{align-items:stretch}.budget-rate input{width:100%}.health-head .btn{width:100%;justify-content:center}.health-metrics{gap:8px}.health-metrics div,.budget-metrics div{padding:10px}.health-metrics b{font-size:16px}.disp{font-size:26px}.keys{gap:6px}.keys button{height:42px}.f{gap:10px}}
-@media (max-width:380px){.g4{grid-template-columns:1fr}.qi{grid-template-columns:minmax(0,1fr) 46px 64px 28px}.qi input{font-size:11px}.who{font-size:10px}.who .btn{padding:0 9px}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ── Print ── */
+@media print{body{background:#fff;padding:0}.page,.toast{display:none!important}#pa{display:block;padding:0;font-size:var(--fs-md);print-color-adjust:exact;-webkit-print-color-adjust:exact}#pa table{font-size:var(--fs-md)}}
+
+/* ── Responsive breakpoints ── */
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g21,.gf{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){
+  .g2,.g3,.f{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}
+  .qi{grid-template-columns:1fr 56px 80px 28px}.sp{margin-left:0}
+  .bar input,.bar select{min-width:0;flex:1}
+  .health-metrics{grid-template-columns:1fr 1fr}
+  .budget-metrics{grid-template-columns:1fr}
+  .page{padding:20px 14px 32px}
+  header{align-items:flex-start}
+  .logo small{display:block;margin:2px 0 0}
+  .who{order:3;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .theme-toggle{margin-left:auto}
+  h1{font-size:clamp(40px,12vw,64px);margin:28px 0 18px}
+  #tabs{margin-left:-14px;margin-right:-14px;padding:0 14px 8px;scrollbar-width:auto;scroll-snap-type:x proximity}
+  #tabs .chip{scroll-snap-align:start}
+  .tile{padding:16px}
+  .tw table:has(thead){min-width:560px}
+  .bar{align-items:stretch}
+  .bar input,.bar select{width:100%;flex-basis:100%}
+  .bar .btn{justify-content:center}
+  .qi{grid-template-columns:minmax(0,1fr) 52px 72px 28px;gap:5px}
+  .qi input{min-width:0;padding:0 7px}
+  .toast{width:max-content;max-width:calc(100vw - 28px);text-align:center}
+}
+@media(max-width:480px){
+  .cv{grid-template-columns:1fr}
+  .budget-rate{align-items:stretch}.budget-rate input{width:100%}
+  .health-head .btn{width:100%;justify-content:center}
+  .health-metrics{gap:8px}
+  .health-metrics div,.budget-metrics div{padding:10px}
+  .health-metrics b{font-size:16px}
+  .disp{font-size:26px}
+  .keys{gap:6px}.keys button{height:42px}
+  .f{gap:10px}
+}
+@media(max-width:380px){
+  .g4{grid-template-columns:1fr}
+  .qi{grid-template-columns:minmax(0,1fr) 46px 64px 28px}
+  .qi input{font-size:var(--fs-xs)}
+  .who{font-size:var(--fs-xs)}
+  .who .btn{padding:0 9px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
 </style>
 <link rel="stylesheet" href="/straitgate-theme.css">
 <script src="/straitgate-theme.js"></script>
@@ -108,7 +230,7 @@ td.r,th.r{text-align:right}
 <h1 id="ttl">Dashboard</h1>
 <div class="tabs" role="tablist" id="tabs"></div>
 <div id="view"></div>
-<footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px;border-top:1px solid #ddd"><a href="straitgate-home.html">Home</a> &nbsp;·&nbsp; <a href="straitgate-catalog.html">Catalog</a></footer>
+<footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px"><a href="straitgate-home.html">Home</a> &nbsp;·&nbsp; <a href="straitgate-catalog.html">Catalog</a></footer>
 </div>
 <div id="pa"></div>
 <div class="toast" id="toast" role="status"></div>
@@ -118,8 +240,8 @@ var TABS=[['dashboard','Dashboard'],['products','Products'],['inventory','Invent
 var CATS=['Security door','Sliding gate','Pedestrian gate','Estate gate','Garden gate','Driveway gate','Accessory'];
 var ITYPES=['Equipment','Machine','Tool','Product','Material'];
 var DB={products:[],inv:[],quotes:[]};
-var METRIC_PERIOD={traffic:'day',signups:'day'};
-function metricCard(kind,title,values){var period=METRIC_PERIOD[kind];return '<div class="tile kpi"><div class="l">'+title+'</div><div class="v">'+(values?.[period]||0)+'</div><div class="d"><select data-metric-period="'+kind+'" aria-label="'+title+' date range" style="width:auto;min-width:110px"><option value="day"'+(period==='day'?' selected':'')+'>Daily</option><option value="week"'+(period==='week'?' selected':'')+'>Weekly</option><option value="month"'+(period==='month'?' selected':'')+'>Monthly</option></select></div></div>'}
+var METRIC_PERIOD={traffic:'day',signups:'day',revenue:'day'};
+function metricCard(kind,title,values){var period=METRIC_PERIOD[kind],value=values?.[period]||0;return '<div class="tile kpi"><div class="l">'+title+'</div><div class="v">'+(kind==='revenue'?gbp(value):value)+'</div><div class="d"><select data-metric-period="'+kind+'" aria-label="'+title+' date range" style="width:auto;min-width:110px"><option value="day"'+(period==='day'?' selected':'')+'>Daily</option><option value="week"'+(period==='week'?' selected':'')+'>Weekly</option><option value="month"'+(period==='month'?' selected':'')+'>Monthly</option></select></div></div>'}
 var dataLoaded=false,dataIssue='';
 async function refresh(){try{var r=await fetch('/api/admin/data',{cache:'no-store'}),data=await r.json();if(!r.ok)throw Error(data.error||'Could not load dashboard data');if(!Array.isArray(data.products)||!Array.isArray(data.inv)||!Array.isArray(data.quotes))throw Error('Dashboard data is incomplete');DB=data;dataLoaded=true;dataIssue='';show();return true}catch(e){dataIssue=e.message||'Could not load dashboard data';show();return false}}
 async function change(kind,action,data){if(dataIssue){toast('Reconnect to the database before saving');return false}try{var r=await fetch('/api/admin/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:kind,action:action,data:data})});var result=await r.json();if(!r.ok)throw Error(result.error||'Could not save');DB=result;dataLoaded=true;show();return true}catch(e){toast(e.message);return false}}
@@ -153,14 +275,10 @@ function isLowStock(i){return i.qty!==null&&i.qty<=Math.max(i.min,2)}
 V.budget=function(){return '<section class="tile budget-panel" aria-label="Sales-based budget calculator"><h2>Sales-based budget</h2><p class="note">Uses accepted quotations as an estimate of sales. This is not confirmed cash received or profit.</p><div class="budget-rate"><label for="budgetPercent">Allocate from net quotation value</label><input id="budgetPercent" type="number" min="0" max="100" step="0.1" value="'+budgetPercent+'"><span>%</span></div><div class="budget-metrics"><div><span class="note">Accepted quotations</span><b id="budgetSales">₦0</b></div><div><span class="note">Budget allocation</span><b id="budgetAmount">₦0</b></div><div><span class="note">Accepted quotes counted</span><b id="budgetCount">0</b></div></div><p class="note">Budget = accepted quotation totals after discounts × allocation percentage. The percentage is a calculator setting for this open tab.</p></section>'}
 V.health=function(){return '<section class="tile health-panel" aria-label="Backend health"><div class="health-head"><div><h2 style="margin-bottom:4px">Backend health</h2><span class="note" id="healthStatus">Checking Neon database and server…</span></div><button class="btn sm" id="healthRefresh" type="button">Check now</button></div><div class="health-metrics"><div><span class="note">Response time</span><b id="healthResponse">—</b></div><div><span class="note">Neon database</span><b id="healthDatabase">—</b></div><div><span class="note">Server uptime</span><b id="healthUptime">—</b></div></div><div class="note">Response time history (this open tab)</div><div class="health-chart" id="healthChart" role="img" aria-label="No health samples yet"></div><p class="note" id="pingStatus">Random-signal ping every 14 minutes while this admin tab stays open. It cannot prevent sleep after the tab closes.</p></section>'}
 V.dashboard=function(){
- var qs=DB.quotes,inventory=inventoryRows(),low=inventory.filter(isLowStock).length,
- signups=DB.signupSeries||[],visitors=DB.visitorSeries||[],revenue=DB.revenueSeries||[],colours=['#0a0a0a','#f5c20f','#1f5fe0','#ccf97c','#e5271d','#96724b'];
- return '<div class="grid g3">'+
- metricCard('traffic','Unique visitors',DB.traffic)+metricCard('signups','New signups',DB.signups)+'<div class="tile kpi"><div class="l">Top product</div><div class="v">'+esc(DB.topProduct?.name||'—')+'</div><div class="d">'+(DB.topProduct?.views||0)+' views</div></div></div><div class="grid g4" style="margin-top:clamp(12px,2vw,24px)">'+
- [['Products',DB.products.length,'In database',1],['Total revenue',DB.confirmedRevenue==null?'—':gbp(DB.confirmedRevenue),DB.confirmedRevenue==null?'Payment data unavailable':'Confirmed payments only',1],['Low-stock items',low,low?'Needs restocking':'All stocked',!low]].map(function(k){return '<div class="tile kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div><div class="d '+(k[3]?'up':'dn')+'">'+k[2]+'</div></div>'}).join('')+'</div>'+
- '<div class="grid g21" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>New users by month</h3>'+barChart(signups.map(function(x){return x.label}),signups.map(function(x){return x.value}),signups.length-1,'New users')+'</div><div class="tile"><h3>Revenue by product category</h3>'+donut((DB.revenueCategories||[]).map(function(x,i){return [x.label,x.value,colours[i%colours.length]]}))+'</div></div>'+
- '<div class="grid g2" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Unique visitors by week</h3>'+line(visitors.map(function(x){return x.label}),visitors.map(function(x){return x.value}))+'</div><div class="tile"><h3>Confirmed revenue by month</h3>'+barChart(revenue.map(function(x){return x.label}),revenue.map(function(x){return x.value}),revenue.length-1,'Revenue')+'</div></div>'+
- '<div class="grid g2" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Inventory</h3><p>'+inventory.length+' items tracked (including products)</p><p>'+gbp(DB.inv.reduce(function(s,i){return s+i.qty*i.cost},0))+' stock value at cost for items with recorded costs</p></div><div class="tile"><h3>Record confirmed payment</h3><div class="f"><div><label for="payProduct">Product</label><select id="payProduct">'+DB.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+'</option>'}).join('')+'</select></div><div><label for="payAmount">Confirmed amount (₦)</label><input id="payAmount" type="number" min="0.01" step="0.01"></div><div class="w"><label for="payReference">Payment reference</label><input id="payReference" placeholder="Verified transaction reference"></div></div><button class="btn l" id="paySave" type="button" style="margin-top:14px">Record payment</button><p class="note">Record only payments independently verified as successful. Each reference can be used once.</p></div></div>'+
+ var qs=DB.quotes;
+ return '<div class="grid g4">'+
+ metricCard('traffic','Unique visitors',DB.traffic)+metricCard('signups','New signups',DB.signups)+metricCard('revenue','Revenue',DB.revenue)+'<div class="tile kpi"><div class="l">Top product</div><div class="v">'+esc(DB.topProduct?.name||'—')+'</div><div class="d">'+(DB.topProduct?.views||0)+' views</div></div></div>'+
+ '<div class="tile kpi" style="margin-top:clamp(12px,2vw,24px)"><div class="l">Products</div><div class="v">'+DB.products.length+'</div><div class="d">In database</div></div>'+
  '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h3>Recent quotations</h3>'+quoteTable(qs.slice(-4).reverse(),true)+'</div>'};
 
 V.products=function(){
@@ -265,7 +383,6 @@ document.addEventListener('click',async function(e){var b=e.target.closest('butt
  var id=b.id;
  if(id==='dataRetry'){refresh();return}
  if(id==='healthRefresh'){checkHealth();return}
- if(id==='paySave'){var productId=+$('payProduct').value,amount=+$('payAmount').value,reference=val('payReference');if(!productId||!amount||!reference){toast('Choose a product, amount and verified reference');return}change('payments','confirm',{productId:productId,amount:amount,reference:reference}).then(function(ok){if(ok)toast('Confirmed payment recorded')});return}
  if(id==='qai'){var promptText=val('qprompt');if(!promptText){toast('Describe the changes you want');return}b.disabled=true;try{var response=await fetch('/api/admin/quote-draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:promptText,context:JSON.stringify({customer:val('qc'),items:QI,installation:val('qin'),discount:val('qd'),existingNotes:val('qn')})})}),result=await response.json();if(!response.ok)throw Error(result.error||'AI drafting failed');$('qn').value=result.draft;toast('Draft added. Review it before saving.')}catch(error){toast(error.message)}finally{b.disabled=false}return}
  if(id==='saveletterhead'){var file=$('letterhead').files[0];if(!file||file.size>750000||!['image/png','image/jpeg'].includes(file.type)){toast('Choose a PNG or JPEG under 750 KB');return}var reader=new FileReader();reader.onload=function(){change('settings','letterhead',{image:reader.result}).then(function(ok){if(ok)toast('Letterhead saved')})};reader.readAsDataURL(file);return}
  if(id==='qprint'){var dr=qDraft();if(!val('qc')||!dr.items.length){toast('Add a customer and at least one line');return}var draft={no:'DRAFT',date:new Date().toISOString().slice(0,10),valid:$('qv').value,cust:val('qc'),email:val('qe'),phone:val('qt'),addr:val('qa'),items:dr.items,inst:dr.inst,disc:dr.disc,notes:val('qn')};$('pa').innerHTML=qHtml(draft);var image=$('pa').querySelector('img');if(image)try{await image.decode()}catch(er){}window.print();return}
