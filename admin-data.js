@@ -16,7 +16,7 @@ async function publishedProducts(slug) {
 async function list() {
   const [products, inventory, quotes, usage, traffic, signups, leaders, settings, revenue] = await Promise.all([
     pool.query('SELECT id, name, category, description, finish, price_ngn, stock_quantity, image_key, image_keys, main_image_index, created_at FROM public.products ORDER BY id'),
-    pool.query('SELECT id, name, item_type, sku, quantity, unit, minimum_quantity, location, unit_cost, brought_by, acquired_at, created_at FROM public.inventory_items ORDER BY id'),
+    pool.query('SELECT id, name, item_type, sku, quantity, unit, minimum_quantity, location, unit_cost, brought_by, acquired_at, created_at, image_keys FROM public.inventory_items ORDER BY id'),
     pool.query('SELECT id, quote_number, customer_name, customer_email, customer_phone, address, items, installation_cost, discount, status, notes, valid_until, created_at FROM public.quotes ORDER BY id'),
     pool.query('SELECT id,item_id,used_by,taken_at,returned_at FROM public.inventory_usage ORDER BY taken_at DESC LIMIT 200'),
     pool.query("SELECT count(DISTINCT visitor_hash) FILTER (WHERE visited_at>=now()-interval '1 day') AS day,count(DISTINCT visitor_hash) FILTER (WHERE visited_at>=now()-interval '7 days') AS week,count(DISTINCT visitor_hash) FILTER (WHERE visited_at>=now()-interval '30 days') AS month FROM public.site_visits"),
@@ -27,7 +27,7 @@ async function list() {
   ]);
   return {
     products:products.rows.map(p => { const keys=p.image_keys?.length ? p.image_keys : (p.image_key ? [p.image_key] : []); return {id:Number(p.id),name:p.name,cat:p.category,color:p.finish,price:Number(p.price_ngn || 0),stockQuantity:p.stock_quantity === null ? null : Number(p.stock_quantity),desc:p.description,img:keys.length ? `/api/product-image/${p.id}` : '',images:keys.map((_,i)=>`/api/product-image/${p.id}/${i}`),mainImageIndex:p.main_image_index || 0,createdAt:p.created_at?.toISOString() || ''}; }),
-    inv:inventory.rows.map(i => ({id:Number(i.id),name:i.name,type:i.item_type,sku:i.sku || '',qty:Number(i.quantity),unit:i.unit,min:Number(i.minimum_quantity),loc:i.location,cost:Number(i.unit_cost),broughtBy:i.brought_by || '',acquiredAt:i.acquired_at?.toISOString() || '',createdAt:i.created_at.toISOString()})),
+    inv:inventory.rows.map(i => ({id:Number(i.id),name:i.name,type:i.item_type,sku:i.sku || '',qty:Number(i.quantity),unit:i.unit,min:Number(i.minimum_quantity),loc:i.location,cost:Number(i.unit_cost),broughtBy:i.brought_by || '',acquiredAt:i.acquired_at?.toISOString() || '',createdAt:i.created_at.toISOString(),img:i.image_keys?.length ? `/api/admin/inventory-image/${i.id}` : '',images:(i.image_keys || []).map((_,index)=>`/api/admin/inventory-image/${i.id}/${index}`)})),
     quotes:quotes.rows.map(q => ({id:Number(q.id),no:q.quote_number,cust:q.customer_name,email:q.customer_email || '',phone:q.customer_phone || '',addr:q.address || '',items:q.items,inst:Number(q.installation_cost),disc:Number(q.discount),status:q.status,notes:q.notes,valid:q.valid_until ? (q.valid_until instanceof Date ? q.valid_until.toISOString() : String(q.valid_until)).slice(0,10) : '',date:q.created_at.toISOString().slice(0,10)})),
     usage:usage.rows.map(u=>({id:Number(u.id),itemId:Number(u.item_id),usedBy:u.used_by,takenAt:u.taken_at.toISOString(),returnedAt:u.returned_at?.toISOString() || ''})),
     traffic:Object.fromEntries(Object.entries(traffic.rows[0]).map(([k,v])=>[k,Number(v)])),
@@ -81,10 +81,18 @@ async function mutate(kind, action, input) {
     if (!changed.rows.length) throw new TypeError('Product image not found.');
   } else if (action === 'add' && kind === 'inventory') {
     const name = label(input.name), qty = number(input.qty), min = number(input.min), cost = number(input.cost);
-    if (!name || qty === null || min === null || cost === null) throw new TypeError('Enter a name and valid non-negative numbers.');
+    const images=input.images || [];
+    if (!name || qty === null || min === null || cost === null || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 300000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, valid numbers and up to five JPEG images under 225 KB each.');
     const acquired=input.acquiredAt ? new Date(input.acquiredAt) : null;
     if (acquired && !Number.isFinite(acquired.getTime())) throw new TypeError('Enter a valid date and time.');
-    await pool.query('INSERT INTO public.inventory_items (name,item_type,sku,quantity,unit,minimum_quantity,location,unit_cost,brought_by,acquired_at) VALUES ($1,$2,NULLIF($3,\'\'),$4,$5,$6,$7,$8,$9,$10)',[name,label(input.type,80),label(input.sku,80),qty,label(input.unit,20) || 'pcs',min,label(input.loc,120),cost,label(input.broughtBy,120),acquired]);
+    const keys=[];
+    try {
+      for (const image of images) keys.push(await r2.uploadJpeg(Buffer.from(image.slice('data:image/jpeg;base64,'.length),'base64'),'inventory'));
+      await pool.query('INSERT INTO public.inventory_items (name,item_type,sku,quantity,unit,minimum_quantity,location,unit_cost,brought_by,acquired_at,image_keys) VALUES ($1,$2,NULLIF($3,\'\'),$4,$5,$6,$7,$8,$9,$10,$11)',[name,label(input.type,80),label(input.sku,80),qty,label(input.unit,20) || 'pcs',min,label(input.loc,120),cost,label(input.broughtBy,120),acquired,keys]);
+    } catch (error) {
+      await Promise.all(keys.map(key=>r2.remove(key).catch(()=>{})));
+      throw error;
+    }
   } else if (kind === 'inventory' && action === 'checkout') {
     if (!id(input.id) || !label(input.usedBy,120)) throw new TypeError('Choose an item and enter who used it.');
     const item=await pool.query("SELECT item_type FROM public.inventory_items WHERE id=$1",[input.id]);
@@ -104,8 +112,9 @@ async function mutate(kind, action, input) {
   } else if (action === 'remove' && ['products','inventory','quotes'].includes(kind)) {
     const table = {products:'products',inventory:'inventory_items',quotes:'quotes'}[kind];
     if (!id(input.id)) throw new TypeError('Invalid item ID.');
-    const removed = await pool.query(`DELETE FROM public.${table} WHERE id=$1 RETURNING ${kind === 'products' ? 'image_key,image_keys' : 'id'}`,[input.id]);
+    const removed = await pool.query(`DELETE FROM public.${table} WHERE id=$1 RETURNING ${kind === 'products' ? 'image_key,image_keys' : kind === 'inventory' ? 'image_keys' : 'id'}`,[input.id]);
     if (kind === 'products' && removed.rows[0]) for (const key of new Set([removed.rows[0].image_key,...(removed.rows[0].image_keys || [])].filter(Boolean))) await r2.remove(key).catch(error => console.error('R2 cleanup failed:', error.message));
+    if (kind === 'inventory' && removed.rows[0]) for (const key of removed.rows[0].image_keys || []) await r2.remove(key).catch(error => console.error('R2 cleanup failed:', error.message));
   } else if (action === 'adjust' && kind === 'inventory') {
     if (!id(input.id) || ![-1,1].includes(input.delta)) throw new TypeError('Invalid stock change.');
     await pool.query('UPDATE public.inventory_items SET quantity=GREATEST(0,quantity+$1) WHERE id=$2',[input.delta,input.id]);
@@ -121,6 +130,14 @@ async function productImage(productId, imageIndex) {
   const row=result.rows[0]; if (!row) return null;
   const keys=row.image_keys?.length ? row.image_keys : (row.image_key ? [row.image_key] : []);
   const index=imageIndex === undefined ? row.main_image_index || 0 : Number(imageIndex);
+  return Number.isInteger(index) && keys[index] ? r2.getJpeg(keys[index]) : null;
+}
+
+async function inventoryImage(itemId, imageIndex) {
+  if (!id(itemId)) return null;
+  const result=await pool.query('SELECT image_keys FROM public.inventory_items WHERE id=$1',[itemId]);
+  const keys=result.rows[0]?.image_keys || [];
+  const index=imageIndex === undefined ? 0 : Number(imageIndex);
   return Number.isInteger(index) && keys[index] ? r2.getJpeg(keys[index]) : null;
 }
 
@@ -142,4 +159,4 @@ async function getLetterhead() {
   return result.rows[0]?.value || null;
 }
 
-module.exports = {configured:!!pool, list, mutate, productImage, publishedProducts, checkDatabase, recordVisit, getLetterhead};
+module.exports = {configured:!!pool, list, mutate, productImage, inventoryImage, publishedProducts, checkDatabase, recordVisit, getLetterhead};

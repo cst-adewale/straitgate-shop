@@ -12,10 +12,11 @@ const client = configured ? new S3Client({
   credentials:{accessKeyId,secretAccessKey}
 }) : null;
 
-async function uploadJpeg(buffer) {
+async function uploadJpeg(buffer, folder = 'products') {
   if (!configured) throw new Error('Cloudflare R2 is not configured.');
   if (!Buffer.isBuffer(buffer) || buffer.length < 4 || buffer.length > 225000 || buffer[0] !== 0xff || buffer[1] !== 0xd8 || buffer.at(-2) !== 0xff || buffer.at(-1) !== 0xd9) throw new TypeError('Use a valid JPEG image under 225 KB.');
-  const key = `products/${randomUUID()}.jpg`;
+  if (!['products','inventory'].includes(folder)) throw new TypeError('Invalid image folder.');
+  const key = `${folder}/${randomUUID()}.jpg`;
   await client.send(new PutObjectCommand({Bucket:bucket,Key:key,Body:buffer,ContentType:'image/jpeg'}));
   return key;
 }
@@ -30,7 +31,7 @@ async function uploadPng(buffer) {
 
 async function getJpeg(key) {
   if (!configured) throw new Error('Cloudflare R2 is not configured.');
-  if (!/^products\/[a-f0-9-]{36}\.(jpg|png)$/.test(key)) throw new TypeError('Invalid image key.');
+  if (!/^(products|inventory)\/[a-f0-9-]{36}\.(jpg|png)$/.test(key)) throw new TypeError('Invalid image key.');
   const object = await client.send(new GetObjectCommand({Bucket:bucket,Key:key}));
   return Buffer.from(await object.Body.transformToByteArray());
 }

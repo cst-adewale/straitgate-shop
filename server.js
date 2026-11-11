@@ -347,6 +347,18 @@ const server = http.createServer(async (req, res) => {
       return send(res, 503, 'Image service unavailable');
     }
   }
+  if (req.method === 'GET' && /^\/api\/admin\/inventory-image\/\d+(?:\/[0-4])?$/.test(pathname)) {
+    if (!await adminSession(req.headers.cookie)) return send(res, 401, 'Sign in as an admin');
+    if (!adminData.configured) return send(res, 503, 'Image service unavailable');
+    try {
+      const parts=pathname.split('/');
+      const image=await adminData.inventoryImage(parts[4],parts[5]);
+      return image ? send(res,200,image,{'Content-Type':'image/jpeg','Cache-Control':'private, max-age=300'}) : send(res,404,'Image not found');
+    } catch (error) {
+      console.error('Inventory image failed:',error.code || error.message);
+      return send(res,503,'Image service unavailable');
+    }
+  }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res, 405, 'Method not allowed');
   if (pathname === '/sitemap.xml') {
     try { return send(res, 200, seo.sitemap(publicOrigin,adminData.configured ? await adminData.publishedProducts() : []), {'Content-Type':types['.xml']}); }
