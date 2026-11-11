@@ -15,7 +15,7 @@ async function publishedProducts(slug) {
 
 async function list() {
   const [products, inventory, quotes, usage, traffic, signups, leaders, settings, revenue] = await Promise.all([
-    pool.query('SELECT id, name, category, description, finish, price_ngn, stock_quantity, image_key, image_keys, main_image_index FROM public.products ORDER BY id'),
+    pool.query('SELECT id, name, category, description, finish, price_ngn, stock_quantity, image_key, image_keys, main_image_index, created_at FROM public.products ORDER BY id'),
     pool.query('SELECT id, name, item_type, sku, quantity, unit, minimum_quantity, location, unit_cost, brought_by, acquired_at, created_at FROM public.inventory_items ORDER BY id'),
     pool.query('SELECT id, quote_number, customer_name, customer_email, customer_phone, address, items, installation_cost, discount, status, notes, valid_until, created_at FROM public.quotes ORDER BY id'),
     pool.query('SELECT id,item_id,used_by,taken_at,returned_at FROM public.inventory_usage ORDER BY taken_at DESC LIMIT 200'),
@@ -26,7 +26,7 @@ async function list() {
     pool.query("SELECT coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '1 day'),0) AS day,coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '7 days'),0) AS week,coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '30 days'),0) AS month FROM public.confirmed_payments")
   ]);
   return {
-    products:products.rows.map(p => { const keys=p.image_keys?.length ? p.image_keys : (p.image_key ? [p.image_key] : []); return {id:Number(p.id),name:p.name,cat:p.category,color:p.finish,price:Number(p.price_ngn || 0),stockQuantity:p.stock_quantity === null ? null : Number(p.stock_quantity),desc:p.description,img:keys.length ? `/api/product-image/${p.id}` : '',images:keys.map((_,i)=>`/api/product-image/${p.id}/${i}`),mainImageIndex:p.main_image_index || 0}; }),
+    products:products.rows.map(p => { const keys=p.image_keys?.length ? p.image_keys : (p.image_key ? [p.image_key] : []); return {id:Number(p.id),name:p.name,cat:p.category,color:p.finish,price:Number(p.price_ngn || 0),stockQuantity:p.stock_quantity === null ? null : Number(p.stock_quantity),desc:p.description,img:keys.length ? `/api/product-image/${p.id}` : '',images:keys.map((_,i)=>`/api/product-image/${p.id}/${i}`),mainImageIndex:p.main_image_index || 0,createdAt:p.created_at?.toISOString() || ''}; }),
     inv:inventory.rows.map(i => ({id:Number(i.id),name:i.name,type:i.item_type,sku:i.sku || '',qty:Number(i.quantity),unit:i.unit,min:Number(i.minimum_quantity),loc:i.location,cost:Number(i.unit_cost),broughtBy:i.brought_by || '',acquiredAt:i.acquired_at?.toISOString() || '',createdAt:i.created_at.toISOString()})),
     quotes:quotes.rows.map(q => ({id:Number(q.id),no:q.quote_number,cust:q.customer_name,email:q.customer_email || '',phone:q.customer_phone || '',addr:q.address || '',items:q.items,inst:Number(q.installation_cost),disc:Number(q.discount),status:q.status,notes:q.notes,valid:q.valid_until ? (q.valid_until instanceof Date ? q.valid_until.toISOString() : String(q.valid_until)).slice(0,10) : '',date:q.created_at.toISOString().slice(0,10)})),
     usage:usage.rows.map(u=>({id:Number(u.id),itemId:Number(u.item_id),usedBy:u.used_by,takenAt:u.taken_at.toISOString(),returnedAt:u.returned_at?.toISOString() || ''})),

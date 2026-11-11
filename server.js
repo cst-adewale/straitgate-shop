@@ -362,7 +362,7 @@ const server = http.createServer(async (req, res) => {
       return send(res,200,seo.productPage(template,product,publicOrigin),{'Content-Type':types['.html']});
     } catch (error) { console.error('Product page failed:',error.code || error.message); return send(res,503,'Product unavailable'); }
   }
-  if (pathname === '/admin' || pathname === '/straitgate-admin.html') {
+  if (['/admin','/admin/products','/admin/inventory','/straitgate-admin.html'].includes(pathname)) {
     try {
       if (!await adminSession(req.headers.cookie)) return send(res, 302, '', {Location:'/straitgate-admin-login.html'});
       return serveFile(res, adminFile);

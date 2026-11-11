@@ -72,7 +72,7 @@ async function request(url, options = {}) {
       assert.equal(res.status, 200, page);
       console.log(`200 ${page}`);
     }
-    for (const page of ['/admin', '/straitgate-admin.html']) {
+    for (const page of ['/admin', '/admin/products', '/admin/inventory', '/straitgate-admin.html']) {
       const res = await request(page);
       assert.equal(res.status, 302, page);
       assert.equal(res.headers.get('location'), '/straitgate-admin-login.html');
@@ -120,6 +120,11 @@ async function request(url, options = {}) {
     const admin = await request('/admin', {headers:{Cookie:cookie}});
     assert.equal(admin.status, 200);
     assert.match(await admin.text(), /Admin dashboard/);
+    for (const page of ['/admin/products', '/admin/inventory']) {
+      const browse=await request(page,{headers:{Cookie:cookie}});
+      assert.equal(browse.status,200,page);
+      assert.match(await browse.text(),/Add to quotation/);
+    }
     console.log('200 /admin with session');
     const logout = await request('/api/admin/logout', {method:'POST', headers:{Cookie:cookie}});
     assert.equal(logout.status, 200);
