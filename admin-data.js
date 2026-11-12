@@ -95,13 +95,17 @@ async function mutate(kind, action, input) {
     }
   } else if (kind === 'inventory' && action === 'checkout') {
     if (!id(input.id) || !label(input.usedBy,120)) throw new TypeError('Choose an item and enter who used it.');
+    const taken=input.takenAt ? new Date(input.takenAt) : new Date();
+    if (!Number.isFinite(taken.getTime()) || taken.getTime() > Date.now() + 60000) throw new TypeError('Enter a valid time taken.');
     const item=await pool.query("SELECT item_type FROM public.inventory_items WHERE id=$1",[input.id]);
     if (!['Machine','Tool','Equipment'].includes(item.rows[0]?.item_type)) throw new TypeError('Only equipment and tools can be checked out.');
-    await pool.query('INSERT INTO public.inventory_usage(item_id,used_by) VALUES($1,$2)',[input.id,label(input.usedBy,120)]);
+    await pool.query('INSERT INTO public.inventory_usage(item_id,used_by,taken_at) VALUES($1,$2,$3)',[input.id,label(input.usedBy,120),taken]);
   } else if (kind === 'inventory' && action === 'return') {
     if (!id(input.id)) throw new TypeError('Invalid usage record.');
-    const result=await pool.query('UPDATE public.inventory_usage SET returned_at=now() WHERE id=$1 AND returned_at IS NULL RETURNING id',[input.id]);
-    if (!result.rows.length) throw new TypeError('This item was already returned.');
+    const returned=input.returnedAt ? new Date(input.returnedAt) : new Date();
+    if (!Number.isFinite(returned.getTime()) || returned.getTime() > Date.now() + 60000) throw new TypeError('Enter a valid return time.');
+    const result=await pool.query('UPDATE public.inventory_usage SET returned_at=$2 WHERE id=$1 AND returned_at IS NULL AND taken_at<=$2 RETURNING id',[input.id,returned]);
+    if (!result.rows.length) throw new TypeError('The usage record was returned already, or its return time is before it was taken.');
   } else if (action === 'add' && kind === 'quotes') {
     const customer = label(input.cust), items = input.items;
     if (!customer || !Array.isArray(items) || !items.length || items.length > 50 || items.some(i => !label(i.d) || number(i.q) === null || Number(i.q) <= 0 || number(i.p) === null)) throw new TypeError('Enter a customer and valid quote items.');
