@@ -100,12 +100,6 @@ svg.ch{width:100%;height:auto;display:block}
 /* ── Forms ── */
 label{display:block;font-size:var(--fs-xs);color:var(--mute);margin:0 0 5px}
 input,select,textarea{width:100%;height:var(--h-md);border:1px solid var(--field-line);border-radius:var(--r-pill);padding:0 14px;font:inherit;font-size:var(--fs-md);background:var(--field);color:var(--ink)}
-@supports (appearance:base-select){
-  select,select::picker(select){appearance:base-select}
-  select::picker(select){border:1px solid var(--field-line);border-radius:var(--r-md);background:var(--field);color:var(--ink);padding:6px;box-shadow:0 14px 36px #0002}
-  select option{border-radius:var(--r-sm);padding:8px 12px}
-  select option:checked{background:var(--lime);color:var(--on-lime)}
-}
 input::placeholder,textarea::placeholder{color:var(--mute)}
 textarea{height:70px;border-radius:var(--r-md);padding:10px 14px;resize:vertical}
 input[type=file]{padding:6px 14px;height:auto;border-radius:var(--r-sm)}
