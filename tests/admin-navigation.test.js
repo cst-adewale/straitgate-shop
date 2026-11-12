@@ -28,12 +28,12 @@ const context = {document:{getElementById:get,addEventListener(){}},window:{addE
   assert.match(get('view').innerHTML,/href="\/admin\/products\/1"/);
   context.location.pathname='/admin/products/1';context.show();
   assert.match(get('view').innerHTML,/Steel gate/);
-  assert.match(get('view').innerHTML,/Replace pictures/);
+  assert.match(get('view').innerHTML,/Save changes/);
   context.location.pathname='/admin/inventory';context.show();
   assert.match(get('view').innerHTML,/href="\/admin\/inventory\/2"/);
   context.location.pathname='/admin/inventory/2';context.show();
   assert.match(get('view').innerHTML,/D-1/);
-  assert.match(get('view').innerHTML,/Replace pictures/);
+  assert.match(get('view').innerHTML,/Save changes/);
   working=false;
   assert.equal(await context.refresh(),false);
   assert.match(get('view').innerHTML,/Showing previously loaded data/);
