@@ -10,12 +10,12 @@ function label(value, max = 200) { return typeof value === 'string' ? value.trim
 
 async function publishedProducts(slug) {
   const result = await pool.query('SELECT id,slug,name,category,description,finish,operation,price_ngn,stock_quantity,image_key,image_keys,main_image_index FROM public.products WHERE published=true' + (slug ? ' AND slug=$1' : '') + ' ORDER BY created_at DESC,id DESC',slug ? [slug] : []);
-  return result.rows.map(p => { const keys = p.image_keys?.length ? p.image_keys : (p.image_key ? [p.image_key] : []); return {id:Number(p.id),slug:p.slug,name:p.name,category:p.category,description:p.description,finish:p.finish,operation:p.operation,price:Number(p.price_ngn || 0),stockQuantity:p.stock_quantity === null ? null : Number(p.stock_quantity),image:keys.length ? `/api/product-image/${p.id}` : '',images:keys.map((_,i) => `/api/product-image/${p.id}/${i}`),mainImageIndex:p.main_image_index || 0}; });
+  return result.rows.map(p => { const keys = p.image_keys?.length ? p.image_keys : (p.image_key ? [p.image_key] : []); return {id:Number(p.id),slug:p.slug,name:p.name,category:p.category,description:p.description,finish:p.finish,operation:p.operation,price:Number(p.price_ngn || 0),stockQuantity:p.stock_quantity === null ? null : Number(p.stock_quantity),image:keys.length ? `/api/product-image/${p.id}?v=${encodeURIComponent(keys[p.main_image_index || 0] || keys[0])}` : '',images:keys.map((key,i) => `/api/product-image/${p.id}/${i}?v=${encodeURIComponent(key)}`),mainImageIndex:p.main_image_index || 0}; });
 }
 
 async function list() {
   const [products, inventory, quotes, usage, traffic, signups, leaders, settings, revenue] = await Promise.all([
-    pool.query('SELECT id, name, category, description, finish, price_ngn, stock_quantity, image_key, image_keys, main_image_index, created_at FROM public.products ORDER BY id'),
+    pool.query('SELECT id, name, category, description, finish, operation, price_ngn, stock_quantity, image_key, image_keys, main_image_index, created_at FROM public.products ORDER BY id'),
     pool.query('SELECT id, name, item_type, sku, quantity, unit, minimum_quantity, location, unit_cost, brought_by, acquired_at, created_at, image_keys FROM public.inventory_items ORDER BY id'),
     pool.query('SELECT id, quote_number, customer_name, customer_email, customer_phone, address, items, installation_cost, discount, status, notes, valid_until, created_at FROM public.quotes ORDER BY id'),
     pool.query('SELECT id,item_id,used_by,taken_at,returned_at FROM public.inventory_usage ORDER BY taken_at DESC LIMIT 200'),
@@ -26,8 +26,8 @@ async function list() {
     pool.query("SELECT coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '1 day'),0) AS day,coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '7 days'),0) AS week,coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '30 days'),0) AS month FROM public.confirmed_payments")
   ]);
   return {
-    products:products.rows.map(p => { const keys=p.image_keys?.length ? p.image_keys : (p.image_key ? [p.image_key] : []); return {id:Number(p.id),name:p.name,cat:p.category,color:p.finish,price:Number(p.price_ngn || 0),stockQuantity:p.stock_quantity === null ? null : Number(p.stock_quantity),desc:p.description,img:keys.length ? `/api/product-image/${p.id}` : '',images:keys.map((_,i)=>`/api/product-image/${p.id}/${i}`),mainImageIndex:p.main_image_index || 0,createdAt:p.created_at?.toISOString() || ''}; }),
-    inv:inventory.rows.map(i => ({id:Number(i.id),name:i.name,type:i.item_type,sku:i.sku || '',qty:Number(i.quantity),unit:i.unit,min:Number(i.minimum_quantity),loc:i.location,cost:Number(i.unit_cost),broughtBy:i.brought_by || '',acquiredAt:i.acquired_at?.toISOString() || '',createdAt:i.created_at.toISOString(),img:i.image_keys?.length ? `/api/admin/inventory-image/${i.id}` : '',images:(i.image_keys || []).map((_,index)=>`/api/admin/inventory-image/${i.id}/${index}`)})),
+    products:products.rows.map(p => { const keys=p.image_keys?.length ? p.image_keys : (p.image_key ? [p.image_key] : []); return {id:Number(p.id),name:p.name,cat:p.category,color:p.finish,operation:p.operation || '',price:Number(p.price_ngn || 0),stockQuantity:p.stock_quantity === null ? null : Number(p.stock_quantity),desc:p.description,img:keys.length ? `/api/product-image/${p.id}?v=${encodeURIComponent(keys[p.main_image_index || 0] || keys[0])}` : '',images:keys.map((key,i)=>`/api/product-image/${p.id}/${i}?v=${encodeURIComponent(key)}`),mainImageIndex:p.main_image_index || 0,createdAt:p.created_at?.toISOString() || ''}; }),
+    inv:inventory.rows.map(i => ({id:Number(i.id),name:i.name,type:i.item_type,sku:i.sku || '',qty:Number(i.quantity),unit:i.unit,min:Number(i.minimum_quantity),loc:i.location,cost:Number(i.unit_cost),broughtBy:i.brought_by || '',acquiredAt:i.acquired_at?.toISOString() || '',createdAt:i.created_at.toISOString(),img:i.image_keys?.length ? `/api/admin/inventory-image/${i.id}?v=${encodeURIComponent(i.image_keys[0])}` : '',images:(i.image_keys || []).map((key,index)=>`/api/admin/inventory-image/${i.id}/${index}?v=${encodeURIComponent(key)}`)})),
     quotes:quotes.rows.map(q => ({id:Number(q.id),no:q.quote_number,cust:q.customer_name,email:q.customer_email || '',phone:q.customer_phone || '',addr:q.address || '',items:q.items,inst:Number(q.installation_cost),disc:Number(q.discount),status:q.status,notes:q.notes,valid:q.valid_until ? (q.valid_until instanceof Date ? q.valid_until.toISOString() : String(q.valid_until)).slice(0,10) : '',date:q.created_at.toISOString().slice(0,10)})),
     usage:usage.rows.map(u=>({id:Number(u.id),itemId:Number(u.item_id),usedBy:u.used_by,takenAt:u.taken_at.toISOString(),returnedAt:u.returned_at?.toISOString() || ''})),
     traffic:Object.fromEntries(Object.entries(traffic.rows[0]).map(([k,v])=>[k,Number(v)])),
@@ -74,6 +74,27 @@ async function mutate(kind, action, input) {
     if (!productId || quantity === null) throw new TypeError('Enter a valid whole-number stock quantity.');
     const changed=await pool.query('UPDATE public.products SET stock_quantity=$2 WHERE id=$1 RETURNING id',[productId,quantity]);
     if (!changed.rows.length) throw new TypeError('Product not found.');
+  } else if (action === 'edit' && ['products','inventory'].includes(kind)) {
+    const itemId=id(input.id), images=input.images || [], name=label(input.name);
+    if (!itemId || !name || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name and up to five JPEG images under 900 KB each.');
+    const price=kind==='products'?number(input.price):null, quantity=kind==='products'?stock(input.stockQuantity):number(input.qty), min=kind==='inventory'?number(input.min):null, cost=kind==='inventory'?number(input.cost):null;
+    const acquired=kind==='inventory'&&input.acquiredAt?new Date(input.acquiredAt):null;
+    if (quantity===null || (kind==='products'&&price===null) || (kind==='inventory'&&(min===null||cost===null)) || (acquired&&!Number.isFinite(acquired.getTime()))) throw new TypeError('Enter valid price, quantity, cost and date values.');
+    const table=kind==='products'?'products':'inventory_items';
+    const previous=images.length?await pool.query(`SELECT ${kind==='products'?'image_key,':''}image_keys FROM public.${table} WHERE id=$1`,[itemId]):null;
+    if (previous&&!previous.rows.length) throw new TypeError('Item not found.');
+    const keys=[];
+    try {
+      for (const image of images) keys.push(await r2.uploadJpeg(Buffer.from(image.slice('data:image/jpeg;base64,'.length),'base64'),kind==='products'?'products':'inventory'));
+      const updated=kind==='products'
+        ? await pool.query('UPDATE public.products SET name=$2,category=$3,description=$4,operation=$5,price_ngn=$6,stock_quantity=$7,image_keys=COALESCE($8,image_keys),image_key=COALESCE($9,image_key),main_image_index=CASE WHEN $8 IS NULL THEN main_image_index ELSE 0 END,updated_at=now() WHERE id=$1 RETURNING id',[itemId,name,label(input.cat,80),label(input.desc,500),label(input.operation,80),price,quantity,keys.length?keys:null,keys[0] || null])
+        : await pool.query('UPDATE public.inventory_items SET name=$2,item_type=$3,sku=NULLIF($4,\'\'),quantity=$5,unit=$6,minimum_quantity=$7,location=$8,unit_cost=$9,brought_by=$10,acquired_at=$11,image_keys=COALESCE($12,image_keys) WHERE id=$1 RETURNING id',[itemId,name,label(input.type,80),label(input.sku,80),quantity,label(input.unit,20)||'pcs',min,label(input.loc,120),cost,label(input.broughtBy,120),acquired,keys.length?keys:null]);
+      if (!updated.rows.length) throw new TypeError('Item not found.');
+    } catch (error) {
+      await Promise.all(keys.map(key=>r2.remove(key).catch(()=>{})));
+      throw error;
+    }
+    if (previous) for (const key of new Set([previous.rows[0].image_key,...(previous.rows[0].image_keys || [])].filter(Boolean))) await r2.remove(key).catch(error=>console.error('R2 cleanup failed:',error.message));
   } else if (action === 'mainImage' && kind === 'products') {
     const productId=id(input.id), index=Number(input.index);
     if (!productId || !Number.isInteger(index) || index < 0 || index > 4) throw new TypeError('Choose a valid product image.');
