@@ -6,11 +6,12 @@ const html = fs.readFileSync(require('node:path').join(__dirname,'../private/str
 const script = [...html.matchAll(/<script(?:[^>]*)>([\s\S]*?)<\/script>/g)].at(-1)[1];
 const elements = new Map();
 const get = id => {
-  if (!elements.has(id)) elements.set(id,{innerHTML:'',textContent:'',value:'',hidden:true,onclick:null,setAttribute(){}});
+  if (!elements.has(id)) elements.set(id,{innerHTML:'',textContent:'',value:'',hidden:true,onclick:null,setAttribute(){},focus(){}});
   return elements.get(id);
 };
 let working = false;
 const context = {document:{getElementById:get,addEventListener(){}},window:{addEventListener(){}},location:{hash:'',pathname:'/admin'},fetch:async()=>{if(!working)throw Error('Database unavailable');return {ok:true,json:async()=>({products:[],inv:[],quotes:[]})}},performance:{now:()=>0},setInterval(){},setTimeout(){},clearTimeout(){},console};
+context.history={pushState(_state,_title,url){const [path,hash='']=url.split('#');context.location.pathname=path;context.location.hash=hash?'#'+hash:''}};
 (async()=>{
   vm.runInNewContext(script,context);
   assert.match(get('tabs').innerHTML,/data-tab="products"/);
@@ -19,7 +20,7 @@ const context = {document:{getElementById:get,addEventListener(){}},window:{addE
   await new Promise(resolve=>setImmediate(resolve));
   assert.match(get('view').innerHTML,/Database data unavailable/);
   assert.doesNotMatch(get('view').innerHTML,/Total revenue/);
-  context.want='budget';context.show();
+  context.location.hash='#budget';context.show();
   assert.match(get('view').innerHTML,/Database data unavailable/);
   working=true;
   assert.equal(await context.refresh(),true);
@@ -37,7 +38,7 @@ const context = {document:{getElementById:get,addEventListener(){}},window:{addE
   assert.equal(get('uploadOverlay').hidden,true);
   context.fetch=originalFetch;
   context.DB={products:[{id:1,name:'Gate',cat:'Garden gate',price:250,stockQuantity:2,desc:'Steel gate',images:['/api/product-image/1/0?v=one'],img:'/api/product-image/1?v=one'}],inv:[{id:2,name:'Drill',type:'Tool',sku:'D-1',qty:1,unit:'pcs',cost:100,images:['/api/admin/inventory-image/2/0?v=two'],img:'/api/admin/inventory-image/2?v=two'}],quotes:[],usage:[]};
-  context.want='';context.location.pathname='/admin/products';context.show();
+  context.location.hash='';context.location.pathname='/admin/products';context.show();
   assert.match(get('view').innerHTML,/href="\/admin\/products\/1"/);
   context.location.pathname='/admin/products/1';context.show();
   assert.match(get('view').innerHTML,/Steel gate/);
@@ -48,6 +49,21 @@ const context = {document:{getElementById:get,addEventListener(){}},window:{addE
   assert.match(get('view').innerHTML,/D-1/);
   assert.match(get('view').innerHTML,/Save changes/);
   assert.doesNotMatch(get('view').innerHTML,/data-quote-inventory="2"/);
+  context.navigate('dashboard');
+  assert.equal(context.location.pathname,'/admin');
+  assert.equal(context.location.hash,'#dashboard');
+  assert.equal(context.cur,'dashboard');
+  context.show();
+  assert.equal(context.cur,'dashboard');
+  context.selectUsageItem(2);
+  assert.equal(context.cur,'inventory');
+  assert.equal(get('usageItem').value,'2');
+  context.DB.quotes=[{id:3,no:'Q-3',cust:'Ada',email:'ada@example.test',phone:'123',addr:'Site',valid:'2026-12-01',inst:10,disc:0,notes:'Old terms',items:[{d:'Gate',q:1,p:250}],date:'2026-11-12',status:'Draft'}];
+  context.editQuote(context.DB.quotes[0]);
+  assert.equal(context.cur,'quotes');
+  assert.equal(context.editingQuoteId,3);
+  assert.equal(get('qc').value,'Ada');
+  assert.match(get('view').innerHTML,/Save changes/);
   working=false;
   assert.equal(await context.refresh(),false);
   assert.match(get('view').innerHTML,/Showing previously loaded data/);

@@ -127,13 +127,19 @@ async function mutate(kind, action, input) {
     if (!Number.isFinite(returned.getTime()) || returned.getTime() > Date.now() + 60000) throw new TypeError('Enter a valid return time.');
     const result=await pool.query('UPDATE public.inventory_usage SET returned_at=$2 WHERE id=$1 AND returned_at IS NULL AND taken_at<=$2 RETURNING id',[input.id,returned]);
     if (!result.rows.length) throw new TypeError('The usage record was returned already, or its return time is before it was taken.');
-  } else if (action === 'add' && kind === 'quotes') {
+  } else if (['add','edit'].includes(action) && kind === 'quotes') {
     const customer = label(input.cust), items = input.items;
     if (!customer || !Array.isArray(items) || !items.length || items.length > 50 || items.some(i => !label(i.d) || number(i.q) === null || Number(i.q) <= 0 || number(i.p) === null)) throw new TypeError('Enter a customer and valid quote items.');
     const inst = number(input.inst), disc = number(input.disc);
     if (inst === null || disc === null || disc > 100 || (input.valid && !/^\d{4}-\d{2}-\d{2}$/.test(input.valid))) throw new TypeError('Enter valid installation, discount and date values.');
-    const numberValue = `Q-${Date.now()}`;
-    await pool.query('INSERT INTO public.quotes (quote_number,customer_name,customer_email,customer_phone,address,items,installation_cost,discount,status,notes,valid_until) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,\'Draft\',$9,$10)',[numberValue,customer,label(input.email,254),label(input.phone,60),label(input.addr,300),JSON.stringify(items.map(i => ({d:label(i.d),q:Number(i.q),p:Number(i.p)}))),inst,disc,label(input.notes,2000),input.valid || null]);
+    const fields=[customer,label(input.email,254),label(input.phone,60),label(input.addr,300),JSON.stringify(items.map(i => ({d:label(i.d),q:Number(i.q),p:Number(i.p)}))),inst,disc,label(input.notes,2000),input.valid || null];
+    if (action === 'add') {
+      await pool.query('INSERT INTO public.quotes (quote_number,customer_name,customer_email,customer_phone,address,items,installation_cost,discount,status,notes,valid_until) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,\'Draft\',$9,$10)',[`Q-${Date.now()}`,...fields]);
+    } else {
+      if (!id(input.id)) throw new TypeError('Choose a quotation to edit.');
+      const updated=await pool.query('UPDATE public.quotes SET customer_name=$2,customer_email=$3,customer_phone=$4,address=$5,items=$6,installation_cost=$7,discount=$8,notes=$9,valid_until=$10 WHERE id=$1 RETURNING id',[input.id,...fields]);
+      if (!updated.rows.length) throw new TypeError('Quotation not found.');
+    }
   } else if (action === 'remove' && ['products','inventory','quotes'].includes(kind)) {
     const table = {products:'products',inventory:'inventory_items',quotes:'quotes'}[kind];
     if (!id(input.id)) throw new TypeError('Invalid item ID.');
