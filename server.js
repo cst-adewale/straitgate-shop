@@ -123,7 +123,7 @@ async function handleAdminData(req, res, pathname) {
     if (req.method !== 'POST' || pathname !== '/api/admin/data') return json(res, 405, {error:'Method not allowed.'});
     if (req.headers.origin !== publicOrigin) return json(res, 403, {error:'Request origin not allowed.'});
     let input;
-    try { input = JSON.parse(await readBody(req, 1600000)); }
+    try { input = JSON.parse(await readBody(req, 6500000)); }
     catch { return json(res, 400, {error:'Invalid request.'}); }
     await adminData.mutate(input.kind, input.action, input.data || {});
     return json(res, 200, await adminData.list());
@@ -374,7 +374,7 @@ const server = http.createServer(async (req, res) => {
       return send(res,200,seo.productPage(template,product,publicOrigin),{'Content-Type':types['.html']});
     } catch (error) { console.error('Product page failed:',error.code || error.message); return send(res,503,'Product unavailable'); }
   }
-  if (['/admin','/admin/products','/admin/inventory','/straitgate-admin.html'].includes(pathname)) {
+  if (['/admin','/admin/products','/admin/inventory','/straitgate-admin.html'].includes(pathname) || /^\/admin\/(products|inventory)\/\d+$/.test(pathname)) {
     try {
       if (!await adminSession(req.headers.cookie)) return send(res, 302, '', {Location:'/straitgate-admin-login.html'});
       return serveFile(res, adminFile);

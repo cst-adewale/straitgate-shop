@@ -51,7 +51,7 @@ async function mutate(kind, action, input) {
   } else if (action === 'add' && kind === 'products') {
     const name = label(input.name), price = number(input.price), quantity = stock(input.stockQuantity), images = input.images || (input.img ? [input.img] : []);
     const mainIndex = input.mainImageIndex === undefined ? 0 : Number(input.mainImageIndex);
-    if (!name || price === null || quantity === null || !Array.isArray(images) || images.length > 5 || !Number.isInteger(mainIndex) || mainIndex < 0 || (images.length && mainIndex >= images.length) || images.some(image => typeof image !== 'string' || image.length > 300000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, price, whole-number stock quantity and up to five JPEG images under 225 KB each.');
+    if (!name || price === null || quantity === null || !Array.isArray(images) || images.length > 5 || !Number.isInteger(mainIndex) || mainIndex < 0 || (images.length && mainIndex >= images.length) || images.some(image => typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, price, whole-number stock quantity and up to five JPEG images under 900 KB each.');
     const slug = `product-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
     if (input.removeBackground && !process.env.REMOVEBG_API_KEY) throw new TypeError('Configure REMOVEBG_API_KEY on the server to remove backgrounds.');
     const imageKeys = [];
@@ -82,7 +82,7 @@ async function mutate(kind, action, input) {
   } else if (action === 'add' && kind === 'inventory') {
     const name = label(input.name), qty = number(input.qty), min = number(input.min), cost = number(input.cost);
     const images=input.images || [];
-    if (!name || qty === null || min === null || cost === null || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 300000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, valid numbers and up to five JPEG images under 225 KB each.');
+    if (!name || qty === null || min === null || cost === null || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, valid numbers and up to five JPEG images under 900 KB each.');
     const acquired=input.acquiredAt ? new Date(input.acquiredAt) : null;
     if (acquired && !Number.isFinite(acquired.getTime())) throw new TypeError('Enter a valid date and time.');
     const keys=[];
