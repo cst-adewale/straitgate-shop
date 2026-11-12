@@ -76,7 +76,7 @@ async function mutate(kind, action, input) {
     if (!changed.rows.length) throw new TypeError('Product not found.');
   } else if (action === 'edit' && ['products','inventory'].includes(kind)) {
     const itemId=id(input.id), images=input.images || [], name=label(input.name);
-    if (!itemId || !name || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name and up to five JPEG images under 900 KB each.');
+    if (!itemId || !name || (kind==='inventory'&&!['Equipment','Tool','Product','Material'].includes(input.type)) || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a valid name and type, and up to five JPEG images under 900 KB each.');
     const price=kind==='products'?number(input.price):null, quantity=kind==='products'?stock(input.stockQuantity):number(input.qty), min=kind==='inventory'?number(input.min):null, cost=kind==='inventory'?number(input.cost):null;
     const acquired=kind==='inventory'&&input.acquiredAt?new Date(input.acquiredAt):null;
     if (quantity===null || (kind==='products'&&price===null) || (kind==='inventory'&&(min===null||cost===null)) || (acquired&&!Number.isFinite(acquired.getTime()))) throw new TypeError('Enter valid price, quantity, cost and date values.');
@@ -103,7 +103,7 @@ async function mutate(kind, action, input) {
   } else if (action === 'add' && kind === 'inventory') {
     const name = label(input.name), qty = number(input.qty), min = number(input.min), cost = number(input.cost);
     const images=input.images || [];
-    if (!name || qty === null || min === null || cost === null || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, valid numbers and up to five JPEG images under 900 KB each.');
+    if (!name || !['Equipment','Tool','Product','Material'].includes(input.type) || qty === null || min === null || cost === null || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, valid type and numbers, and up to five JPEG images under 900 KB each.');
     const acquired=input.acquiredAt ? new Date(input.acquiredAt) : null;
     if (acquired && !Number.isFinite(acquired.getTime())) throw new TypeError('Enter a valid date and time.');
     const keys=[];
@@ -119,7 +119,7 @@ async function mutate(kind, action, input) {
     const taken=input.takenAt ? new Date(input.takenAt) : new Date();
     if (!Number.isFinite(taken.getTime()) || taken.getTime() > Date.now() + 60000) throw new TypeError('Enter a valid time taken.');
     const item=await pool.query("SELECT item_type FROM public.inventory_items WHERE id=$1",[input.id]);
-    if (!['Machine','Tool','Equipment'].includes(item.rows[0]?.item_type)) throw new TypeError('Only equipment and tools can be checked out.');
+    if (!['Tool','Equipment'].includes(item.rows[0]?.item_type)) throw new TypeError('Only equipment and tools can be checked out.');
     await pool.query('INSERT INTO public.inventory_usage(item_id,used_by,taken_at) VALUES($1,$2,$3)',[input.id,label(input.usedBy,120),taken]);
   } else if (kind === 'inventory' && action === 'return') {
     if (!id(input.id)) throw new TypeError('Invalid usage record.');

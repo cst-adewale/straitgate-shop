@@ -6,7 +6,7 @@ const html = fs.readFileSync(require('node:path').join(__dirname,'../private/str
 const script = [...html.matchAll(/<script(?:[^>]*)>([\s\S]*?)<\/script>/g)].at(-1)[1];
 const elements = new Map();
 const get = id => {
-  if (!elements.has(id)) elements.set(id,{innerHTML:'',textContent:'',value:'',onclick:null,setAttribute(){}});
+  if (!elements.has(id)) elements.set(id,{innerHTML:'',textContent:'',value:'',hidden:true,onclick:null,setAttribute(){}});
   return elements.get(id);
 };
 let working = false;
@@ -15,6 +15,7 @@ const context = {document:{getElementById:get,addEventListener(){}},window:{addE
   vm.runInNewContext(script,context);
   assert.match(get('tabs').innerHTML,/data-tab="products"/);
   assert.match(get('tabs').innerHTML,/data-tab="budget"/);
+  assert.deepEqual([...context.ITYPES],['Equipment','Tool','Product','Material']);
   await new Promise(resolve=>setImmediate(resolve));
   assert.match(get('view').innerHTML,/Database data unavailable/);
   assert.doesNotMatch(get('view').innerHTML,/Total revenue/);
@@ -23,6 +24,18 @@ const context = {document:{getElementById:get,addEventListener(){}},window:{addE
   working=true;
   assert.equal(await context.refresh(),true);
   assert.match(get('view').innerHTML,/Sales-based budget/);
+  assert.equal(get('uploadOverlay').hidden,true);
+  assert.equal(context.actionProgress('quotes','add'),'Creating quotation...');
+  const originalFetch=context.fetch;
+  let resolveSave;
+  context.fetch=()=>new Promise(resolve=>{resolveSave=resolve});
+  const saving=context.change('quotes','add',{});
+  assert.equal(get('uploadOverlay').hidden,false);
+  assert.equal(get('uploadStatus').textContent,'Creating quotation...');
+  resolveSave({ok:true,json:async()=>({products:[],inv:[],quotes:[]})});
+  assert.equal(await saving,true);
+  assert.equal(get('uploadOverlay').hidden,true);
+  context.fetch=originalFetch;
   context.DB={products:[{id:1,name:'Gate',cat:'Garden gate',price:250,stockQuantity:2,desc:'Steel gate',images:['/api/product-image/1/0?v=one'],img:'/api/product-image/1?v=one'}],inv:[{id:2,name:'Drill',type:'Tool',sku:'D-1',qty:1,unit:'pcs',cost:100,images:['/api/admin/inventory-image/2/0?v=two'],img:'/api/admin/inventory-image/2?v=two'}],quotes:[],usage:[]};
   context.want='';context.location.pathname='/admin/products';context.show();
   assert.match(get('view').innerHTML,/href="\/admin\/products\/1"/);
@@ -34,6 +47,7 @@ const context = {document:{getElementById:get,addEventListener(){}},window:{addE
   context.location.pathname='/admin/inventory/2';context.show();
   assert.match(get('view').innerHTML,/D-1/);
   assert.match(get('view').innerHTML,/Save changes/);
+  assert.doesNotMatch(get('view').innerHTML,/data-quote-inventory="2"/);
   working=false;
   assert.equal(await context.refresh(),false);
   assert.match(get('view').innerHTML,/Showing previously loaded data/);

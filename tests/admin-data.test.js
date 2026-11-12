@@ -43,6 +43,7 @@ const data = require('../admin-data');
   await data.mutate('payments','confirm',{productId:1,amount:500,reference:'verified-1'});
   assert.match(statements[21].sql,/INSERT INTO public\.confirmed_payments/);
   await assert.rejects(()=>data.mutate('inventory','checkout',{id:1,usedBy:''}),TypeError);
+  await assert.rejects(()=>data.mutate('inventory','add',{name:'Invalid type',type:'Other',qty:1,min:0,cost:0}),TypeError);
   await assert.rejects(() => data.mutate('products','add',{name:'Bad',price:1,img:'javascript:alert(1)'}), TypeError);
   await assert.rejects(() => data.mutate('inventory','adjust',{id:1,delta:100}), TypeError);
   console.log('Admin database actions and validation pass');
