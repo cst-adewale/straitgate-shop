@@ -196,32 +196,52 @@ footer{border-top:1px solid var(--line)}
 @media print{html,body{margin:0;background:#fff;padding:0}.page,.toast{display:none!important}#pa{display:block;padding:0;font-size:var(--fs-md);print-color-adjust:exact;-webkit-print-color-adjust:exact}#pa table{font-size:var(--fs-md)}}
 
 /* ── Responsive breakpoints ── */
-@media(max-width:1000px){.g4{grid-template-columns:repeat(2,1fr)}.g21,.gf{grid-template-columns:1fr}.g3{grid-template-columns:1fr 1fr}}
+footer{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+@media(max-width:1000px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g21,.gf{grid-template-columns:1fr}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:768px){
+  .g2,.g3,.f{grid-template-columns:1fr}
+  .detail-gallery{grid-template-columns:1fr}
+  .inv-controls{flex-direction:column;align-items:stretch}
+  .inv-controls input[type=search],.inv-controls select,.inv-controls input#ibfilter,.inv-controls .sg-select-wrap{width:100%!important;min-width:0!important;max-width:none!important;flex:none}
+  .calc-tile{width:100%;justify-self:stretch}
+  .calc{width:100%;max-width:340px;margin:0 auto}
+}
 @media(max-width:620px){
-  .g2,.g3,.f{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}
-  .qi{grid-template-columns:1fr 56px 80px 28px}.sp{margin-left:0}
-  .bar input,.bar select{min-width:0;flex:1}
-  .health-metrics{grid-template-columns:1fr 1fr}
+  .g2,.g3,.f{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .qi{grid-template-columns:1fr 1fr;gap:8px;padding:10px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--line)}
+  .qi input:first-child{grid-column:1/-1}
+  .qi button[data-qrm]{grid-column:1/-1;width:100%;height:30px}
+  .sp{margin-left:0}
+  .bar input,.bar select,.bar .sg-select-wrap{min-width:0!important;max-width:none!important;width:100%!important;flex:1 1 100%}
+  .kpi .d .sg-select-wrap{width:100%!important;min-width:0!important}
+  .browse-grid{grid-template-columns:repeat(auto-fill,minmax(min(155px,100%),1fr))}
+  .browse-card .bar{flex-wrap:wrap}
+  .browse-card .bar input{flex:1 1 70px!important;width:auto!important}
+  .browse-card .bar .btn{flex:1 1 auto}
+  .usage-return{flex-direction:column;align-items:stretch;white-space:normal}
+  .usage-return input{width:100%;flex:none}
+  .health-metrics{grid-template-columns:1fr}
   .budget-metrics{grid-template-columns:1fr}
-  .page{padding:20px 14px 32px}
-  header{align-items:flex-start}
+  .page{padding:18px 12px 32px}
+  header{align-items:center}
   .logo small{display:block;margin:2px 0 0}
-  .who{order:3;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .who{order:3;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
   .theme-toggle{margin-left:auto}
-  h1{font-size:clamp(40px,12vw,64px);margin:28px 0 18px}
-  #tabs{margin-left:-14px;margin-right:-14px;padding:0 14px 8px;scrollbar-width:auto;scroll-snap-type:x proximity}
+  h1{font-size:clamp(34px,10vw,56px);margin:22px 0 16px;overflow-wrap:anywhere}
+  #tabs{margin-left:-12px;margin-right:-12px;padding:0 12px 8px;scrollbar-width:none;scroll-snap-type:x proximity}
   #tabs .chip{scroll-snap-align:start}
-  .tile{padding:16px}
-  .tw table:has(thead){min-width:560px}
+  .tile{padding:14px}
+  .tw{margin:0 -4px;padding:0 4px}
+  .tw table:has(thead){min-width:480px}
   .bar{align-items:stretch}
-  .bar input,.bar select{width:100%;flex-basis:100%}
-  .bar .btn{justify-content:center}
-  .qi{grid-template-columns:minmax(0,1fr) 52px 72px 28px;gap:5px}
-  .qi input{min-width:0;padding:0 7px}
+  .bar .btn{justify-content:center;flex:1 1 auto}
+  .bar .mic-btn{flex:none;width:36px}
   .detail-row{flex-direction:column;gap:3px}.detail-row strong{text-align:left}
-  .toast{width:max-content;max-width:calc(100vw - 28px);text-align:center}
+  .toast{width:max-content;max-width:calc(100vw - 24px);text-align:center}
 }
 @media(max-width:480px){
+  .g4{grid-template-columns:1fr}
+  .browse-grid{grid-template-columns:1fr}
   .cv{grid-template-columns:1fr}
   .budget-rate{align-items:stretch}.budget-rate input{width:100%}
   .health-head .btn{width:100%;justify-content:center}
@@ -233,9 +253,6 @@ footer{border-top:1px solid var(--line)}
   .f{gap:10px}
 }
 @media(max-width:380px){
-  .g4{grid-template-columns:1fr}
-  .qi{grid-template-columns:minmax(0,1fr) 46px 64px 28px}
-  .qi input{font-size:var(--fs-xs)}
   .who{font-size:var(--fs-xs)}
   .who .btn{padding:0 9px}
 }
@@ -251,7 +268,7 @@ footer{border-top:1px solid var(--line)}
 <h1 id="ttl">Dashboard</h1>
 <div class="tabs" role="tablist" id="tabs"></div>
 <div id="view"></div>
-<footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px"><a href="/straitgate-home.html">Home</a> &nbsp;·&nbsp; <a href="/straitgate-catalog.html">Catalog</a> &nbsp;·&nbsp; <a href="/admin/products">Products page</a> &nbsp;·&nbsp; <a href="/admin/inventory">Inventory page</a></footer>
+<footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px"><a href="/straitgate-home.html">Home</a><span>·</span><a href="/straitgate-catalog.html">Catalog</a><span>·</span><a href="/admin/products">Products page</a><span>·</span><a href="/admin/inventory">Inventory page</a></footer>
 </div>
 <div id="pa"></div>
 <div class="toast" id="toast" role="status"></div>
