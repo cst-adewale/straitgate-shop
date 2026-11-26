@@ -278,19 +278,20 @@ function barChart(l,v,hi,caption){var m=Math.max(1,Math.max.apply(null,v)*1.15),
  [0,.5,1].forEach(function(f){var y=h-24-(h-40)*f;s+='<line x1="0" x2="'+w+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/>'});
  v.forEach(function(x,i){var bh=(h-40)*x/m,y=h-24-bh;s+='<rect x="'+(i*bw+bw*.18)+'" y="'+y+'" width="'+bw*.64+'" height="'+bh+'" rx="4" fill="'+(i===hi?'#ccf97c':'var(--ink)')+'"><title>'+l[i]+': '+(caption==='Revenue'?gbp(x):x)+'</title></rect><text x="'+(i*bw+bw/2)+'" y="'+(h-8)+'" font-size="9" text-anchor="middle" fill="var(--mute)">'+l[i]+'</text>'});
  return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+caption+' by month">'+s+'</svg>'}
-function donut(d){var total=d.reduce(function(s,x){return s+x[1]},0);if(!total)return '<div class="empty">No quotation values recorded yet.</div>';var r=50,C=2*Math.PI*r,o=0,s='';
+function donut(d){var total=d.reduce(function(s,x){return s+x[1]},0);if(!total)return '<div class="empty">No shop catalog stock value yet.</div>';var r=50,C=2*Math.PI*r,o=0,s='';
  d.forEach(function(x){var len=C*x[1]/total;s+='<circle cx="70" cy="70" r="'+r+'" fill="none" stroke="'+x[2]+'" stroke-width="24" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-o)+'" transform="rotate(-90 70 70)"><title>'+esc(x[0])+': '+gbp(x[1])+'</title></circle>';o+=len});
- return '<svg class="ch" viewBox="0 0 140 140" style="max-width:190px;margin:0 auto" role="img" aria-label="Quotation value breakdown">'+s+'<text x="70" y="75" text-anchor="middle" font-size="13" fill="var(--ink)">'+gbp(total)+'</text></svg><div class="leg">'+d.map(function(x){return '<span><i style="background:'+x[2]+'"></i>'+esc(x[0])+' ('+gbp(x[1])+')</span>'}).join('')+'</div>'}
+ return '<svg class="ch" viewBox="0 0 140 140" style="max-width:190px;margin:0 auto" role="img" aria-label="Catalog stock value by category">'+s+'<text x="70" y="75" text-anchor="middle" font-size="13" fill="var(--ink)">'+gbp(total)+'</text></svg><div class="leg">'+d.map(function(x){return '<span><i style="background:'+x[2]+'"></i>'+esc(x[0])+' ('+gbp(x[1])+')</span>'}).join('')+'</div>'}
 function line(l,v){var m=Math.max(1,Math.max.apply(null,v)*1.15),w=400,h=170,p=v.map(function(x,i){return [i*(w-20)/Math.max(1,v.length-1)+10,h-24-(h-40)*x/m]}),s='';
  s+='<polyline points="'+p.map(function(a){return a.join(',')}).join(' ')+'" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>';
  p.forEach(function(a,i){s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="3.5" fill="'+(i===v.length-1?'#ccf97c':'var(--ink)')+'" stroke="var(--ink)"><title>'+l[i]+': '+v[i]+'</title></circle><text x="'+a[0]+'" y="'+(h-6)+'" font-size="9" text-anchor="middle" fill="var(--mute)">'+l[i]+'</text>'});
- return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Activity trend">'+s+'</svg>'}
+ return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Visitor & signup activity">'+s+'</svg>'}
 function dashboardSeries(){
- var now=new Date(),mLabels=[],mQuotes=[],mRev=[],i;
- for(i=5;i>=0;i--){var d=new Date(now.getFullYear(),now.getMonth()-i,1),ym=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');mLabels.push(d.toLocaleDateString('en-GB',{month:'short'}));var mq=DB.quotes.filter(function(q){return (q.date||'').slice(0,7)===ym});mQuotes.push(mq.length);mRev.push(mq.filter(function(q){return q.status==='Accepted'}).reduce(function(s,q){return s+totals(q).total},0))}
- var statusColors=[['Accepted','var(--lime)'],['Sent','var(--blu)'],['Draft','var(--mute)'],['Declined','var(--red)']],statusDonut=statusColors.map(function(sc){var sum=DB.quotes.filter(function(q){return q.status===sc[0]}).reduce(function(s,q){return s+totals(q).total},0);return [sc[0],sum,sc[1]]}).filter(function(x){return x[1]>0});
- var catPalette=['#ccf97c','#1f5fe0','#f5c20f','#2e7d12','#e5271d','#8a8a8a','#5b8cff'],catLabels=CATS.map(function(c){return c.split(' ')[0]}),catCounts=CATS.map(function(c){return DB.products.filter(function(p){return p.cat===c}).length});
- return {mLabels:mLabels,mQuotes:mQuotes,mRev:mRev,statusDonut:statusDonut,catLabels:catLabels,catCounts:catCounts,catPalette:catPalette}
+ var catPalette=['#ccf97c','#1f5fe0','#f5c20f','#2e7d12','#e5271d','#8a8a8a','#5b8cff'];
+ var catLabels=CATS.map(function(c){return c.split(' ')[0]});
+ var catStockUnits=CATS.map(function(c){return DB.products.filter(function(p){return p.cat===c}).reduce(function(s,p){return s+(Number(p.stockQuantity)||0)},0)});
+ var catValueDonut=CATS.map(function(c,idx){var val=DB.products.filter(function(p){return p.cat===c}).reduce(function(s,p){return s+(Number(p.price)||0)*Math.max(1,Number(p.stockQuantity)||1)},0);return [c,val,catPalette[idx%catPalette.length]]}).filter(function(x){return x[1]>0});
+ var tLabels=['30d avg/wk','7d total','Last 24h'],tTraffic=[Math.round((DB.traffic?.month||0)/4.3),DB.traffic?.week||0,DB.traffic?.day||0],tSignups=[DB.signups?.month||0,DB.signups?.week||0,DB.signups?.day||0];
+ return {catLabels:catLabels,catStockUnits:catStockUnits,catValueDonut:catValueDonut,tLabels:tLabels,tTraffic:tTraffic,tSignups:tSignups}
 }
 
 /* views */
@@ -304,7 +305,7 @@ V.dashboard=function(){
  return '<div class="grid g4">'+
  metricCard('traffic','Unique visitors',DB.traffic)+metricCard('signups','New signups',DB.signups)+metricCard('revenue','Revenue',DB.revenue)+'<div class="tile kpi"><div class="l">Top product</div><div class="v">'+esc(DB.topProduct?.name||'—')+'</div><div class="d">'+(DB.topProduct?.views||0)+' views</div></div></div>'+
  '<div class="grid g3" style="margin-top:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Products</div><div class="v">'+DB.products.length+'</div><div class="d">In shop catalog</div></div><div class="tile kpi"><div class="l">Low stock alerts</div><div class="v'+(low?' dn':'')+'">'+low+'</div><div class="d">'+(low?'Items at or below reorder level':'All stock levels healthy')+'</div></div><div class="tile kpi"><div class="l">Tools checked out</div><div class="v">'+activeTools+'</div><div class="d">'+(activeTools?'Currently in field use':'All equipment returned')+'</div></div></div>'+
- '<div class="grid g3" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Accepted quotation value (6 mos)</h3>'+barChart(ds.mLabels,ds.mRev,5,'Revenue')+'</div><div class="tile"><h3>Quotation pipeline by status</h3>'+donut(ds.statusDonut)+'</div><div class="tile"><h3>Quotations created (6 mos)</h3>'+line(ds.mLabels,ds.mQuotes)+'<div class="note">Products by category: '+CATS.map(function(c,idx){return esc(c)+': '+ds.catCounts[idx]}).join(' · ')+'</div></div></div>'+
+ '<div class="grid g3" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Shop stock units by category</h3>'+barChart(ds.catLabels,ds.catStockUnits,0,'Units in stock')+'</div><div class="tile"><h3>Catalog value by category</h3>'+donut(ds.catValueDonut)+'</div><div class="tile"><h3>Shop visitor velocity</h3>'+line(ds.tLabels,ds.tTraffic)+'<div class="note">Customer signups — 30d: '+(DB.signups?.month||0)+' · 7d: '+(DB.signups?.week||0)+' · 24h: '+(DB.signups?.day||0)+'</div></div></div>'+
  '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h3>Recent quotations</h3>'+quoteTable(qs.slice(-4).reverse(),true)+'</div>'};
 
 V.products=function(){

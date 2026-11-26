@@ -58,11 +58,18 @@
   function renderCart() {
     document.querySelector('.drawer-shade')?.remove();
     const shade=document.createElement('div');shade.className='drawer-shade';
-    const lines=Object.entries(state.cart).map(([name,qty])=>'<div class="cart-line"><div><b>'+escape(name)+'</b><small>Made to measure · Quote item</small><div class="quantity"><button data-action="minus" data-name="'+escape(name)+'">−</button><span>'+qty+'</span><button data-action="plus" data-name="'+escape(name)+'">+</button></div></div><button class="remove-cart" data-action="remove" data-name="'+escape(name)+'">Remove</button></div>').join('');
-    shade.innerHTML='<aside class="cart-drawer"><div class="drawer-head"><div><small>YOUR SELECTION</small><h2>Cart</h2></div><button class="close-drawer" aria-label="Close cart">×</button></div><div class="cart-lines">'+(lines||'<p>Your cart is empty.</p>')+'</div><div class="cart-total"><span>Quote items</span><strong>'+Object.values(state.cart).reduce((a,b)=>a+b,0)+'</strong></div><button class="checkout">Continue to quote request</button></aside>';
+    let totalAmount = 0;
+    const lines=Object.entries(state.cart).map(([name,qty])=>{
+      const prod = state.products.find(p => p.name === name);
+      const unitPrice = prod ? prod.price : 0;
+      const lineTotal = unitPrice * qty;
+      totalAmount += lineTotal;
+      return '<div class="cart-line"><div><b>'+escape(name)+'</b><small>'+(unitPrice ? money(unitPrice)+' each · Subtotal: '+money(lineTotal) : 'Ready for delivery')+'</small><div class="quantity"><button data-action="minus" data-name="'+escape(name)+'">−</button><span>'+qty+'</span><button data-action="plus" data-name="'+escape(name)+'">+</button></div></div><button class="remove-cart" data-action="remove" data-name="'+escape(name)+'">Remove</button></div>';
+    }).join('');
+    shade.innerHTML='<aside class="cart-drawer"><div class="drawer-head"><div><small>YOUR SHOPPING BAG</small><h2>Cart</h2></div><button class="close-drawer" aria-label="Close cart">×</button></div><div class="cart-lines">'+(lines||'<p>Your cart is empty.</p>')+'</div><div class="cart-total"><span>Total ('+Object.values(state.cart).reduce((a,b)=>a+b,0)+' items)</span><strong>'+money(totalAmount)+'</strong></div><button class="checkout">Proceed to checkout</button></aside>';
     document.body.append(shade);
     shade.addEventListener('click',event=>{if(event.target===shade||event.target.closest('.close-drawer'))shade.remove();const button=event.target.closest('[data-action]');if(!button)return;const name=button.dataset.name;if(button.dataset.action==='plus')state.cart[name]++;if(button.dataset.action==='minus')state.cart[name]=Math.max(0,state.cart[name]-1);if(button.dataset.action==='remove'||!state.cart[name])delete state.cart[name];save();updateCart();renderCart()});
-    shade.querySelector('.checkout').onclick=()=>toast(Object.keys(state.cart).length?'Quote request prepared':'Add a product first');
+    shade.querySelector('.checkout').onclick=()=>toast(Object.keys(state.cart).length?'Proceeding to order checkout':'Add a product to your cart first');
   }
 
   grid.replaceChildren();count.textContent='Loading products…';

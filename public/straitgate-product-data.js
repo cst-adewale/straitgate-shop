@@ -17,14 +17,14 @@
     document.title='Straitgate – '+current.name;
     byId('bc').textContent=current.name;byId('cat').textContent=current.category;byId('name').textContent=current.name;
     byId('price').textContent=money(current.price);byId('desc').textContent=current.description || current.category;
-    byId('cn').textContent=current.finish || 'Not specified';byId('cols').replaceChildren();
-    byId('sn').textContent='Made to measure';byId('sizes').replaceChildren();
-    byId('g').textContent=current.operation || 'Discuss during consultation';
+    byId('cn').textContent=current.finish || 'Standard finish';byId('cols').replaceChildren();
+    byId('sn').textContent=current.stockQuantity === null ? 'Available to order' : (current.stockQuantity > 0 ? current.stockQuantity + ' in stock' : 'Out of stock');byId('sizes').replaceChildren();
+    byId('g').textContent=current.operation || 'Standard operation';
     const images=current.images?.length ? current.images : (current.image ? [current.image] : []);
     if (selectedImage>=images.length) selectedImage=0;
     byId('main').innerHTML=images.length?'<img src="'+escape(images[selectedImage])+'" alt="'+escape(current.name)+'">':image(current);byId('main').setAttribute('aria-label',current.name);
     byId('thumbs').innerHTML=images.map((src,i)=>'<button type="button" data-image="'+i+'" aria-label="Show image '+(i+1)+'" aria-pressed="'+(selectedImage===i)+'"><img src="'+escape(src)+'" alt=""></button>').join('');
-    byId('spec').innerHTML=[['Category',current.category],['Finish',current.finish||'To be selected'],['Operation',current.operation||'To be confirmed'],['Configuration','Made to measure']].map(([name,value])=>'<div>'+escape(name)+'<span>'+escape(value)+'</span></div>').join('');
+    byId('spec').innerHTML=[['Category',current.category],['Finish',current.finish||'Standard'],['Operation',current.operation||'Standard'],['Fulfilment','Direct doorstep delivery']].map(([name,value])=>'<div>'+escape(name)+'<span>'+escape(value)+'</span></div>').join('');
     byId('rel').innerHTML=products.filter(p=>p.id!==current.id).slice(0,3).map(p=>'<a href="/products/'+encodeURIComponent(p.slug)+'"><div class="tile">'+image(p)+'</div><div class="r"><span>'+escape(p.name)+'</span><span>'+money(p.price)+'</span></div><p>'+escape(p.category)+'</p></a>').join('');
   }
   byId('menuToggle').onclick=function(){const open=document.querySelector('nav').classList.toggle('open');this.setAttribute('aria-expanded',open);this.setAttribute('aria-label',open?'Close menu':'Open menu')};
