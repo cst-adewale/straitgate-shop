@@ -30,7 +30,11 @@
     const menu = wrap.querySelector('.sg-select-menu');
     if (!btn || !menu) return;
     const selected = select.options[select.selectedIndex] || select.options[0];
-    btn.textContent = selected ? selected.textContent : '';
+    const nextText = selected ? selected.textContent : '';
+    const sig = Array.from(select.options).map((o, i) => `${i === select.selectedIndex ? '*' : ''}${o.value}:${o.textContent}`).join('|');
+    if (wrap.dataset.sgSig === sig && btn.textContent === nextText) return;
+    wrap.dataset.sgSig = sig;
+    btn.textContent = nextText;
     menu.innerHTML = '';
     Array.from(select.options).forEach((opt, idx) => {
       const item = document.createElement('button');
@@ -98,17 +102,24 @@
     update();
     enhanceSelects();
     if (typeof MutationObserver !== 'undefined' && document.body) {
-      let enhancing = false;
-      new MutationObserver(() => {
-        if (enhancing) return;
-        enhancing = true;
-        try {
-          enhanceSelects();
-          document.querySelectorAll('select.sg-select-native').forEach(syncSelect);
-        } finally {
-          enhancing = false;
-        }
-      }).observe(document.body, {childList: true, subtree: true});
+      let scheduled = false;
+      const observer = new MutationObserver(mutations => {
+        if (scheduled) return;
+        const relevant = mutations.some(m => !m.target.closest?.('.sg-select-menu'));
+        if (!relevant) return;
+        scheduled = true;
+        requestAnimationFrame(() => {
+          observer.disconnect();
+          try {
+            enhanceSelects();
+            document.querySelectorAll('select.sg-select-native').forEach(syncSelect);
+          } finally {
+            scheduled = false;
+            observer.observe(document.body, {childList: true, subtree: true});
+          }
+        });
+      });
+      observer.observe(document.body, {childList: true, subtree: true});
     }
   });
   system.addEventListener('change', () => { if (!root.dataset.theme) update(); });
