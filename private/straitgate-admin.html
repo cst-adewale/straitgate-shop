@@ -333,7 +333,7 @@ V.dashboard=function(){
  '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h3>Recent quotations</h3>'+quoteTable(qs.slice(-4).reverse(),true)+'</div>'};
 
 V.products=function(){
- return '<div class="tile"><h2>Upload a product</h2><div class="f">'+
+ return '<div class="tile"><div class="bar" style="justify-content:space-between"><h2>Upload a product</h2><button class="btn sm" type="button" data-tab="product-browser">Browse products ('+DB.products.length+') →</button></div><div class="f">'+
  '<div><label for="pn">Product name</label><input id="pn" placeholder="e.g. Fortis Red"></div>'+
  '<div><label for="pc">Category</label><select id="pc">'+CATS.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
  '<div><label for="po">Operation</label><select id="po"><option value="">Not specified</option><option>Pivot</option><option>Hinged</option><option>Sliding</option><option>Automated</option></select></div>'+
@@ -387,7 +387,7 @@ var IF='All',IS='',IORDER='newest',IB='';
 V.inventory=function(){
  var inventory=inventoryRows(),val=inventory.reduce(function(s,i){return s+(Number(i.qty)||0)*(i.product?(Number(i.price)||0):(Number(i.cost)||0))},0);
  return '<div class="grid g3" style="margin-bottom:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Items tracked</div><div class="v">'+inventory.length+'</div></div><div class="tile kpi"><div class="l">Total inventory value</div><div class="v">'+gbp(val)+'</div><div class="d">Shop products at listed price; other items at unit cost</div></div><div class="tile kpi"><div class="l">Low stock</div><div class="v">'+inventory.filter(isLowStock).length+'</div></div></div>'+
- '<div class="grid g2" style="align-items:start"><div class="tile"><h2>Add inventory</h2><div class="f"><div class="w"><label for="in">Item name</label><input id="in"></div>'+
+ '<div class="grid g2" style="align-items:start"><div class="tile"><div class="bar" style="justify-content:space-between"><h2>Add inventory</h2><button class="btn sm" type="button" data-tab="inventory-browser">Browse inventory ('+inventory.length+') →</button></div><div class="f"><div class="w"><label for="in">Item name</label><input id="in"></div>'+
  '<div><label for="it">Type</label><select id="it">'+ITYPES.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></div><div><label for="is">SKU</label><input id="is"></div>'+
  '<div><label for="iq">Quantity</label><input id="iq" type="number" min="0" value="1"></div><div><label for="iu">Unit</label><input id="iu" value="pcs"></div>'+
  '<div><label for="im">Reorder level</label><input id="im" type="number" min="0" value="1"></div><div><label for="ic">Unit cost (₦)</label><input id="ic" type="number" min="0" step="0.01" value="0"></div>'+
