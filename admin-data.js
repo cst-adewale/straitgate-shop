@@ -27,7 +27,7 @@ async function list() {
     pool.query("SELECT count(DISTINCT visitor_hash) FILTER (WHERE visited_at>=now()-interval '1 day') AS day,count(DISTINCT visitor_hash) FILTER (WHERE visited_at>=now()-interval '7 days') AS week,count(DISTINCT visitor_hash) FILTER (WHERE visited_at>=now()-interval '30 days') AS month FROM public.site_visits"),
     pool.query("SELECT count(*) FILTER (WHERE created_at>=now()-interval '1 day') AS day,count(*) FILTER (WHERE created_at>=now()-interval '7 days') AS week,count(*) FILTER (WHERE created_at>=now()-interval '30 days') AS month FROM public.customer_profiles"),
     pool.query('SELECT p.id,p.name,count(v.product_id) AS views FROM public.products p LEFT JOIN public.site_visits v ON v.product_id=p.id GROUP BY p.id,p.name ORDER BY views DESC,p.id LIMIT 1'),
-    pool.query("SELECT value FROM public.admin_settings WHERE key='letterhead'"),
+    pool.query("SELECT key,value FROM public.admin_settings WHERE key='letterhead' OR key='active_letterhead' OR key LIKE 'letterhead:%' ORDER BY key"),
     pool.query("SELECT coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '1 day'),0) AS day,coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '7 days'),0) AS week,coalesce(sum(amount_ngn) FILTER (WHERE confirmed_at>=now()-interval '30 days'),0) AS month FROM public.confirmed_payments")
   ]);
   return {
@@ -38,7 +38,8 @@ async function list() {
     traffic:Object.fromEntries(Object.entries(traffic.rows[0]).map(([k,v])=>[k,Number(v)])),
     signups:Object.fromEntries(Object.entries(signups.rows[0]).map(([k,v])=>[k,Number(v)])),
     topProduct:Number(leaders.rows[0]?.views)>0 ? {name:leaders.rows[0].name,views:Number(leaders.rows[0].views)} : null,
-    letterhead:settings.rows[0] ? '/api/admin/letterhead' : '',
+    ...(settings.rows.some(s=>s.key==='letterhead'||s.key==='active_letterhead'||s.key.startsWith('letterhead:'))?{letterheads:settings.rows.filter(s=>s.key==='letterhead'||s.key.startsWith('letterhead:')).map(s=>{let entry;try{entry=s.key==='letterhead'?{name:'Default',image:s.value}:JSON.parse(s.value)}catch{return null}return {id:s.key==='letterhead'?'default':s.key.slice('letterhead:'.length),name:label(entry.name,80)||'Letterhead',url:`/api/admin/letterhead?id=${encodeURIComponent(s.key==='letterhead'?'default':s.key.slice('letterhead:'.length))}`}}).filter(Boolean),activeLetterhead:settings.rows.find(s=>s.key==='active_letterhead')?.value ?? (settings.rows.some(s=>s.key==='letterhead')?'default':'')}:{}),
+    letterhead:(()=>{const selected=settings.rows.find(s=>s.key==='active_letterhead'),active=selected?selected.value:'default';return active&&settings.rows.some(s=>s.key==='letterhead'||s.key===`letterhead:${active}`)?`/api/admin/letterhead?id=${encodeURIComponent(active)}`:''})(),
     revenue:Object.fromEntries(Object.entries(revenue.rows[0]).map(([k,v])=>[k,Number(v)]))
   };
 }
@@ -52,7 +53,23 @@ async function mutate(kind, action, input) {
     await pool.query('INSERT INTO public.confirmed_payments(product_id,reference,amount_ngn) VALUES($1,$2,$3)',[productId,reference,amount]);
   } else if (kind === 'settings' && action === 'letterhead') {
     if (typeof input.image !== 'string' || input.image.length > 1500000 || !/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(input.image)) throw new TypeError('Upload a PNG, JPEG or WebP letterhead under 1 MB.');
-    await pool.query("INSERT INTO public.admin_settings(key,value) VALUES('letterhead',$1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",[input.image]);
+    const name=label(input.name,80)||'Default';
+    const templateId=require('node:crypto').randomUUID();
+    await pool.query('INSERT INTO public.admin_settings(key,value) VALUES($1,$2), (\'active_letterhead\',$3) ON CONFLICT(key) DO UPDATE SET value=excluded.value',[`letterhead:${templateId}`,JSON.stringify({name,image:input.image}),templateId]);
+  } else if (kind === 'settings' && action === 'renameLetterhead') {
+    const templateId=label(input.id,80),name=label(input.name,80);if(!templateId||!name)throw new TypeError('Enter a letterhead name.');
+    const result=await pool.query("SELECT value FROM public.admin_settings WHERE key=$1",[`letterhead:${templateId}`]);if(!result.rows.length)throw new TypeError('Letterhead not found.');
+    let entry;try{entry=JSON.parse(result.rows[0].value)}catch{throw new TypeError('Letterhead could not be updated.')};entry.name=name;
+    await pool.query('UPDATE public.admin_settings SET value=$2 WHERE key=$1',[`letterhead:${templateId}`,JSON.stringify(entry)]);
+  } else if (kind === 'settings' && action === 'selectLetterhead') {
+    const templateId=label(input.id,80);if(!templateId){await pool.query("INSERT INTO public.admin_settings(key,value) VALUES('active_letterhead','') ON CONFLICT(key) DO UPDATE SET value='' ");return}
+    const key=templateId==='default'?'letterhead':`letterhead:${templateId}`;const result=await pool.query('SELECT 1 FROM public.admin_settings WHERE key=$1',[key]);if(!result.rows.length)throw new TypeError('Letterhead not found.');
+    await pool.query("INSERT INTO public.admin_settings(key,value) VALUES('active_letterhead',$1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",[templateId]);
+  } else if (kind === 'settings' && action === 'deleteLetterhead') {
+    const templateId=label(input.id,80);if(!templateId||templateId==='default')throw new TypeError('This letterhead cannot be deleted.');
+    await pool.query('DELETE FROM public.admin_settings WHERE key=$1',[`letterhead:${templateId}`]);
+    const active=await pool.query("SELECT value FROM public.admin_settings WHERE key='active_letterhead'");
+    if(active.rows[0]?.value===templateId){const fallback=await pool.query("SELECT key FROM public.admin_settings WHERE key='letterhead' OR key LIKE 'letterhead:%' ORDER BY CASE WHEN key='letterhead' THEN 0 ELSE 1 END,key LIMIT 1");const next=fallback.rows[0]?.key==='letterhead'?'default':fallback.rows[0]?.key?.slice('letterhead:'.length)||'';await pool.query("UPDATE public.admin_settings SET value=$1 WHERE key='active_letterhead'",[next])}
   } else if (action === 'add' && kind === 'products') {
     const name = label(input.name), price = number(input.price), quantity = stock(input.stockQuantity), images = input.images || (input.img ? [input.img] : []);
     const mainIndex = input.mainImageIndex === undefined ? 0 : Number(input.mainImageIndex);
@@ -189,10 +206,13 @@ async function recordVisit(visitorHash, productId = null) {
   await pool.query('INSERT INTO public.site_visits(visitor_hash,product_id) VALUES($1,$2)',[visitorHash,productId]);
 }
 
-async function getLetterhead() {
+async function getLetterhead(templateId='') {
   if (!pool) return null;
-  const result=await pool.query("SELECT value FROM public.admin_settings WHERE key='letterhead'");
-  return result.rows[0]?.value || null;
+  if(!templateId){const active=await pool.query("SELECT value FROM public.admin_settings WHERE key='active_letterhead'");templateId=active.rows.length?active.rows[0].value:'default'}
+  if(!templateId)return null;
+  if(templateId==='default'){const result=await pool.query("SELECT value FROM public.admin_settings WHERE key='letterhead'");return result.rows[0]?.value||null}
+  const result=await pool.query('SELECT value FROM public.admin_settings WHERE key=$1',[`letterhead:${label(templateId,80)}`]);
+  try{return JSON.parse(result.rows[0]?.value||'null')?.image||null}catch{return null}
 }
 
 module.exports = {configured:!!pool, list, mutate, productImage, inventoryImage, publishedProducts, checkDatabase, recordVisit, getLetterhead};
