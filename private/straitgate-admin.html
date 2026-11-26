@@ -427,7 +427,7 @@ function show(){var detail=location.pathname.match(/^\/admin\/(products|inventor
  if(cur!=='tools'&&!dataLoaded){$('view').innerHTML='<div class="tile" role="status"><h2>'+(dataIssue?'Database data unavailable':'Loading dashboard data…')+'</h2><p>'+(dataIssue?esc(dataIssue):'Connecting to Neon…')+'</p>'+(dataIssue?'<button class="btn" id="dataRetry" type="button">Retry connection</button>':'')+'</div>';return}
  $('view').innerHTML=(dataIssue&&cur!=='tools'?'<div class="tile" role="status" style="margin-bottom:16px"><h3>Showing previously loaded data</h3><p class="note">The database is currently unavailable. Figures may be outdated; saving is paused.</p><button class="btn sm" id="dataRetry" type="button">Retry connection</button></div>':'')+V[cur]();
  if(cur==='budget')updateBudget();if(cur==='health'){renderHealth();if(!healthSamples.length)checkHealth();}
- if(cur==='quotes'){qItems();if(QFORM){Object.keys(QFORM).forEach(function(id){if($(id))$(id).value=QFORM[id]});qSum()}}if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
+ if(cur==='quotes'){qItems();renderQuoteScans();if(QFORM){Object.keys(QFORM).forEach(function(id){if($(id))$(id).value=QFORM[id]});qSum()}}if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
 function val(i){return $(i).value.trim()}
 var speechRec=null,speechListening=false,speechBaseText='';
 async function toggleMic(){
@@ -467,9 +467,11 @@ document.addEventListener('click',async function(e){if(e.target.closest('.sg-sel
  if(d.stock){var stockValue=$('stock-'+d.stock).value;if(!/^\d+$/.test(stockValue)){toast('Enter a whole-number stock quantity');return}change('products','setStock',{id:+d.stock,stockQuantity:+stockValue}).then(function(ok){if(ok)toast('Stock updated')});return}
  if(d.adj){var a=d.adj.split(':');change('inventory','adjust',{id:+a[0],delta:+a[1]});return}
  if(d.return){var returnField=$('usageReturn-'+d.return),returnValue=returnField?.value,returnDate=returnValue?new Date(returnValue):null;if(returnDate&&(!Number.isFinite(returnDate.getTime())||returnDate.getTime()>Date.now())){toast('Enter a valid return time that is not in the future');return}change('inventory','return',{id:+d.return,returnedAt:returnDate?returnDate.toISOString():''}).then(function(ok){if(ok)toast('Return recorded')});return}
- if(d.print){var q=DB.quotes.filter(function(x){return x.id==d.print})[0];$('pa').innerHTML=qHtml(q);var image=$('pa').querySelector('img');if(image)try{await image.decode()}catch(er){}try{window.print()}catch(er){toast('Printing is blocked here. Use Copy as text.')}return}
+ if(d.qscanRemove){quoteScans.splice(+d.qscanRemove,1);renderQuoteScans();return}
+ if(d.print){var q=DB.quotes.filter(function(x){return x.id==d.print})[0],savedScans=quoteScans;quoteScans=[];$('pa').innerHTML=qHtml(q);quoteScans=savedScans;var images=$('pa').querySelectorAll('img');for(var im of images)try{await im.decode()}catch(er){}try{window.print()}catch(er){toast('Printing is blocked here. Use Copy as text.')}return}
  if(d.qrm){QI.splice(+d.qrm,1);if(!QI.length)QI.push({d:'',q:1,p:0});qItems();return}
  var id=b.id;
+ if(id==='qscanTake'){$('qscanCamera').click();return}if(id==='qscanChoose'){$('qscanFile').click();return}
  if(id==='dataRetry'){refresh();return}
  if(id==='qcancel'){editingQuoteId=0;QI=[{d:'',q:1,p:0}];QFORM=null;show();return}
  if(id==='saveProductDetails'||id==='saveInventoryDetails'){var isProduct=id==='saveProductDetails',itemId=Number(location.pathname.split('/').pop()),files=Array.from($('editImages').files),name=val('editName');if(!name||files.length>5||files.some(function(f){return !validImageFile(f)})){toast('Enter a name and choose up to five image files');return}var details=isProduct?{id:itemId,name:name,cat:val('editCategory'),operation:val('editOperation'),price:+val('editPrice'),stockQuantity:+val('editStock'),desc:val('editDescription')}:{id:itemId,name:name,type:val('editType'),sku:val('editSku'),qty:+val('editQty'),unit:val('editUnit'),min:+val('editMin'),cost:+val('editCost'),loc:val('editLocation'),broughtBy:val('editBroughtBy'),acquiredAt:val('editAcquired')&&Number.isFinite(new Date(val('editAcquired')).getTime())?new Date(val('editAcquired')).toISOString():''};if(isProduct&&(!/^\d+$/.test(val('editStock'))||!val('editPrice'))){toast('Enter a price and whole-number stock amount');return}if(!isProduct&&(!val('editQty')||!val('editMin')||!val('editCost'))){toast('Enter quantity, reorder level and unit cost');return}uploadProgress(files.length?'Converting pictures to sharp WebP...':'Saving changes...',b);try{details.images=await Promise.all(files.map(encodeImage));uploadProgress(files.length?'Uploading WebP pictures and saving...':'Saving changes...',b);if(await change(isProduct?'products':'inventory','edit',details))toast('Details saved')}catch(error){toast(error.message||'Could not save details')}finally{$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Save changes'}}return}
@@ -502,6 +504,7 @@ document.addEventListener('input',function(e){var t=e.target;
  if(t.id==='qin'||t.id==='qd')qSum();
  if(/^(dv|wv)$/.test(t.id))cnv()});
 document.addEventListener('change',function(e){var t=e.target;
+ if(t.id==='qscanCamera'||t.id==='qscanFile'){var scanFiles=Array.from(t.files||[]);if(scanFiles.length>8||scanFiles.some(function(f){return !validImageFile(f)})){toast('Choose up to eight document photos');t.value='';return}Promise.all(scanFiles.map(enhanceScan)).then(function(scans){quoteScans=quoteScans.concat(scans).slice(0,8);renderQuoteScans()}).catch(function(error){console.error('Document scan enhancement failed:',error);toast('Could not enhance that photo. Try a clearer image.')}).finally(function(){t.value=''});return}
  if(t.dataset.metricPeriod){METRIC_PERIOD[t.dataset.metricPeriod]=t.value;show();return}
  if(/^(df|dt|wf|wt)$/.test(t.id))cnv();
  if(t.id==='iorder'){IORDER=t.value;show();return}
