@@ -13,7 +13,7 @@
     el.tabIndex = 0;
     el.dataset.id = product.id;
     const stockText = product.stockQuantity === null ? 'Availability pending' : product.stockQuantity <= 3 ? product.stockQuantity+' '+(product.stockQuantity === 1 ? 'unit' : 'units')+' remaining' : 'In stock';
-    el.innerHTML = '<div class="tile">'+(product.image ? '<img src="'+escape(product.image)+'" alt="'+escape(product.name)+'">' : '<span class="product-placeholder">'+escape(product.name.slice(0,1))+'</span>')+'</div><div class="row"><span>'+escape(product.name)+'</span><span>'+money(product.price)+'</span></div><p class="sub">'+escape(product.description || product.category)+'</p><p class="stock-status">'+stockText+'</p><div class="card-actions"><button class="add-cart" type="button">Add to cart</button><button class="wishlist" type="button" aria-label="Save product">'+(state.wishlist.includes(product.name)?'♥':'♡')+'</button></div>';
+    el.innerHTML = '<div class="tile">'+(product.image ? '<img src="'+escape(product.image)+'" alt="'+escape(product.name)+'" loading="lazy" decoding="async">' : '<span class="product-placeholder">'+escape(product.name.slice(0,1))+'</span>')+'</div><div class="row"><span>'+escape(product.name)+'</span><span>'+money(product.price)+'</span></div><p class="sub">'+escape(product.description || product.category)+'</p><p class="stock-status">'+stockText+'</p><div class="card-actions"><button class="add-cart" type="button">Add to cart</button><button class="wishlist" type="button" aria-label="Save product">'+(state.wishlist.includes(product.name)?'♥':'♡')+'</button></div>';
     el.querySelector('.wishlist').classList.toggle('active',state.wishlist.includes(product.name));
     el.addEventListener('click',event => {
       if (event.target.closest('.add-cart')) {state.cart[product.name]=(state.cart[product.name]||0)+1;save();updateCart();toast(product.name+' added to cart')}
@@ -52,7 +52,7 @@
     chips.innerHTML='<button class="chip" data-category="" aria-pressed="true">All</button>'+categories.map(x=>'<button class="chip" data-category="'+escape(x.toLowerCase())+'" aria-pressed="false">'+escape(x)+'</button>').join('');
     chips.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;state.category=button.dataset.category;chips.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===button)));sections[0].querySelectorAll('input').forEach(x=>x.checked=x.value===state.category);render()});
     const arrivals=document.querySelectorAll('.sidebar .panel')[1];
-    arrivals.innerHTML='<h2>New arrivals</h2>'+state.products.slice(0,3).map(p=>'<a class="best-item" href="/products/'+encodeURIComponent(p.slug)+'"><span class="best-thumb">'+(p.image?'<img src="'+escape(p.image)+'" alt="">':'')+'</span><span><b>'+escape(p.name)+'</b><span>'+escape(p.category)+'</span></span></a>').join('');
+    arrivals.innerHTML='<h2>New arrivals</h2>'+state.products.slice(0,3).map(p=>'<a class="best-item" href="/products/'+encodeURIComponent(p.slug)+'"><span class="best-thumb">'+(p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" decoding="async">':'')+'</span><span><b>'+escape(p.name)+'</b><span>'+escape(p.category)+'</span></span></a>').join('');
   }
 
   function renderCart() {

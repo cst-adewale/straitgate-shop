@@ -23,7 +23,14 @@ if (!/^https:\/\/[^/]+$/.test(publicOrigin) && !(process.env.NODE_ENV === 'test'
 const failed = new Map();
 const resetAttempts = new Map();
 const customerAttempts = new Map();
-const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8'};
+const zlib = require('node:zlib');
+const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.txt':'text/plain; charset=utf-8','.xml':'application/xml; charset=utf-8','.webp':'image/webp','.png':'image/png','.jpg':'image/jpeg'};
+function imageMime(buf) {
+  if (!buf || buf.length < 12) return 'image/jpeg';
+  if (buf[0] === 0x89 && buf[1] === 0x50) return 'image/png';
+  if (buf[0] === 0x52 && buf[1] === 0x49 && buf[8] === 0x57 && buf[9] === 0x45) return 'image/webp';
+  return 'image/jpeg';
+}
 const port = Number(process.env.PORT) || 3000;
 function send(res, status, body, headers = {}) {
   const securityHeaders = {
@@ -53,11 +60,19 @@ function trackVisit(req,res,productId=null) {
   const hash=crypto.createHash('sha256').update(visitor).digest('hex');
   adminData.recordVisit(hash,productId).catch(error=>console.error('Visit tracking failed:',error.code || error.message));
 }
-function serveFile(res, file) {
+function serveFile(res, file, req) {
   fs.readFile(file, (err, body) => {
     if (err) return send(res, err.code === 'ENOENT' ? 404 : 500, 'Page unavailable');
     const extension=path.extname(file);
-    send(res, 200, body, {'Content-Type':types[extension] || 'application/octet-stream',...(extension==='.css'||extension==='.js'?{'Cache-Control':'public, max-age=3600'}:{})});
+    const headers = {'Content-Type':types[extension] || 'application/octet-stream',...(extension==='.css'||extension==='.js'?{'Cache-Control':'public, max-age=3600'}:{})};
+    if (req && /\bgzip\b/.test(req.headers['accept-encoding'] || '') && body.length > 1024 && ['.html','.js','.css','.xml','.txt'].includes(extension)) {
+      zlib.gzip(body, (gErr, compressed) => {
+        if (gErr) return send(res, 200, body, headers);
+        send(res, 200, compressed, {...headers, 'Content-Encoding':'gzip', 'Vary':'Accept-Encoding'});
+      });
+      return;
+    }
+    send(res, 200, body, headers);
   });
 }
 function authCookies(header) {
@@ -187,9 +202,9 @@ const server = http.createServer(async (req, res) => {
       if (!await adminSession(req.headers.cookie)) return json(res,401,{error:'Sign in as an admin.'});
       const image=await adminData.getLetterhead();
       if (!image) return send(res,404,'Letterhead unavailable');
-      const match=/^data:image\/(png|jpeg);base64,([a-z0-9+/=]+)$/i.exec(image);
+      const match=/^data:image\/(png|jpeg|webp);base64,([a-z0-9+/=]+)$/i.exec(image);
       if (!match) return send(res,503,'Letterhead is invalid');
-      return send(res,200,Buffer.from(match[2],'base64'),{'Content-Type':`image/${match[1]}`});
+      return send(res,200,Buffer.from(match[2],'base64'),{'Content-Type':`image/${match[1].toLowerCase()}`});
     } catch (error) { console.error('Letterhead failed:',error.message); return send(res,503,'Letterhead unavailable'); }
   }
   if (pathname === '/api/admin/data') return handleAdminData(req, res, pathname);
@@ -343,7 +358,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const parts=pathname.split('/');
       const image = await adminData.productImage(parts[3], parts[4]);
-      return image ? send(res, 200, image, {'Content-Type':image[0]===0x89?'image/png':'image/jpeg','Cache-Control':'public, max-age=3600'}) : send(res, 404, 'Image not found');
+      return image ? send(res, 200, image, {'Content-Type':imageMime(image),'Cache-Control':'public, max-age=604800, immutable'}) : send(res, 404, 'Image not found');
     } catch (error) {
       console.error('Product image failed:', error.code || error.message);
       return send(res, 503, 'Image service unavailable');
@@ -355,7 +370,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const parts=pathname.split('/');
       const image=await adminData.inventoryImage(parts[4],parts[5]);
-      return image ? send(res,200,image,{'Content-Type':'image/jpeg','Cache-Control':'private, max-age=300'}) : send(res,404,'Image not found');
+      return image ? send(res,200,image,{'Content-Type':imageMime(image),'Cache-Control':'private, max-age=86400'}) : send(res,404,'Image not found');
     } catch (error) {
       console.error('Inventory image failed:',error.code || error.message);
       return send(res,503,'Image service unavailable');
@@ -379,7 +394,7 @@ const server = http.createServer(async (req, res) => {
   if (['/admin','/admin/products','/admin/inventory','/straitgate-admin.html'].includes(pathname) || /^\/admin\/(products|inventory)\/\d+$/.test(pathname)) {
     try {
       if (!await adminSession(req.headers.cookie)) return send(res, 302, '', {Location:'/straitgate-admin-login.html'});
-      return serveFile(res, adminFile);
+      return serveFile(res, adminFile, req);
     } catch (error) {
       console.error('Neon Auth session check failed:', error.message);
       return send(res, 503, 'Authentication service unavailable');
@@ -391,7 +406,7 @@ const server = http.createServer(async (req, res) => {
   catch { return send(res, 400, 'Bad request'); }
   const file = path.resolve(root, '.' + pathname);
   if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return send(res, 404, 'Not found');
-  serveFile(res, file);
+  serveFile(res, file, req);
 });
 server.requestTimeout = 30000;
 server.headersTimeout = 10000;

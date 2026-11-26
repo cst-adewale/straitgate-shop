@@ -5,7 +5,7 @@
   const escape = value => String(value || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const cart = JSON.parse(localStorage.getItem('straitgate-cart') || '{}');
   function cartCount(){byId('bagn').textContent=Object.values(cart).reduce((a,b)=>a+b,0)}
-  function image(product){return product.image?'<img src="'+escape(product.image)+'" alt="'+escape(product.name)+'">':'<span class="product-placeholder">'+escape(product.name.slice(0,1))+'</span>'}
+  function image(product){return product.image?'<img src="'+escape(product.image)+'" alt="'+escape(product.name)+'" loading="lazy" decoding="async">':'<span class="product-placeholder">'+escape(product.name.slice(0,1))+'</span>'}
   function render() {
     const id=Number(location.hash.replace('#product-',''));
     const slug=location.pathname.startsWith('/products/') ? decodeURIComponent(location.pathname.slice('/products/'.length)) : '';
@@ -22,8 +22,8 @@
     byId('g').textContent=current.operation || 'Standard operation';
     const images=current.images?.length ? current.images : (current.image ? [current.image] : []);
     if (selectedImage>=images.length) selectedImage=0;
-    byId('main').innerHTML=images.length?'<img src="'+escape(images[selectedImage])+'" alt="'+escape(current.name)+'">':image(current);byId('main').setAttribute('aria-label',current.name);
-    byId('thumbs').innerHTML=images.map((src,i)=>'<button type="button" data-image="'+i+'" aria-label="Show image '+(i+1)+'" aria-pressed="'+(selectedImage===i)+'"><img src="'+escape(src)+'" alt=""></button>').join('');
+    byId('main').innerHTML=images.length?'<img src="'+escape(images[selectedImage])+'" alt="'+escape(current.name)+'" fetchpriority="high" decoding="async">':image(current);byId('main').setAttribute('aria-label',current.name);
+    byId('thumbs').innerHTML=images.map((src,i)=>'<button type="button" data-image="'+i+'" aria-label="Show image '+(i+1)+'" aria-pressed="'+(selectedImage===i)+'"><img src="'+escape(src)+'" alt="" loading="lazy" decoding="async"></button>').join('');
     byId('spec').innerHTML=[['Category',current.category],['Finish',current.finish||'Standard'],['Operation',current.operation||'Standard'],['Fulfilment','Direct doorstep delivery']].map(([name,value])=>'<div>'+escape(name)+'<span>'+escape(value)+'</span></div>').join('');
     byId('rel').innerHTML=products.filter(p=>p.id!==current.id).slice(0,3).map(p=>'<a href="/products/'+encodeURIComponent(p.slug)+'"><div class="tile">'+image(p)+'</div><div class="r"><span>'+escape(p.name)+'</span><span>'+money(p.price)+'</span></div><p>'+escape(p.category)+'</p></a>').join('');
   }

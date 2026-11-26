@@ -7,6 +7,11 @@ function number(value) { const n = Number(value); return Number.isFinite(n) && n
 function stock(value) { const n = Number(value); return value !== '' && value !== null && value !== undefined && Number.isSafeInteger(n) && n >= 0 ? n : null; }
 function id(value) { const n = Number(value); return Number.isSafeInteger(n) && n > 0 ? n : null; }
 function label(value, max = 200) { return typeof value === 'string' ? value.trim().slice(0, max) : ''; }
+const DATA_IMAGE_RE = /^data:image\/(webp|jpeg|png);base64,([a-z0-9+/=]+)$/i;
+function decodeImage(dataUrl) {
+  const m = DATA_IMAGE_RE.exec(dataUrl);
+  return m ? {mime: `image/${m[1].toLowerCase()}`, ext: m[1].toLowerCase() === 'jpeg' ? 'jpg' : m[1].toLowerCase(), buffer: Buffer.from(m[2], 'base64')} : null;
+}
 
 async function publishedProducts(slug) {
   const result = await pool.query('SELECT id,slug,name,category,description,finish,operation,price_ngn,stock_quantity,image_key,image_keys,main_image_index FROM public.products WHERE published=true' + (slug ? ' AND slug=$1' : '') + ' ORDER BY created_at DESC,id DESC',slug ? [slug] : []);
@@ -46,20 +51,20 @@ async function mutate(kind, action, input) {
     if (!product.rows.length) throw new TypeError('Product not found.');
     await pool.query('INSERT INTO public.confirmed_payments(product_id,reference,amount_ngn) VALUES($1,$2,$3)',[productId,reference,amount]);
   } else if (kind === 'settings' && action === 'letterhead') {
-    if (typeof input.image !== 'string' || input.image.length > 1000000 || !/^data:image\/(png|jpeg);base64,[a-z0-9+/=]+$/i.test(input.image)) throw new TypeError('Upload a PNG or JPEG letterhead under 750 KB.');
+    if (typeof input.image !== 'string' || input.image.length > 1500000 || !/^data:image\/(png|jpeg|webp);base64,[a-z0-9+/=]+$/i.test(input.image)) throw new TypeError('Upload a PNG, JPEG or WebP letterhead under 1 MB.');
     await pool.query("INSERT INTO public.admin_settings(key,value) VALUES('letterhead',$1) ON CONFLICT(key) DO UPDATE SET value=excluded.value",[input.image]);
   } else if (action === 'add' && kind === 'products') {
     const name = label(input.name), price = number(input.price), quantity = stock(input.stockQuantity), images = input.images || (input.img ? [input.img] : []);
     const mainIndex = input.mainImageIndex === undefined ? 0 : Number(input.mainImageIndex);
-    if (!name || price === null || quantity === null || !Array.isArray(images) || images.length > 5 || !Number.isInteger(mainIndex) || mainIndex < 0 || (images.length && mainIndex >= images.length) || images.some(image => typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, price, whole-number stock quantity and up to five JPEG images under 900 KB each.');
+    if (!name || price === null || quantity === null || !Array.isArray(images) || images.length > 5 || !Number.isInteger(mainIndex) || mainIndex < 0 || (images.length && mainIndex >= images.length) || images.some(image => typeof image !== 'string' || image.length > 2400000 || !DATA_IMAGE_RE.test(image))) throw new TypeError('Enter a name, price, whole-number stock quantity and up to five images.');
     const slug = `product-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
     if (input.removeBackground && !process.env.REMOVEBG_API_KEY) throw new TypeError('Configure REMOVEBG_API_KEY on the server to remove backgrounds.');
     const imageKeys = [];
     try {
       for (const image of images) {
-        const original=Buffer.from(image.slice('data:image/jpeg;base64,'.length),'base64');
-        if (!input.removeBackground) { imageKeys.push(await r2.uploadJpeg(original)); continue; }
-        const form=new FormData();form.append('image_file',new Blob([original],{type:'image/jpeg'}),'product.jpg');form.append('size','auto');
+        const decoded = decodeImage(image);
+        if (!input.removeBackground) { imageKeys.push(await r2.uploadJpeg(decoded.buffer)); continue; }
+        const form=new FormData();form.append('image_file',new Blob([decoded.buffer],{type:decoded.mime}),`product.${decoded.ext}`);form.append('size','auto');
         const response=await fetch('https://api.remove.bg/v1.0/removebg',{method:'POST',headers:{'X-Api-Key':process.env.REMOVEBG_API_KEY},body:form,signal:AbortSignal.timeout(20000)});
         if (!response.ok) throw new TypeError('Background removal failed. Check the remove.bg key and quota.');
         imageKeys.push(await r2.uploadPng(Buffer.from(await response.arrayBuffer())));
@@ -76,7 +81,7 @@ async function mutate(kind, action, input) {
     if (!changed.rows.length) throw new TypeError('Product not found.');
   } else if (action === 'edit' && ['products','inventory'].includes(kind)) {
     const itemId=id(input.id), images=input.images || [], name=label(input.name);
-    if (!itemId || !name || (kind==='inventory'&&!['Equipment','Tool','Product','Material'].includes(input.type)) || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a valid name and type, and up to five JPEG images under 900 KB each.');
+    if (!itemId || !name || (kind==='inventory'&&!['Equipment','Tool','Product','Material'].includes(input.type)) || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 2400000 || !DATA_IMAGE_RE.test(image))) throw new TypeError('Enter a valid name and type, and up to five images.');
     const price=kind==='products'?number(input.price):null, quantity=kind==='products'?stock(input.stockQuantity):number(input.qty), min=kind==='inventory'?number(input.min):null, cost=kind==='inventory'?number(input.cost):null;
     const acquired=kind==='inventory'&&input.acquiredAt?new Date(input.acquiredAt):null;
     if (quantity===null || (kind==='products'&&price===null) || (kind==='inventory'&&(min===null||cost===null)) || (acquired&&!Number.isFinite(acquired.getTime()))) throw new TypeError('Enter valid price, quantity, cost and date values.');
@@ -85,7 +90,7 @@ async function mutate(kind, action, input) {
     if (previous&&!previous.rows.length) throw new TypeError('Item not found.');
     const keys=[];
     try {
-      for (const image of images) keys.push(await r2.uploadJpeg(Buffer.from(image.slice('data:image/jpeg;base64,'.length),'base64'),kind==='products'?'products':'inventory'));
+      for (const image of images) keys.push(await r2.uploadJpeg(decodeImage(image).buffer,kind==='products'?'products':'inventory'));
       const updated=kind==='products'
         ? await pool.query('UPDATE public.products SET name=$2,category=$3,description=$4,operation=$5,price_ngn=$6,stock_quantity=$7,image_keys=COALESCE($8,image_keys),image_key=COALESCE($9,image_key),main_image_index=CASE WHEN $8 IS NULL THEN main_image_index ELSE 0 END,updated_at=now() WHERE id=$1 RETURNING id',[itemId,name,label(input.cat,80),label(input.desc,500),label(input.operation,80),price,quantity,keys.length?keys:null,keys[0] || null])
         : await pool.query('UPDATE public.inventory_items SET name=$2,item_type=$3,sku=NULLIF($4,\'\'),quantity=$5,unit=$6,minimum_quantity=$7,location=$8,unit_cost=$9,brought_by=$10,acquired_at=$11,image_keys=COALESCE($12,image_keys) WHERE id=$1 RETURNING id',[itemId,name,label(input.type,80),label(input.sku,80),quantity,label(input.unit,20)||'pcs',min,label(input.loc,120),cost,label(input.broughtBy,120),acquired,keys.length?keys:null]);
@@ -103,12 +108,12 @@ async function mutate(kind, action, input) {
   } else if (action === 'add' && kind === 'inventory') {
     const name = label(input.name), qty = number(input.qty), min = number(input.min), cost = number(input.cost);
     const images=input.images || [];
-    if (!name || !['Equipment','Tool','Product','Material'].includes(input.type) || qty === null || min === null || cost === null || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 1250000 || !/^data:image\/jpeg;base64,[a-z0-9+/=]+$/i.test(image))) throw new TypeError('Enter a name, valid type and numbers, and up to five JPEG images under 900 KB each.');
+    if (!name || !['Equipment','Tool','Product','Material'].includes(input.type) || qty === null || min === null || cost === null || !Array.isArray(images) || images.length > 5 || images.some(image=>typeof image !== 'string' || image.length > 2400000 || !DATA_IMAGE_RE.test(image))) throw new TypeError('Enter a name, valid type and numbers, and up to five images.');
     const acquired=input.acquiredAt ? new Date(input.acquiredAt) : null;
     if (acquired && !Number.isFinite(acquired.getTime())) throw new TypeError('Enter a valid date and time.');
     const keys=[];
     try {
-      for (const image of images) keys.push(await r2.uploadJpeg(Buffer.from(image.slice('data:image/jpeg;base64,'.length),'base64'),'inventory'));
+      for (const image of images) keys.push(await r2.uploadJpeg(decodeImage(image).buffer,'inventory'));
       await pool.query('INSERT INTO public.inventory_items (name,item_type,sku,quantity,unit,minimum_quantity,location,unit_cost,brought_by,acquired_at,image_keys) VALUES ($1,$2,NULLIF($3,\'\'),$4,$5,$6,$7,$8,$9,$10,$11)',[name,label(input.type,80),label(input.sku,80),qty,label(input.unit,20) || 'pcs',min,label(input.loc,120),cost,label(input.broughtBy,120),acquired,keys]);
     } catch (error) {
       await Promise.all(keys.map(key=>r2.remove(key).catch(()=>{})));
