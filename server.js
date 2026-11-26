@@ -208,6 +208,27 @@ const server = http.createServer(async (req, res) => {
       return json(res,200,{draft:draft.slice(0,2000)});
     } catch (error) { console.error('AI drafting failed:',error.message); return json(res,502,{error:'The AI assistant is temporarily unavailable. Please try again later or contact support.'}); }
   }
+  if (pathname === '/api/admin/quote-document') {
+    if (req.method !== 'POST') return json(res,405,{error:'Method not allowed.'});
+    if (req.headers.origin !== publicOrigin) return json(res,403,{error:'Request origin not allowed.'});
+    try {
+      if (!await adminSession(req.headers.cookie)) return json(res,401,{error:'Sign in as an admin.'});
+      if (!process.env.LLM_API_KEY) return json(res,503,{error:'The AI assistant is temporarily unavailable. Please try again later or contact support.'});
+      let input;
+      try { input=JSON.parse(await readBody(req,3000000)); } catch { return json(res,400,{error:'Choose a smaller photo and try again.'}); }
+      const match=typeof input.image==='string'&&/^data:image\/(webp|jpeg|png);base64,([a-z0-9+/=]+)$/i.exec(input.image);
+      if (!match || input.image.length>2800000) return json(res,400,{error:'Choose a clear photo under 2 MB.'});
+      const apiUrl=process.env.LLM_API_URL || (/^gsk_/.test(process.env.LLM_API_KEY)?'https://api.groq.com/openai/v1/chat/completions':'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions');
+      const model=process.env.LLM_MODEL || (/^gsk_/.test(process.env.LLM_API_KEY)?'llama-3.2-11b-vision-preview':'gemini-2.5-flash');
+      const url=new URL(apiUrl);
+      if(url.protocol!=='https:')return json(res,503,{error:'The AI assistant is temporarily unavailable. Please try again later or contact support.'});
+      const response=await fetch(url,{method:'POST',headers:{Authorization:`Bearer ${process.env.LLM_API_KEY}`,'Content-Type':'application/json'},body:JSON.stringify({model,messages:[{role:'system',content:'Transcribe the supplied photographed document and format its contents as a clean, readable document. Preserve names, numbers, dates, amounts, and meaning exactly. Do not invent or infer missing information. Mark unclear words as [unclear]. Return only the document text, with simple paragraphs and headings.'},{role:'user',content:[{type:'text',text:'Convert this photographed page into an editable document. Keep the original language and wording.'},{type:'image_url',image_url:{url:input.image}}]}],temperature:0.1,max_tokens:2000}),signal:AbortSignal.timeout(30000)});
+      if(!response.ok){console.error('AI document conversion provider rejected request:',{status:response.status,provider:url.hostname,model});return json(res,502,{error:'The AI assistant is temporarily unavailable. Please try again later or contact support.'});}
+      const result=await response.json(),documentText=result.choices?.[0]?.message?.content;
+      if(typeof documentText!=='string'||!documentText.trim()){console.error('AI document conversion returned no text:',{provider:url.hostname,model});return json(res,502,{error:'The AI assistant could not read that photo. Try a clearer image.'});}
+      return json(res,200,{document:documentText.trim().slice(0,12000)});
+    } catch(error){console.error('AI document conversion failed:',error.message);return json(res,502,{error:'The AI assistant is temporarily unavailable. Please try again later or contact support.'});}
+  }
   if (pathname === '/api/admin/letterhead') {
     if (req.method !== 'GET') return json(res,405,{error:'Method not allowed.'});
     try {
