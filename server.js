@@ -396,4 +396,15 @@ server.headersTimeout = 10000;
 server.keepAliveTimeout = 5000;
 server.maxHeadersCount = 100;
 server.maxRequestsPerSocket = 1000;
-server.listen(port, () => console.log(`Straitgate listening on ${port}`));
+server.listen(port, () => {
+  console.log(`Straitgate listening on ${port}`);
+  if (process.env.NODE_ENV !== 'test' && /^https:\/\//.test(publicOrigin)) {
+    const keepAlive = () => {
+      fetch(`${publicOrigin}/health?signal=${crypto.randomUUID()}`, {
+        headers: {'Cache-Control': 'no-store'},
+        signal: AbortSignal.timeout(10000)
+      }).catch(err => console.error('Keep-alive ping failed:', err.message));
+    };
+    setInterval(keepAlive, 10 * 60 * 1000).unref();
+  }
+});
