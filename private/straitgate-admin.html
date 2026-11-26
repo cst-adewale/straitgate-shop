@@ -169,7 +169,9 @@ td.r,th.r{text-align:right}
 /* ── Converter / calculator ── */
 .res{font-size:clamp(26px,3vw,36px);letter-spacing:-.04em;margin:12px 0 0;color:var(--ink)}
 .cv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.calc{max-width:320px}
+.calc-tile{width:fit-content;max-width:100%;justify-self:start}
+.calc{width:min(300px,100%)}
+.calc .bar{margin-bottom:0}
 .disp{background:var(--ink);color:var(--surface);border-radius:var(--r-md);padding:14px 16px;text-align:right;font-size:30px;letter-spacing:-.03em;min-height:64px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
 .disp small{font-size:var(--fs-sm);color:var(--mute);min-height:14px}
 .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
@@ -378,7 +380,7 @@ V.tools=function(){
  return '<div class="grid g2" style="align-items:start"><div style="display:grid;gap:clamp(12px,2vw,24px)">'+
  '<div class="tile"><h2>Distance</h2><div class="cv"><div><label for="dv">Value</label><input id="dv" type="number" value="1" step="any"></div><div><label for="df">From</label><select id="df">'+opts(DU,'m')+'</select></div></div><div class="cv"><div><label for="dt">To</label><select id="dt">'+opts(DU,'ft')+'</select></div><div style="align-self:end"><button class="btn" id="dsw">&#8646; Swap</button></div></div><div class="res" id="dr"></div><div class="tw" style="margin-top:12px"><table><tbody id="dall"></tbody></table></div></div>'+
  '<div class="tile"><h2>Weight</h2><div class="cv"><div><label for="wv">Value</label><input id="wv" type="number" value="1" step="any"></div><div><label for="wf">From</label><select id="wf">'+opts(WU,'kg')+'</select></div></div><div class="cv"><div><label for="wt">To</label><select id="wt">'+opts(WU,'lb')+'</select></div><div style="align-self:end"><button class="btn" id="wsw">&#8646; Swap</button></div></div><div class="res" id="wr"></div></div></div>'+
- '<div class="tile"><h2>Calculator</h2><div class="calc" id="calc" tabindex="0" aria-label="Calculator"><div class="disp"><small id="cs"></small><span id="cd">0</span></div><div class="keys">'+
+ '<div class="tile calc-tile"><h2>Calculator</h2><div class="calc" id="calc" tabindex="0" aria-label="Calculator"><div class="disp"><small id="cs"></small><span id="cd">0</span></div><div class="keys">'+
  [['C','o'],['&plusmn;','o'],['%','o'],['&divide;','o'],['7'],['8'],['9'],['&times;','o'],['4'],['5'],['6'],['&minus;','o'],['1'],['2'],['3'],['+','o'],['0','z'],['.'],['=','o']].map(function(k){return '<button class="'+(k[1]||'')+(k[1]==='z'?'':'')+'" data-k="'+k[0]+'"'+(k[1]==='z'?' style="grid-column:span 2"':'')+'>'+k[0]+'</button>'}).join('')+'</div><div class="bar" style="margin-top:10px"><button class="btn sm" data-k="bs">&#9003; Delete</button></div></div></div></div>'};
 function cnv(){var d=+$('dv').value||0,m=d*DU[$('df').value];$('dr').textContent=fmt(m/DU[$('dt').value])+' '+$('dt').value;
  $('dall').innerHTML=Object.keys(DU).map(function(k){return '<tr><td>'+k+'</td><td class="r">'+fmt(m/DU[k])+'</td></tr>'}).join('');
@@ -410,19 +412,23 @@ function show(){var detail=location.pathname.match(/^\/admin\/(products|inventor
  if(cur==='quotes'){qItems();if(QFORM){Object.keys(QFORM).forEach(function(id){if($(id))$(id).value=QFORM[id]});qSum()}}if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
 function val(i){return $(i).value.trim()}
 var speechRec=null,speechListening=false,speechBaseText='';
-function toggleMic(){
+async function toggleMic(){
  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SR){toast('Voice transcription is not supported in this browser. Try Chrome or Edge.');return}
- var btn=$('qmic'),status=$('qmicStatus'),field=$('qprompt');
+ var field=$('qprompt');
  if(speechListening&&speechRec){speechRec.stop();return}
+ if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+  try{var stream=await navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(function(t){t.stop()})}
+  catch(err){toast(err&&err.name==='NotAllowedError'?'Please allow microphone access in your browser address bar.':'Could not access microphone: '+(err.message||err.name||'check device'));return}
+ }
  if(!speechRec){
   speechRec=new SR();
-  speechRec.lang='en-NG';
+  speechRec.lang='en-US';
   speechRec.continuous=true;
   speechRec.interimResults=true;
   speechRec.onstart=function(){speechListening=true;var cur=$('qprompt');speechBaseText=cur&&cur.value.trim()?cur.value.trim()+' ':'';if($('qmic'))$('qmic').classList.add('listening');if($('qmicStatus'))$('qmicStatus').textContent='Listening… tap mic to stop'};
   speechRec.onresult=function(ev){var finalChunk='',interimChunk='';for(var i=0;i<ev.results.length;i++){var t=ev.results[i][0].transcript;if(ev.results[i].isFinal)finalChunk+=t+' ';else interimChunk+=t}var box=$('qprompt');if(box){box.value=(speechBaseText+finalChunk+interimChunk).trim();box.scrollTop=box.scrollHeight}};
-  speechRec.onerror=function(ev){if(ev.error!=='aborted')toast('Microphone error: '+ev.error)};
+  speechRec.onerror=function(ev){if(ev.error==='not-allowed'||ev.error==='service-not-allowed')toast('Please allow microphone access in your browser address bar.');else if(ev.error!=='aborted'&&ev.error!=='no-speech')toast('Microphone error: '+ev.error)};
   speechRec.onend=function(){speechListening=false;if($('qmic'))$('qmic').classList.remove('listening');if($('qmicStatus'))$('qmicStatus').textContent='Tap mic to speak'};
  }
  try{if(field)field.focus();speechRec.start()}catch(e){try{speechRec.stop()}catch(er){}}
@@ -450,7 +456,7 @@ document.addEventListener('click',async function(e){if(e.target.closest('.sg-sel
  if(id==='usageSave'){var usageItem=+$('usageItem').value,usageBy=val('usageBy'),takenValue=val('usageTaken'),takenDate=takenValue?new Date(takenValue):null;if(!usageItem||!usageBy){toast('Choose equipment or a tool and enter who used it');return}if(takenDate&&(!Number.isFinite(takenDate.getTime())||takenDate.getTime()>Date.now())){toast('Enter a valid time taken that is not in the future');return}b.disabled=true;try{if(await change('inventory','checkout',{id:usageItem,usedBy:usageBy,takenAt:takenDate?takenDate.toISOString():''}))toast('Equipment or tool use recorded')}finally{if(b.isConnected)b.disabled=false}return}
  if(id==='healthRefresh'){checkHealth();return}
  if(id==='qmic'){toggleMic();return}
- if(id==='qai'){if(speechListening&&speechRec)try{speechRec.stop()}catch(er){}var promptText=val('qprompt');if(!promptText){toast('Describe the changes you want');return}uploadProgress('Drafting quotation notes...',b);try{var response=await fetch('/api/admin/quote-draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:promptText,context:JSON.stringify({customer:val('qc'),items:QI,installation:val('qin'),discount:val('qd'),existingNotes:val('qn')})})}),result=await response.json();if(!response.ok)throw Error(result.error||'AI drafting failed');$('qn').value=result.draft;toast('Draft added. Review it before saving.')}catch(error){toast(error.message)}finally{$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Draft with AI'}}return}
+ if(id==='qai'){if(speechListening&&speechRec)try{speechRec.stop()}catch(er){}var promptText=val('qprompt');if(!promptText){toast('Describe the changes you want');return}uploadProgress('Drafting quotation notes...',b);try{var response=await fetch('/api/admin/quote-draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:promptText,context:JSON.stringify({customer:val('qc'),items:QI,installation:val('qin'),discount:val('qd'),existingNotes:val('qn')})})}),result=await response.json();if(!response.ok){console.error('AI quotation drafting request failed:',{status:response.status,message:result.error||'Unknown server error'});throw Error('The AI assistant is temporarily unavailable. Please try again later or contact support.')}$('qn').value=result.draft;toast('Draft added. Review it before saving.')}catch(error){if(error instanceof TypeError)console.error('AI quotation drafting network error:',error);toast(error.message==='Failed to fetch'?'The AI assistant is temporarily unavailable. Please try again later or contact support.':error.message||'The AI assistant is temporarily unavailable. Please try again later or contact support.')}finally{$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Draft with AI'}}return}
  if(id==='saveletterhead'){var file=$('letterhead').files[0];if(!file||file.size>750000||!['image/png','image/jpeg'].includes(file.type)){toast('Choose a PNG or JPEG under 750 KB');return}uploadProgress('Preparing letterhead...',b);try{var image=await new Promise(function(resolve,reject){var reader=new FileReader();reader.onload=function(){resolve(reader.result)};reader.onerror=reject;reader.readAsDataURL(file)});uploadProgress('Uploading letterhead...',b);if(await change('settings','letterhead',{image:image}))toast('Letterhead saved')}catch(error){toast('Could not read letterhead image')}finally{$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Save letterhead'}}return}
  if(id==='qprint'){var dr=qDraft();if(!val('qc')||!dr.items.length){toast('Add a customer and at least one line');return}var draft={no:'DRAFT',date:new Date().toISOString().slice(0,10),valid:$('qv').value,cust:val('qc'),email:val('qe'),phone:val('qt'),addr:val('qa'),items:dr.items,inst:dr.inst,disc:dr.disc,notes:val('qn')};$('pa').innerHTML=qHtml(draft);var image=$('pa').querySelector('img');if(image)try{await image.decode()}catch(er){}window.print();return}
  if(id==='addp'){if(productSaving)return;var n2=val('pn'),pr=parseFloat($('pp').value),stockValue=$('ps').value;if(!n2||isNaN(pr)||!/^\d+$/.test(stockValue)){toast('Add a name, price and whole-number stock quantity');return}
