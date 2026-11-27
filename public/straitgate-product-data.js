@@ -4,6 +4,7 @@
   const money = value => '₦' + Number(value || 0).toLocaleString('en-NG');
   const escape = value => String(value || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
   const cart = JSON.parse(localStorage.getItem('straitgate-cart') || '{}');
+  function selectForCheckout(name){let selected;try{selected=JSON.parse(localStorage.getItem('straitgate-cart-selected')||'null')}catch(error){selected=null}if(!Array.isArray(selected))selected=Object.keys(cart);if(!selected.includes(name))selected.push(name);localStorage.setItem('straitgate-cart-selected',JSON.stringify(selected))}
   function cartCount(){byId('bagn').textContent=Object.values(cart).reduce((a,b)=>a+b,0)}
   function image(product){return product.image?'<img src="'+escape(product.image)+'" alt="'+escape(product.name)+'" loading="lazy" decoding="async">':'<span class="product-placeholder">'+escape(product.name.slice(0,1))+'</span>'}
   function render() {
@@ -31,7 +32,7 @@
   byId('thumbs').onclick=event=>{const button=event.target.closest('[data-image]');if(button){selectedImage=Number(button.dataset.image);render()}};
   byId('m').onclick=()=>{quantity=Math.max(1,quantity-1);byId('q').textContent=quantity};
   byId('p').onclick=()=>{quantity=Math.min(9,quantity+1);byId('q').textContent=quantity};
-  byId('add').onclick=()=>{if(!current)return;cart[current.name]=(cart[current.name]||0)+quantity;localStorage.setItem('straitgate-cart',JSON.stringify(cart));cartCount();const toast=byId('toast');toast.textContent=quantity+' × '+current.name+' added to cart';toast.classList.add('on');setTimeout(()=>toast.classList.remove('on'),2200)};
+  byId('add').onclick=()=>{if(!current)return;cart[current.name]=(cart[current.name]||0)+quantity;localStorage.setItem('straitgate-cart',JSON.stringify(cart));selectForCheckout(current.name);cartCount();const toast=byId('toast');toast.textContent=quantity+' × '+current.name+' added to cart';toast.classList.add('on');setTimeout(()=>toast.classList.remove('on'),2200)};
   window.addEventListener('hashchange',()=>{quantity=1;byId('q').textContent=1;render();window.scrollTo(0,0)});
   cartCount();byId('name').textContent='Loading product…';
   fetch('/api/products').then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.error||'Products unavailable');products=data.products;render()}).catch(error=>{byId('name').textContent='Product unavailable';byId('desc').textContent=error.message;byId('add').disabled=true});

@@ -4,15 +4,28 @@
   const state = {products:[],category:'',finish:'',operation:'',search:'',min:0,max:Infinity,sort:'featured',cart:JSON.parse(localStorage.getItem('straitgate-cart') || '{}'),wishlist:JSON.parse(localStorage.getItem('straitgate-wishlist') || '[]')};
   const money = value => '₦' + Number(value || 0).toLocaleString('en-NG');
   const escape = value => String(value || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const adMessages = ['Made-to-measure doors built for your home','Custom gates made in Lagos','Nationwide delivery on shop orders'];
-  const adMessage = document.getElementById('shopAdMessage');
-  let adIndex = 0;
-  if (adMessage) setInterval(() => {
-    if (document.hidden) return;
-    adMessage.classList.add('changing');
-    setTimeout(() => { adIndex = (adIndex + 1) % adMessages.length; adMessage.textContent = adMessages[adIndex]; adMessage.classList.remove('changing'); }, 200);
-  }, 5000);
+  function setupAdCarousel(products) {
+    const slides = document.getElementById('catalogAdSlides');
+    const dots = document.getElementById('catalogAdDots');
+    if (!slides || !dots) return;
+    const adverts = products.filter(product => product.image || product.images?.length).map(product => ({name:product.name,slug:product.slug,image:product.image || product.images[0]}));
+    if (!adverts.length) return;
+    let current = 0;
+    slides.innerHTML = adverts.map((product,index) => '<a class="catalog-ad-slide'+(index===0?' active':'')+'" href="/products/'+encodeURIComponent(product.slug)+'" aria-label="View '+escape(product.name)+'" aria-hidden="'+(index!==0)+'" tabindex="'+(index===0?'0':'-1')+'"><img src="'+escape(product.image)+'" alt=""'+(index===0?' fetchpriority="high"':' loading="lazy"')+'></a>').join('');
+    dots.innerHTML = adverts.map((product,index) => '<button type="button" aria-label="Show advert '+(index+1)+'" aria-current="'+(index===0)+'"></button>').join('');
+    if (adverts.length < 2) { dots.hidden = true; document.getElementById('catalogAdPrev').hidden = true; document.getElementById('catalogAdNext').hidden = true; }
+    const show = index => {
+      current = (index + adverts.length) % adverts.length;
+      slides.querySelectorAll('.catalog-ad-slide').forEach((slide,n) => {slide.classList.toggle('active',n===current);slide.setAttribute('aria-hidden',String(n!==current));slide.tabIndex=n===current?0:-1});
+      dots.querySelectorAll('button').forEach((dot,n) => dot.setAttribute('aria-current',String(n===current)));
+    };
+    dots.addEventListener('click',event=>{const button=event.target.closest('button');if(button)show([...dots.children].indexOf(button))});
+    document.getElementById('catalogAdPrev')?.addEventListener('click',()=>show(current-1));
+    document.getElementById('catalogAdNext')?.addEventListener('click',()=>show(current+1));
+    if (adverts.length > 1) setInterval(()=>{if(!document.hidden&&!slides.matches(':hover,:focus-within'))show(current+1)},5000);
+  }
   const save = () => {localStorage.setItem('straitgate-cart',JSON.stringify(state.cart));localStorage.setItem('straitgate-wishlist',JSON.stringify(state.wishlist))};
+  const selectForCheckout = name => {let selected;try{selected=JSON.parse(localStorage.getItem('straitgate-cart-selected')||'null')}catch(error){selected=null}if(!Array.isArray(selected))selected=Object.keys(state.cart);if(!selected.includes(name))selected.push(name);localStorage.setItem('straitgate-cart-selected',JSON.stringify(selected))};
   const toast = message => {document.querySelector('.toast')?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.append(el);setTimeout(()=>el.remove(),2200)};
   const updateCart = () => {document.getElementById('cartCount').textContent=Object.values(state.cart).reduce((a,b)=>a+b,0)};
 
@@ -24,7 +37,7 @@
     el.innerHTML = '<div class="tile">'+(product.image ? '<img src="'+escape(product.image)+'" alt="'+escape(product.name)+'" loading="lazy" decoding="async">' : '<span class="product-placeholder">'+escape(product.name.slice(0,1))+'</span>')+'</div><div class="row"><span>'+escape(product.name)+'</span><span>'+money(product.price)+'</span></div><p class="sub">'+escape(product.description || product.category)+'</p><p class="stock-status">'+stockText+'</p><div class="card-actions"><button class="add-cart" type="button">Add to cart</button><button class="wishlist" type="button" aria-label="Save product">'+(state.wishlist.includes(product.name)?'♥':'♡')+'</button></div>';
     el.querySelector('.wishlist').classList.toggle('active',state.wishlist.includes(product.name));
     el.addEventListener('click',event => {
-      if (event.target.closest('.add-cart')) {state.cart[product.name]=(state.cart[product.name]||0)+1;save();updateCart();toast(product.name+' added to cart')}
+      if (event.target.closest('.add-cart')) {state.cart[product.name]=(state.cart[product.name]||0)+1;selectForCheckout(product.name);save();updateCart();toast(product.name+' added to cart')}
       else if (event.target.closest('.wishlist')) {state.wishlist=state.wishlist.includes(product.name)?state.wishlist.filter(x=>x!==product.name):[...state.wishlist,product.name];save();render();toast('Wishlist updated')}
       else location.href='/products/'+encodeURIComponent(product.slug);
     });
@@ -63,15 +76,6 @@
     arrivals.innerHTML='<h2>New arrivals</h2>'+state.products.slice(0,3).map(p=>'<a class="best-item" href="/products/'+encodeURIComponent(p.slug)+'"><span class="best-thumb">'+(p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" decoding="async">':'')+'</span><span><b>'+escape(p.name)+'</b><span>'+escape(p.category)+'</span></span></a>').join('');
   }
 
-  function renderWishlist() {
-    document.querySelector('.drawer-shade')?.remove();
-    const shade=document.createElement('div');shade.className='drawer-shade';
-    const entries=state.wishlist.map(name=>({name,product:state.products.find(p=>p.name===name)}));
-    shade.innerHTML='<aside class="cart-drawer" aria-label="Saved products"><div class="drawer-head"><div><small>YOUR SAVED ITEMS</small><h2>Saved products</h2></div><button class="close-drawer" aria-label="Close saved products">×</button></div><div class="cart-lines">'+(entries.length?entries.map(({name,product})=>'<div class="cart-line"><div>'+(product?'<a href="/products/'+encodeURIComponent(product.slug)+'"><b>'+escape(name)+'</b></a>':'<b>'+escape(name)+'</b><small>This product is no longer available.</small>')+'</div><button class="remove-cart" type="button" data-wishlist-remove="'+escape(name)+'">Remove</button></div>').join(''):'<p style="padding:40px 0;color:var(--mute)">You have no saved products yet.</p>')+'</div></aside>';
-    document.body.append(shade);
-    shade.addEventListener('click',event=>{if(event.target===shade||event.target.closest('.close-drawer')){shade.remove();return}const remove=event.target.closest('[data-wishlist-remove]');if(remove){state.wishlist=state.wishlist.filter(name=>name!==remove.dataset.wishlistRemove);save();renderWishlist()}});
-  }
-
   function categoryMatch(key, category) {
     const value=category.toLowerCase();
     if(key==='security-doors') return value.includes('door')&&!value.includes('pedestrian');
@@ -94,7 +98,6 @@
       document.getElementById('menuToggle')?.setAttribute('aria-expanded','false');
       render();document.getElementById('catalog').scrollIntoView({behavior:'smooth'});return;
     }
-    if(event.target.closest('[data-open-wishlist]')){event.preventDefault();renderWishlist();return}
   });
 
   grid.replaceChildren();count.textContent='Loading products…';
@@ -109,5 +112,5 @@
   document.querySelectorAll('.price-fields input').forEach(input=>input.onchange=()=>{const fields=document.querySelectorAll('.price-fields input');state.min=Number(fields[0].value)||0;state.max=Number(fields[1].value)||Infinity;render()});
   document.querySelector('.sign button').onclick=()=>toast('Newsletter sign-up is not available yet');
   updateCart();
-  fetch('/api/products').then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.error||'Products unavailable');state.products=data.products;filters();render()}).catch(error=>{grid.replaceChildren();const box=document.createElement('div');box.className='empty-state';box.textContent=error.message;grid.append(box);count.textContent='Products unavailable'});
+  fetch('/api/products').then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.error||'Products unavailable');state.products=data.products;setupAdCarousel(state.products);filters();render()}).catch(error=>{grid.replaceChildren();const box=document.createElement('div');box.className='empty-state';box.textContent=error.message;grid.append(box);count.textContent='Products unavailable'});
 })();
