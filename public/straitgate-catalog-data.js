@@ -4,6 +4,14 @@
   const state = {products:[],category:'',finish:'',operation:'',search:'',min:0,max:Infinity,sort:'featured',cart:JSON.parse(localStorage.getItem('straitgate-cart') || '{}'),wishlist:JSON.parse(localStorage.getItem('straitgate-wishlist') || '[]')};
   const money = value => '₦' + Number(value || 0).toLocaleString('en-NG');
   const escape = value => String(value || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const adMessages = ['Made-to-measure doors built for your home','Custom gates made in Lagos','Nationwide delivery on shop orders'];
+  const adMessage = document.getElementById('shopAdMessage');
+  let adIndex = 0;
+  if (adMessage) setInterval(() => {
+    if (document.hidden) return;
+    adMessage.classList.add('changing');
+    setTimeout(() => { adIndex = (adIndex + 1) % adMessages.length; adMessage.textContent = adMessages[adIndex]; adMessage.classList.remove('changing'); }, 200);
+  }, 5000);
   const save = () => {localStorage.setItem('straitgate-cart',JSON.stringify(state.cart));localStorage.setItem('straitgate-wishlist',JSON.stringify(state.wishlist))};
   const toast = message => {document.querySelector('.toast')?.remove();const el=document.createElement('div');el.className='toast';el.textContent=message;document.body.append(el);setTimeout(()=>el.remove(),2200)};
   const updateCart = () => {document.getElementById('cartCount').textContent=Object.values(state.cart).reduce((a,b)=>a+b,0)};
@@ -71,6 +79,41 @@
     shade.addEventListener('click',event=>{if(event.target===shade||event.target.closest('.close-drawer'))shade.remove();const button=event.target.closest('[data-action]');if(!button)return;const name=button.dataset.name;if(button.dataset.action==='plus')state.cart[name]++;if(button.dataset.action==='minus')state.cart[name]=Math.max(0,state.cart[name]-1);if(button.dataset.action==='remove'||!state.cart[name])delete state.cart[name];save();updateCart();renderCart()});
     shade.querySelector('.checkout').onclick=()=>toast(Object.keys(state.cart).length?'Proceeding to order checkout':'Add a product to your cart first');
   }
+
+  function renderWishlist() {
+    document.querySelector('.drawer-shade')?.remove();
+    const shade=document.createElement('div');shade.className='drawer-shade';
+    const entries=state.wishlist.map(name=>({name,product:state.products.find(p=>p.name===name)}));
+    shade.innerHTML='<aside class="cart-drawer" aria-label="Saved products"><div class="drawer-head"><div><small>YOUR SAVED ITEMS</small><h2>Saved products</h2></div><button class="close-drawer" aria-label="Close saved products">×</button></div><div class="cart-lines">'+(entries.length?entries.map(({name,product})=>'<div class="cart-line"><div>'+(product?'<a href="/products/'+encodeURIComponent(product.slug)+'"><b>'+escape(name)+'</b></a>':'<b>'+escape(name)+'</b><small>This product is no longer available.</small>')+'</div><button class="remove-cart" type="button" data-wishlist-remove="'+escape(name)+'">Remove</button></div>').join(''):'<p style="padding:40px 0;color:var(--mute)">You have no saved products yet.</p>')+'</div></aside>';
+    document.body.append(shade);
+    shade.addEventListener('click',event=>{if(event.target===shade||event.target.closest('.close-drawer')){shade.remove();return}const remove=event.target.closest('[data-wishlist-remove]');if(remove){state.wishlist=state.wishlist.filter(name=>name!==remove.dataset.wishlistRemove);save();renderWishlist()}});
+  }
+
+  function categoryMatch(key, category) {
+    const value=category.toLowerCase();
+    if(key==='security-doors') return value.includes('door')&&!value.includes('pedestrian');
+    if(key==='sliding-gates') return value.includes('sliding');
+    if(key==='pedestrian-gates') return value.includes('pedestrian');
+    if(key==='estate-gates') return value.includes('estate');
+    return false;
+  }
+
+  document.addEventListener('click',event=>{
+    const link=event.target.closest('[data-shop-category]');
+    if(link){
+      event.preventDefault();
+      const key=link.dataset.shopCategory;
+      const product=state.products.find(item=>categoryMatch(key,item.category));
+      state.category=key==='all'?'':product?product.category.toLowerCase():key;
+      document.querySelectorAll('.chips .chip').forEach(chip=>chip.setAttribute('aria-pressed',String(chip.dataset.category===state.category)));
+      document.querySelectorAll('.sidebar .filter:first-of-type input').forEach(input=>input.checked=input.value===state.category);
+      document.querySelector('.category-nav')?.classList.remove('open');
+      document.getElementById('menuToggle')?.setAttribute('aria-expanded','false');
+      render();document.getElementById('catalog').scrollIntoView({behavior:'smooth'});return;
+    }
+    if(event.target.closest('[data-open-wishlist]')){event.preventDefault();renderWishlist();return}
+    if(event.target.closest('#footerCart')){event.preventDefault();renderCart()}
+  });
 
   grid.replaceChildren();count.textContent='Loading products…';
   document.querySelector('.pagination').hidden=true;document.getElementById('moreButton').hidden=true;

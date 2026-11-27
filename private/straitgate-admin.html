@@ -795,6 +795,31 @@
       margin-bottom: 14px
     }
 
+    .bar h2,
+    .bar h3 {
+      margin: 0
+    }
+
+    label:has(input[type=checkbox]) {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer
+    }
+
+    label:has(input[type=checkbox]) input[type=checkbox] {
+      width: 15px !important;
+      height: 15px !important;
+      margin: 0;
+      flex: none;
+      accent-color: var(--lime)
+    }
+
+    td.r .btn {
+      vertical-align: middle;
+      margin-left: 4px
+    }
+
     .bar input,
     .bar select {
       width: auto;
@@ -1496,7 +1521,7 @@
     function barChart(l, v, hi, caption) {
       var m = Math.max(1, Math.max.apply(null, v) * 1.15), w = 400, h = 190, bw = w / l.length, s = '';
       [0, .5, 1].forEach(function (f) { var y = h - 24 - (h - 40) * f; s += '<line x1="0" x2="' + w + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)"/>' });
-      v.forEach(function (x, i) { var bh = (h - 40) * x / m, y = h - 24 - bh; s += '<rect x="' + (i * bw + bw * .18) + '" y="' + y + '" width="' + bw * .64 + '" height="' + bh + '" rx="4" fill="' + (i === hi ? '#ccf97c' : 'var(--ink)') + '"><title>' + l[i] + ': ' + (caption === 'Revenue' ? gbp(x) : x) + '</title></rect><text x="' + (i * bw + bw / 2) + '" y="' + (h - 8) + '" font-size="9" text-anchor="middle" fill="var(--mute)">' + l[i] + '</text>' });
+      v.forEach(function (x, i) { var bh = (h - 40) * x / m, y = h - 24 - bh; s += '<rect x="' + (i * bw + bw * .18) + '" y="' + y + '" width="' + bw * .64 + '" height="' + bh + '" rx="4" fill="' + (i === hi ? '#ccf97c' : 'var(--ink)') + '"><title>' + l[i] + ': ' + (caption === 'Revenue' ? gbp(x) : x) + '</title></rect><text x="' + (i * bw + bw / 2) + '" y="' + (h - 8) + '" font-size="' + (l.length > 7 ? '7.5' : '9') + '" text-anchor="middle" fill="var(--mute)">' + l[i] + '</text>' });
       return '<svg class="ch" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + caption + ' by month">' + s + '</svg>'
     }
     function donut(d) {
@@ -1505,14 +1530,15 @@
       return '<svg class="ch" viewBox="0 0 140 140" style="max-width:190px;margin:0 auto" role="img" aria-label="Catalog stock value by category">' + s + '<text x="70" y="75" text-anchor="middle" font-size="13" fill="var(--ink)">' + gbp(total) + '</text></svg><div class="leg">' + d.map(function (x) { return '<span><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ' (' + gbp(x[1]) + ')</span>' }).join('') + '</div>'
     }
     function line(l, v) {
-      var m = Math.max(1, Math.max.apply(null, v) * 1.15), w = 400, h = 170, p = v.map(function (x, i) { return [i * (w - 20) / Math.max(1, v.length - 1) + 10, h - 24 - (h - 40) * x / m] }), s = '';
+      var m = Math.max(1, Math.max.apply(null, v) * 1.15), w = 400, h = 170, pad = 28, p = v.map(function (x, i) { return [i * (w - pad * 2) / Math.max(1, v.length - 1) + pad, h - 24 - (h - 40) * x / m] }), s = '';
       s += '<polyline points="' + p.map(function (a) { return a.join(',') }).join(' ') + '" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>';
-      p.forEach(function (a, i) { s += '<circle cx="' + a[0] + '" cy="' + a[1] + '" r="3.5" fill="' + (i === v.length - 1 ? '#ccf97c' : 'var(--ink)') + '" stroke="var(--ink)"><title>' + l[i] + ': ' + v[i] + '</title></circle><text x="' + a[0] + '" y="' + (h - 6) + '" font-size="9" text-anchor="middle" fill="var(--mute)">' + l[i] + '</text>' });
+      p.forEach(function (a, i) { var anchor = i === 0 ? 'start' : i === v.length - 1 ? 'end' : 'middle'; s += '<circle cx="' + a[0] + '" cy="' + a[1] + '" r="3.5" fill="' + (i === v.length - 1 ? '#ccf97c' : 'var(--ink)') + '" stroke="var(--ink)"><title>' + l[i] + ': ' + v[i] + '</title></circle><text x="' + a[0] + '" y="' + (h - 6) + '" font-size="9" text-anchor="' + anchor + '" fill="var(--mute)">' + l[i] + '</text>' });
       return '<svg class="ch" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Visitor & signup activity">' + s + '</svg>'
     }
     function dashboardSeries() {
       var catPalette = ['#ccf97c', '#1f5fe0', '#f5c20f', '#2e7d12', '#e5271d', '#8a8a8a', '#5b8cff'];
-      var catLabels = CATS.map(function (c) { return c.split(' ')[0] });
+      var shortNames = { 'Security door': 'Security', 'Iron door': 'Iron', 'Chair': 'Chair', 'Furniture': 'Furn.', 'Sliding gate': 'Sliding', 'Pedestrian gate': 'Pedest.', 'Estate gate': 'Estate', 'Garden gate': 'Garden', 'Driveway gate': 'Driveway', 'Accessory': 'Access.' };
+      var catLabels = CATS.map(function (c) { return shortNames[c] || c.split(' ')[0] });
       var catStockUnits = CATS.map(function (c) { return DB.products.filter(function (p) { return p.cat === c }).reduce(function (s, p) { return s + (Number(p.stockQuantity) || 0) }, 0) });
       var catValueDonut = CATS.map(function (c, idx) { var val = DB.products.filter(function (p) { return p.cat === c }).reduce(function (s, p) { return s + (Number(p.price) || 0) * Math.max(1, Number(p.stockQuantity) || 1) }, 0); return [c, val, catPalette[idx % catPalette.length]] }).filter(function (x) { return x[1] > 0 });
       var tLabels = ['30d avg/wk', '7d total', 'Last 24h'], tTraffic = [Math.round((DB.traffic?.month || 0) / 4.3), DB.traffic?.week || 0, DB.traffic?.day || 0], tSignups = [DB.signups?.month || 0, DB.signups?.week || 0, DB.signups?.day || 0];
@@ -1584,7 +1610,7 @@
         '<div class="f"><div><label for="qin">Installation (₦)</label><input id="qin" type="number" min="0" value="0"></div><div><label for="qd">Discount (%)</label><input id="qd" type="number" min="0" max="100" value="0"></div>' +
         '<div class="w"><h3>Document scanner</h3><p class="note">Take a clear photo or choose an image. Enhance it, then convert it into editable text with AI. Review the text and print it on your company letterhead.</p><input id="qscanCamera" type="file" accept="image/*" capture="environment" hidden><input id="qscanFile" type="file" accept="image/*" hidden><div class="bar"><button class="btn sm" id="qscanTake" type="button">Scan with camera</button><button class="btn sm" id="qscanChoose" type="button">Choose photo</button></div><div id="qscanPreview" class="bar" style="margin-top:10px;flex-wrap:wrap"></div></div>' +
         '<div class="w"><label for="qn">Notes and terms</label><textarea id="qn" placeholder="Enter your terms"></textarea></div><div class="w"><label for="qprompt">Ask AI to draft quotation notes and items</label><textarea id="qprompt" placeholder="For example: Add two Fortis Red gates at ₦250,000 each and include a 12-month warranty"></textarea><p class="note">Use shop products when you name them, or ask for custom items that are not in the store. You can also ask for notes only. Review suggestions before saving.</p><div class="bar" style="margin:8px 0 0"><button class="btn sm" id="qai" type="button">Draft notes and items with AI</button><button class="mic-btn" id="qmic" type="button" aria-label="Speak to transcribe into AI prompt" title="Speak to transcribe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button><span class="note" id="qmicStatus" style="margin:0">Tap mic to speak</span></div></div></div></div>' +
-        '<div class="quote-editor-stack"><div class="tile"><h2>Summary</h2><div class="sum" id="qs"></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="qsave">' + (editingQuoteId ? 'Save changes' : 'Save quotation') + '</button>' + (editingQuoteId ? '<button class="btn sm" id="qcancel" type="button">Cancel editing</button>' : '') + '<button class="btn" id="qcopy">Copy as text</button><button class="btn" id="qprint">Download quotation (PDF)</button></div></div><div class="tile"><h2>Letterhead</h2><p class="note">Save named letterheads here and choose one for this quotation.</p><label for="quoteUseLetterhead"><input id="quoteUseLetterhead" type="checkbox" style="width:auto"' + (useQuoteLetterhead ? ' checked' : '') + '> Use letterhead</label><select id="letterheadSelect" aria-label="Choose a letterhead"' + (useQuoteLetterhead ? '' : ' disabled') + '><option value="">Select a letterhead</option>' + (DB.letterheads || []).map(function (h) { return '<option value="' + esc(h.id) + '"' + (h.id === DB.activeLetterhead ? ' selected' : '') + '>' + esc(h.name) + '</option>' }).join('') + '</select><div class="bar"><input id="letterheadName" maxlength="80" placeholder="Name for this letterhead" aria-label="Name for this letterhead"><input id="letterhead" type="file" accept="image/png,image/jpeg"><button class="btn sm" id="saveletterhead" type="button">Save as new</button></div><div class="bar">' + (DB.activeLetterhead && DB.activeLetterhead !== 'default' ? '<button class="btn sm" id="renameLetterhead" type="button">Rename selected</button><button class="btn sm x" id="deleteLetterhead" type="button">Delete selected</button>' : '') + '</div></div></div><section class="tile quote-preview-panel" aria-label="Quotation document preview"><h2>Document preview</h2><p class="note">Updates as you edit. Choose Download quotation (PDF), then select Save as PDF in the print window.</p><div class="quote-preview-frame"><div id="quotePreviewDocument"></div></div></section></div>' +
+        '<div class="quote-editor-stack"><div class="tile"><h2>Summary</h2><div class="sum" id="qs"></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="qsave">' + (editingQuoteId ? 'Save changes' : 'Save quotation') + '</button>' + (editingQuoteId ? '<button class="btn sm" id="qcancel" type="button">Cancel editing</button>' : '') + '<button class="btn" id="qcopy">Copy as text</button><button class="btn" id="qprint">Download quotation (PDF)</button></div></div><div class="tile"><h2>Letterhead</h2><p class="note">Save named letterheads here and choose one for this quotation.</p><label for="quoteUseLetterhead" style="margin:10px 0 8px"><input id="quoteUseLetterhead" type="checkbox"' + (useQuoteLetterhead ? ' checked' : '') + '> Use letterhead</label><select id="letterheadSelect" aria-label="Choose a letterhead"' + (useQuoteLetterhead ? '' : ' disabled') + '><option value="">Select a letterhead</option>' + (DB.letterheads || []).map(function (h) { return '<option value="' + esc(h.id) + '"' + (h.id === DB.activeLetterhead ? ' selected' : '') + '>' + esc(h.name) + '</option>' }).join('') + '</select><div class="bar" style="margin-top:10px"><input id="letterheadName" maxlength="80" placeholder="Name for this letterhead" aria-label="Name for this letterhead"><input id="letterhead" type="file" accept="image/png,image/jpeg"><button class="btn sm" id="saveletterhead" type="button">Save as new</button></div><div class="bar">' + (DB.activeLetterhead && DB.activeLetterhead !== 'default' ? '<button class="btn sm" id="renameLetterhead" type="button">Rename selected</button><button class="btn sm x" id="deleteLetterhead" type="button">Delete selected</button>' : '') + '</div></div></div><section class="tile quote-preview-panel" aria-label="Quotation document preview"><h2>Document preview</h2><p class="note">Updates as you edit. Choose Download quotation (PDF), then select Save as PDF in the print window.</p><div class="quote-preview-frame"><div id="quotePreviewDocument"></div></div></section></div>' +
         '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h2>All quotations (' + DB.quotes.length + ')</h2>' + quoteTable(DB.quotes.slice().reverse()) + '</div>'
     };
     function qItems() { $('qi').innerHTML = QI.map(function (i, n) { return '<div class="qi"><input data-qi="d:' + n + '" value="' + esc(i.d) + '" placeholder="Description" aria-label="Description"><input data-qi="q:' + n + '" type="number" min="1" value="' + i.q + '" aria-label="Qty"><input data-qi="p:' + n + '" type="number" min="0" step="0.01" value="' + i.p + '" aria-label="Unit price"><button class="btn sm x" data-qrm="' + n + '" aria-label="Remove line" style="padding:0">&times;</button></div>' }).join(''); qSum() }
