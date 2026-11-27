@@ -63,23 +63,6 @@
     arrivals.innerHTML='<h2>New arrivals</h2>'+state.products.slice(0,3).map(p=>'<a class="best-item" href="/products/'+encodeURIComponent(p.slug)+'"><span class="best-thumb">'+(p.image?'<img src="'+escape(p.image)+'" alt="" loading="lazy" decoding="async">':'')+'</span><span><b>'+escape(p.name)+'</b><span>'+escape(p.category)+'</span></span></a>').join('');
   }
 
-  function renderCart() {
-    document.querySelector('.drawer-shade')?.remove();
-    const shade=document.createElement('div');shade.className='drawer-shade';
-    let totalAmount = 0;
-    const lines=Object.entries(state.cart).map(([name,qty])=>{
-      const prod = state.products.find(p => p.name === name);
-      const unitPrice = prod ? prod.price : 0;
-      const lineTotal = unitPrice * qty;
-      totalAmount += lineTotal;
-      return '<div class="cart-line"><div><b>'+escape(name)+'</b><small>'+(unitPrice ? money(unitPrice)+' each · Subtotal: '+money(lineTotal) : 'Ready for delivery')+'</small><div class="quantity"><button data-action="minus" data-name="'+escape(name)+'">−</button><span>'+qty+'</span><button data-action="plus" data-name="'+escape(name)+'">+</button></div></div><button class="remove-cart" data-action="remove" data-name="'+escape(name)+'">Remove</button></div>';
-    }).join('');
-    shade.innerHTML='<aside class="cart-drawer"><div class="drawer-head"><div><small>YOUR SHOPPING BAG</small><h2>Cart</h2></div><button class="close-drawer" aria-label="Close cart">×</button></div><div class="cart-lines">'+(lines||'<p>Your cart is empty.</p>')+'</div><div class="cart-total"><span>Total ('+Object.values(state.cart).reduce((a,b)=>a+b,0)+' items)</span><strong>'+money(totalAmount)+'</strong></div><button class="checkout">Proceed to checkout</button></aside>';
-    document.body.append(shade);
-    shade.addEventListener('click',event=>{if(event.target===shade||event.target.closest('.close-drawer'))shade.remove();const button=event.target.closest('[data-action]');if(!button)return;const name=button.dataset.name;if(button.dataset.action==='plus')state.cart[name]++;if(button.dataset.action==='minus')state.cart[name]=Math.max(0,state.cart[name]-1);if(button.dataset.action==='remove'||!state.cart[name])delete state.cart[name];save();updateCart();renderCart()});
-    shade.querySelector('.checkout').onclick=()=>toast(Object.keys(state.cart).length?'Proceeding to order checkout':'Add a product to your cart first');
-  }
-
   function renderWishlist() {
     document.querySelector('.drawer-shade')?.remove();
     const shade=document.createElement('div');shade.className='drawer-shade';
@@ -112,7 +95,6 @@
       render();document.getElementById('catalog').scrollIntoView({behavior:'smooth'});return;
     }
     if(event.target.closest('[data-open-wishlist]')){event.preventDefault();renderWishlist();return}
-    if(event.target.closest('#footerCart')){event.preventDefault();renderCart()}
   });
 
   grid.replaceChildren();count.textContent='Loading products…';
@@ -125,8 +107,7 @@
   document.querySelector('.mobile-filter-button').onclick=()=>document.querySelector('.sidebar').classList.add('mobile-sidebar-open');
   document.querySelector('.mobile-sidebar-close').onclick=()=>document.querySelector('.sidebar').classList.remove('mobile-sidebar-open');
   document.querySelectorAll('.price-fields input').forEach(input=>input.onchange=()=>{const fields=document.querySelectorAll('.price-fields input');state.min=Number(fields[0].value)||0;state.max=Number(fields[1].value)||Infinity;render()});
-  document.getElementById('cartTrigger').onclick=event=>{event.preventDefault();renderCart()};
   document.querySelector('.sign button').onclick=()=>toast('Newsletter sign-up is not available yet');
   updateCart();
-  fetch('/api/products').then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.error||'Products unavailable');state.products=data.products;filters();render();if(location.hash==='#cart')renderCart()}).catch(error=>{grid.replaceChildren();const box=document.createElement('div');box.className='empty-state';box.textContent=error.message;grid.append(box);count.textContent='Products unavailable'});
+  fetch('/api/products').then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.error||'Products unavailable');state.products=data.products;filters();render()}).catch(error=>{grid.replaceChildren();const box=document.createElement('div');box.className='empty-state';box.textContent=error.message;grid.append(box);count.textContent='Products unavailable'});
 })();
