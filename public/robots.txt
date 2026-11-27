@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api/admin/
+Disallow: /straitgate-admin-login.html
+Disallow: /straitgate-reset-password.html
 
 Sitemap: https://straitgate.onrender.com/sitemap.xml

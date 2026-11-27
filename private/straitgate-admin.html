@@ -280,6 +280,86 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr)
     }
 
+    .quote-workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, .9fr);
+      gap: clamp(12px, 2vw, 24px);
+      align-items: start
+    }
+
+    .quote-editor-stack {
+      display: grid;
+      gap: clamp(12px, 2vw, 24px);
+      min-width: 0
+    }
+
+    .quote-preview-panel {
+      position: sticky;
+      top: 16px;
+      min-width: 0
+    }
+
+    .quote-preview-frame {
+      width: 100%;
+      min-height: 70vh;
+      max-height: 78vh;
+      overflow: auto;
+      background: #e8e8e8;
+      padding: clamp(8px, 2vw, 20px);
+      border-radius: var(--r-md)
+    }
+
+    .quote-preview-frame #quotePreviewDocument {
+      width: min(100%, 794px);
+      min-height: 1123px;
+      margin: 0 auto;
+      background: #fff;
+      color: #111;
+      box-shadow: 0 2px 14px rgba(0, 0, 0, .16);
+      font-family: Arial, sans-serif;
+      font-size: 12px
+    }
+
+    .quote-preview-frame #quotePreviewDocument > div {
+      min-height: 1123px !important;
+      font-size: 12px
+    }
+
+    .quote-preview-frame #quotePreviewDocument table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    .quote-preview-frame #quotePreviewDocument th,
+    .quote-preview-frame #quotePreviewDocument td {
+      padding: 8px 6px;
+      border-bottom: 1px solid #ddd;
+      text-align: left
+    }
+
+    .quote-preview-frame #quotePreviewDocument .r {
+      text-align: right
+    }
+
+    .quote-preview-frame #quotePreviewDocument img {
+      max-width: 100%
+    }
+
+    @media(max-width:1000px) {
+      .quote-workspace {
+        grid-template-columns: minmax(0, 1fr)
+      }
+
+      .quote-preview-panel {
+        position: static
+      }
+
+      .quote-preview-frame {
+        min-height: 60vh;
+        max-height: 70vh
+      }
+    }
+
     /* ── Tiles ── */
     .tile {
       background: var(--tile);
@@ -848,13 +928,14 @@
     }
 
     .calc-tile {
-      width: fit-content;
+      width: 100%;
       max-width: 100%;
-      justify-self: start
+      justify-self: stretch
     }
 
     .calc {
-      width: min(390px, 100%)
+      width: 100%;
+      max-width: 560px
     }
 
     .calc .bar {
@@ -1087,13 +1168,14 @@
       }
 
       .calc-tile {
-        width: fit-content;
+        width: 100%;
         max-width: 100%;
-        justify-self: start
+        justify-self: stretch
       }
 
       .calc {
-        width: min(390px, 100%)
+        width: 100%;
+        max-width: 560px
       }
     }
 
@@ -1389,7 +1471,7 @@
 
   <script>
     var TABS = [['dashboard', 'Dashboard'], ['products', 'Products'], ['inventory', 'Inventory'], ['quotes', 'Quotations'], ['budget', 'Budget'], ['health', 'Health'], ['tools', 'Converter & calculator']];
-    var CATS = ['Security door', 'Sliding gate', 'Pedestrian gate', 'Estate gate', 'Garden gate', 'Driveway gate', 'Accessory'];
+    var CATS = ['Security door', 'Iron door', 'Chair', 'Furniture', 'Sliding gate', 'Pedestrian gate', 'Estate gate', 'Garden gate', 'Driveway gate', 'Accessory'];
     var ITYPES = ['Equipment', 'Tool', 'Product', 'Material'];
     var DB = { products: [], inv: [], quotes: [] };
     var METRIC_PERIOD = { traffic: 'day', signups: 'day', revenue: 'day' };
@@ -1489,11 +1571,11 @@
       }).join('') + '</tbody></table></div>'
     }
 
-    var QI = [{ d: '', q: 1, p: 0 }], QFORM = null, editingQuoteId = 0, quoteScans = [], quoteDocuments = [];
+    var QI = [{ d: '', q: 1, p: 0 }], QFORM = null, editingQuoteId = 0, quoteScans = [], useQuoteLetterhead = true;
     function editQuote(q) { editingQuoteId = q.id; QI = q.items.map(function (i) { return { d: i.d, q: i.q, p: i.p } }); QFORM = { qc: q.cust, qe: q.email, qt: q.phone, qv: q.valid, qa: q.addr, qin: q.inst, qd: q.disc, qn: q.notes, qprompt: '' }; navigate('quotes') }
     function captureQuoteForm() { QFORM = {};['qc', 'qe', 'qt', 'qv', 'qa', 'qin', 'qd', 'qn', 'qprompt'].forEach(function (id) { if ($(id)) QFORM[id] = $(id).value }) }
     V.quotes = function () {
-      return '<div class="grid gf"><div class="tile"><h2>' + (editingQuoteId ? 'Edit quotation ' + esc(DB.quotes.find(function (q) { return q.id === editingQuoteId })?.no || '') : 'New quotation') + '</h2><div class="f">' +
+      return '<div class="quote-workspace"><div class="quote-editor-stack"><div class="tile"><h2>' + (editingQuoteId ? 'Edit quotation ' + esc(DB.quotes.find(function (q) { return q.id === editingQuoteId })?.no || '') : 'New quotation') + '</h2><div class="f">' +
         '<div><label for="qc">Customer name</label><input id="qc"></div><div><label for="qe">Email</label><input id="qe" type="email"></div>' +
         '<div><label for="qt">Phone</label><input id="qt"></div><div><label for="qv">Valid until</label><input id="qv" type="date"></div>' +
         '<div class="w"><label for="qa">Site address</label><input id="qa"></div></div>' +
@@ -1502,14 +1584,16 @@
         '<div class="f"><div><label for="qin">Installation (₦)</label><input id="qin" type="number" min="0" value="0"></div><div><label for="qd">Discount (%)</label><input id="qd" type="number" min="0" max="100" value="0"></div>' +
         '<div class="w"><h3>Document scanner</h3><p class="note">Take a clear photo or choose an image. Enhance it, then convert it into editable text with AI. Review the text and print it on your company letterhead.</p><input id="qscanCamera" type="file" accept="image/*" capture="environment" hidden><input id="qscanFile" type="file" accept="image/*" hidden><div class="bar"><button class="btn sm" id="qscanTake" type="button">Scan with camera</button><button class="btn sm" id="qscanChoose" type="button">Choose photo</button></div><div id="qscanPreview" class="bar" style="margin-top:10px;flex-wrap:wrap"></div></div>' +
         '<div class="w"><label for="qn">Notes and terms</label><textarea id="qn" placeholder="Enter your terms"></textarea></div><div class="w"><label for="qprompt">Ask AI to draft quotation notes and items</label><textarea id="qprompt" placeholder="For example: Add two Fortis Red gates at ₦250,000 each and include a 12-month warranty"></textarea><p class="note">Use shop products when you name them, or ask for custom items that are not in the store. You can also ask for notes only. Review suggestions before saving.</p><div class="bar" style="margin:8px 0 0"><button class="btn sm" id="qai" type="button">Draft notes and items with AI</button><button class="mic-btn" id="qmic" type="button" aria-label="Speak to transcribe into AI prompt" title="Speak to transcribe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button><span class="note" id="qmicStatus" style="margin:0">Tap mic to speak</span></div></div></div></div>' +
-        '<div><div class="tile"><h2>Summary</h2><div class="sum" id="qs"></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="qsave">' + (editingQuoteId ? 'Save changes' : 'Save quotation') + '</button>' + (editingQuoteId ? '<button class="btn sm" id="qcancel" type="button">Cancel editing</button>' : '') + '<button class="btn" id="qcopy">Copy as text</button><button class="btn" id="qprint">Print draft</button></div></div><div class="tile" style="margin-top:16px"><h2>Company letterheads</h2><p class="note">Save named letterheads and choose which one appears behind quotations and converted documents.</p><label for="letterheadSelect">Use letterhead</label><select id="letterheadSelect"><option value="">No letterhead</option>' + (DB.letterheads || []).map(function (h) { return '<option value="' + esc(h.id) + '"' + (h.id === DB.activeLetterhead ? ' selected' : '') + '>' + esc(h.name) + '</option>' }).join('') + '</select><div class="bar"><input id="letterheadName" maxlength="80" placeholder="Name for this letterhead" aria-label="Name for this letterhead"><input id="letterhead" type="file" accept="image/png,image/jpeg"><button class="btn sm" id="saveletterhead" type="button">Save as new</button></div><div class="bar">' + (DB.activeLetterhead && DB.activeLetterhead !== 'default' ? '<button class="btn sm" id="renameLetterhead" type="button">Rename selected</button><button class="btn sm x" id="deleteLetterhead" type="button">Delete selected</button>' : '') + '</div></div></div></div>' +
+        '<div class="quote-editor-stack"><div class="tile"><h2>Summary</h2><div class="sum" id="qs"></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="qsave">' + (editingQuoteId ? 'Save changes' : 'Save quotation') + '</button>' + (editingQuoteId ? '<button class="btn sm" id="qcancel" type="button">Cancel editing</button>' : '') + '<button class="btn" id="qcopy">Copy as text</button><button class="btn" id="qprint">Download quotation (PDF)</button></div></div><div class="tile"><h2>Letterhead</h2><p class="note">Save named letterheads here and choose one for this quotation.</p><label for="quoteUseLetterhead"><input id="quoteUseLetterhead" type="checkbox" style="width:auto"' + (useQuoteLetterhead ? ' checked' : '') + '> Use letterhead</label><select id="letterheadSelect" aria-label="Choose a letterhead"' + (useQuoteLetterhead ? '' : ' disabled') + '><option value="">Select a letterhead</option>' + (DB.letterheads || []).map(function (h) { return '<option value="' + esc(h.id) + '"' + (h.id === DB.activeLetterhead ? ' selected' : '') + '>' + esc(h.name) + '</option>' }).join('') + '</select><div class="bar"><input id="letterheadName" maxlength="80" placeholder="Name for this letterhead" aria-label="Name for this letterhead"><input id="letterhead" type="file" accept="image/png,image/jpeg"><button class="btn sm" id="saveletterhead" type="button">Save as new</button></div><div class="bar">' + (DB.activeLetterhead && DB.activeLetterhead !== 'default' ? '<button class="btn sm" id="renameLetterhead" type="button">Rename selected</button><button class="btn sm x" id="deleteLetterhead" type="button">Delete selected</button>' : '') + '</div></div></div><section class="tile quote-preview-panel" aria-label="Quotation document preview"><h2>Document preview</h2><p class="note">Updates as you edit. Choose Download quotation (PDF), then select Save as PDF in the print window.</p><div class="quote-preview-frame"><div id="quotePreviewDocument"></div></div></section></div>' +
         '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h2>All quotations (' + DB.quotes.length + ')</h2>' + quoteTable(DB.quotes.slice().reverse()) + '</div>'
     };
     function qItems() { $('qi').innerHTML = QI.map(function (i, n) { return '<div class="qi"><input data-qi="d:' + n + '" value="' + esc(i.d) + '" placeholder="Description" aria-label="Description"><input data-qi="q:' + n + '" type="number" min="1" value="' + i.q + '" aria-label="Qty"><input data-qi="p:' + n + '" type="number" min="0" step="0.01" value="' + i.p + '" aria-label="Unit price"><button class="btn sm x" data-qrm="' + n + '" aria-label="Remove line" style="padding:0">&times;</button></div>' }).join(''); qSum() }
     function qDraft() { return { items: QI.filter(function (i) { return i.d || i.p }), inst: +$('qin').value || 0, disc: +$('qd').value || 0 } }
-    function qSum() { var t = totals(qDraft()); $('qs').innerHTML = '<div>Subtotal<span>' + gbp(t.sub) + '</span></div><div>Discount<span>-' + gbp(t.d) + '</span></div><div>Installation<span>' + gbp(t.inst) + '</span></div><div class="t">Total<span>' + gbp(t.total) + '</span></div>' }
+    function qSum() { var t = totals(qDraft()), summary = $('qs'); if (summary) summary.innerHTML = '<div>Subtotal<span>' + gbp(t.sub) + '</span></div><div>Discount<span>-' + gbp(t.d) + '</span></div><div>Installation<span>' + gbp(t.inst) + '</span></div><div class="t">Total<span>' + gbp(t.total) + '</span></div>'; updateQuotePreview() }
     function qText(q) { var t = totals(q); return 'QUOTATION ' + q.no + '\nStraitgate – Gates & security doors\nDate: ' + q.date + (q.valid ? '   Valid until: ' + q.valid : '') + '\n\nCustomer: ' + q.cust + '\n' + (q.email ? q.email + '\n' : '') + (q.phone ? q.phone + '\n' : '') + (q.addr ? q.addr + '\n' : '') + '\n' + q.items.map(function (i) { return i.q + ' x ' + i.d + ' @ ' + gbp(i.p) + ' = ' + gbp(i.q * i.p) }).join('\n') + '\n\nSubtotal: ' + gbp(t.sub) + '\nDiscount: -' + gbp(t.d) + '\nInstallation: ' + gbp(t.inst) + '\nTOTAL: ' + gbp(t.total) + '\n\n' + (q.notes || '') }
-    function qHtml(q) { var t = totals(q); return '<div style="min-height:90vh;position:relative">' + (DB.letterhead ? '<img src="' + DB.letterhead + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill">' : '') + '<div style="position:relative;padding:150px 45px 70px"><h2 style="font-size:28px;margin:0">Straitgate</h2><p>Gates &amp; security doors</p><h3>Quotation ' + esc(q.no) + '</h3><p>Date: ' + esc(q.date) + (q.valid ? ' &middot; Valid until: ' + esc(q.valid) : '') + '</p><p><b>' + esc(q.cust) + '</b><br>' + esc(q.email) + ' ' + esc(q.phone) + '<br>' + esc(q.addr) + '</p><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr></thead><tbody>' + q.items.map(function (i) { return '<tr><td>' + esc(i.d) + '</td><td class="r">' + i.q + '</td><td class="r">' + gbp(i.p) + '</td><td class="r">' + gbp(i.q * i.p) + '</td></tr>' }).join('') + '</tbody></table><p style="text-align:right">Subtotal ' + gbp(t.sub) + '<br>Discount -' + gbp(t.d) + '<br>Installation ' + gbp(t.inst) + '<br><b style="font-size:18px">Total ' + gbp(t.total) + '</b></p><p>' + esc(q.notes) + '</p></div></div>' + quoteDocuments.map(function (doc, n) { return '<div style="page-break-before:always;min-height:95vh;position:relative">' + (DB.letterhead ? '<img src="' + DB.letterhead + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill">' : '') + '<div style="position:relative;padding:42mm 24mm 25mm;white-space:pre-wrap;font:12pt/1.55 Arial,sans-serif">' + esc(doc.text) + '</div></div>' }).join('') + quoteScans.map(function (src, n) { return '<div style="page-break-before:always;text-align:center;padding:12mm"><p>Attached document ' + (n + 1) + '</p><img src="' + src + '" alt="Scanned document" style="max-width:100%;max-height:250mm;object-fit:contain"></div>' }).join('') }
+    function qHtml(q) { var t = totals(q), letterhead = useQuoteLetterhead ? DB.letterhead : ''; return '<div style="min-height:90vh;position:relative">' + (letterhead ? '<img src="' + letterhead + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill">' : '') + '<div style="position:relative;padding:150px 45px 70px"><h2 style="font-size:28px;margin:0">Straitgate</h2><p>Gates &amp; security doors</p><h3>Quotation ' + esc(q.no) + '</h3><p>Date: ' + esc(q.date) + (q.valid ? ' &middot; Valid until: ' + esc(q.valid) : '') + '</p><p><b>' + esc(q.cust) + '</b><br>' + esc(q.email) + ' ' + esc(q.phone) + '<br>' + esc(q.addr) + '</p><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr></thead><tbody>' + q.items.map(function (i) { return '<tr><td>' + esc(i.d) + '</td><td class="r">' + i.q + '</td><td class="r">' + gbp(i.p) + '</td><td class="r">' + gbp(i.q * i.p) + '</td></tr>' }).join('') + '</tbody></table><p style="text-align:right">Subtotal ' + gbp(t.sub) + '<br>Discount -' + gbp(t.d) + '<br>Installation ' + gbp(t.inst) + '<br><b style="font-size:18px">Total ' + gbp(t.total) + '</b></p><p>' + esc(q.notes) + '</p></div></div>' + quoteScans.map(function (src, n) { return '<div style="page-break-before:always;min-height:95vh;position:relative;text-align:center;padding:12mm">' + (letterhead ? '<img src="' + letterhead + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill">' : '') + '<div style="position:relative"><p>Scanned document ' + (n + 1) + '</p><img src="' + src + '" alt="Scanned document ' + (n + 1) + '" style="max-width:100%;max-height:250mm;object-fit:contain"></div></div>' }).join('') }
+    function qPreviewDraft() { var draft = qDraft(); return { no: editingQuoteId ? (DB.quotes.find(function (q) { return q.id === editingQuoteId }) || {}).no || 'DRAFT' : 'DRAFT', date: editingQuoteId ? (DB.quotes.find(function (q) { return q.id === editingQuoteId }) || {}).date || new Date().toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10), valid: $('qv')?.value || '', cust: $('qc')?.value || '', email: $('qe')?.value || '', phone: $('qt')?.value || '', addr: $('qa')?.value || '', items: draft.items, inst: draft.inst, disc: draft.disc, notes: $('qn')?.value || '' } }
+    function updateQuotePreview() { var preview = $('quotePreviewDocument'); if (preview) preview.innerHTML = qHtml(qPreviewDraft()) }
 
     var IF = 'All', IS = '', IORDER = 'newest', IB = '';
     V.inventory = function () {
@@ -1562,7 +1646,7 @@
       if (cur !== 'tools' && !dataLoaded) { $('view').innerHTML = '<div class="tile" role="status"><h2>' + (dataIssue ? 'Database data unavailable' : 'Loading dashboard data…') + '</h2><p>' + (dataIssue ? esc(dataIssue) : 'Connecting to Neon…') + '</p>' + (dataIssue ? '<button class="btn" id="dataRetry" type="button">Retry connection</button>' : '') + '</div>'; return }
       $('view').innerHTML = (dataIssue && cur !== 'tools' ? '<div class="tile" role="status" style="margin-bottom:16px"><h3>Showing previously loaded data</h3><p class="note">The database is currently unavailable. Figures may be outdated; saving is paused.</p><button class="btn sm" id="dataRetry" type="button">Retry connection</button></div>' : '') + V[cur]();
       if (cur === 'budget') updateBudget(); if (cur === 'health') { renderHealth(); if (!healthSamples.length) checkHealth(); }
-      if (cur === 'quotes') { qItems(); renderQuoteScans(); if (QFORM) { Object.keys(QFORM).forEach(function (id) { if ($(id)) $(id).value = QFORM[id] }); qSum() } } if (cur === 'tools') { cnv(); C = { cur: '0', prev: null, op: null, fresh: true } }
+      if (cur === 'quotes') { qItems(); renderQuoteScans(); if (QFORM) { Object.keys(QFORM).forEach(function (id) { if ($(id)) $(id).value = QFORM[id] }); qSum() } updateQuotePreview() } if (cur === 'tools') { cnv(); C = { cur: '0', prev: null, op: null, fresh: true } }
     }
     function val(i) { return $(i).value.trim() }
     var speechRec = null, speechListening = false, speechShouldListen = false, speechBaseText = '', speechFinalText = '', speechResultSegments = [], speechRestartTimer = 0;
@@ -1590,7 +1674,7 @@
     }
     function validImageFile(f) { return f && (/^image\//i.test(f.type) || /\.(jpe?g|png|webp|avif|gif|bmp|svg|tiff?|heic|heif|ico)$/i.test(f.name || '')) }
     function enhanceScan(file) { return encodeImage(file).then(function (data) { return new Promise(function (resolve, reject) { var image = new Image(); image.onload = function () { var cv = document.createElement('canvas'); cv.width = image.naturalWidth; cv.height = image.naturalHeight; var cx = cv.getContext('2d'); cx.drawImage(image, 0, 0); var pixels = cx.getImageData(0, 0, cv.width, cv.height), d = pixels.data; for (var i = 0; i < d.length; i += 4) { var gray = d[i] * .299 + d[i + 1] * .587 + d[i + 2] * .114, enhanced = Math.max(0, Math.min(255, (gray - 128) * 1.45 + 145)); d[i] = d[i + 1] = d[i + 2] = enhanced } cx.putImageData(pixels, 0, 0); resolve(cv.toDataURL('image/jpeg', .9)) }; image.onerror = reject; image.src = data }) }) }
-    function renderQuoteScans() { var box = $('qscanPreview'); if (!box) return; box.innerHTML = quoteScans.map(function (src, index) { return '<div class="tile" style="padding:8px;max-width:220px"><img src="' + src + '" alt="Enhanced scan ' + (index + 1) + '" style="display:block;max-width:100%;max-height:220px;object-fit:contain"><p class="note">Photo ' + (index + 1) + '</p><button class="btn sm" type="button" data-qscan-convert="' + index + '">Convert to letterhead document</button> <button class="btn sm x" type="button" data-qscan-remove="' + index + '">Remove</button></div>' }).join('') + quoteDocuments.map(function (doc, index) { return '<div class="tile" style="padding:10px;width:100%"><label for="qdoc-' + index + '">Document ' + (index + 1) + ' — edit the text before printing</label><textarea id="qdoc-' + index + '" data-qdoc="' + index + '" style="min-height:200px">' + esc(doc.text) + '</textarea><button class="btn sm x" type="button" data-qdoc-remove="' + index + '">Remove document</button></div>' }).join('') }
+    function renderQuoteScans() { var box = $('qscanPreview'); if (!box) return; box.innerHTML = quoteScans.map(function (src, index) { return '<div class="tile" style="padding:8px;max-width:220px"><img src="' + src + '" alt="Scanned page ' + (index + 1) + ' preview" style="display:block;max-width:100%;max-height:220px;object-fit:contain"><p class="note">Scanned page ' + (index + 1) + '</p><button class="btn sm x" type="button" data-qscan-remove="' + index + '">Remove</button></div>' }).join(''); updateQuotePreview() }
     function encodeImage(f) { return new Promise(function (resolve, reject) { var rd = new FileReader(); rd.onload = function () { var im = new Image(); im.onload = function () { var maxDim = 2560, scale = Math.min(1, maxDim / Math.max(im.width || 1, im.height || 1)), cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round((im.width || 800) * scale)); cv.height = Math.max(1, Math.round((im.height || 600) * scale)); var cx = cv.getContext('2d'); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high'; cx.clearRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height); var mime = 'image/webp', result = cv.toDataURL(mime, 0.92); if (!/^data:image\/webp/i.test(result)) { mime = 'image/jpeg'; cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height); result = cv.toDataURL(mime, 0.92) } for (var attempt = 1; attempt < 7 && result.length > 1500000; attempt++) { var q = Math.max(0.78, 0.92 - attempt * 0.03); if (attempt >= 3) { cv.width = Math.max(1, Math.round(cv.width * 0.88)); cv.height = Math.max(1, Math.round(cv.height * 0.88)); cx = cv.getContext('2d'); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high'; if (mime === 'image/jpeg') { cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height) } cx.drawImage(im, 0, 0, cv.width, cv.height) } result = cv.toDataURL(mime, q) } if (result.length > 1800000) reject(Error('Image is too large')); else resolve(result) }; im.onerror = function () { reject(Error('Unsupported image format')) }; im.src = rd.result }; rd.onerror = reject; rd.readAsDataURL(f) }) }
     document.addEventListener('click', async function (e) {
       if (e.target.closest('.sg-select-wrap')) return; var b = e.target.closest('button,[data-k]'); if (!b) return; var d = b.dataset;
@@ -1605,9 +1689,8 @@
       if (d.stock) { var stockValue = $('stock-' + d.stock).value; if (!/^\d+$/.test(stockValue)) { toast('Enter a whole-number stock quantity'); return } change('products', 'setStock', { id: +d.stock, stockQuantity: +stockValue }).then(function (ok) { if (ok) toast('Stock updated') }); return }
       if (d.adj) { var a = d.adj.split(':'); change('inventory', 'adjust', { id: +a[0], delta: +a[1] }); return }
       if (d.return) { var returnField = $('usageReturn-' + d.return), returnValue = returnField?.value, returnDate = returnValue ? new Date(returnValue) : null; if (returnDate && (!Number.isFinite(returnDate.getTime()) || returnDate.getTime() > Date.now())) { toast('Enter a valid return time that is not in the future'); return } change('inventory', 'return', { id: +d.return, returnedAt: returnDate ? returnDate.toISOString() : '' }).then(function (ok) { if (ok) toast('Return recorded') }); return }
-      if (d.qscanConvert !== undefined) { var scanIndex = +d.qscanConvert, scanImage = quoteScans[scanIndex], convertButton = b; if (!scanImage) return; convertButton.disabled = true; convertButton.textContent = 'Converting photo…'; try { var convertResponse = await fetch('/api/admin/quote-document', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: scanImage }) }), convertResult = await convertResponse.json(); if (!convertResponse.ok) { console.error('AI document conversion request failed: ' + JSON.stringify({ status: convertResponse.status, ...(convertResult.debug || {}), message: convertResult.error || 'Unknown server error' })); throw Error(convertResult.error || 'Could not convert this photo') } quoteDocuments.push({ text: convertResult.document }); renderQuoteScans() } catch (error) { toast(error.message || 'Could not convert this photo') } finally { if (convertButton.isConnected) { convertButton.disabled = false; convertButton.textContent = 'Convert to letterhead document' } } return }
-      if (d.qscanRemove) { quoteScans.splice(+d.qscanRemove, 1); renderQuoteScans(); return } if (d.qdocRemove) { quoteDocuments.splice(+d.qdocRemove, 1); renderQuoteScans(); return }
-      if (d.print) { var q = DB.quotes.filter(function (x) { return x.id == d.print })[0], savedScans = quoteScans, savedDocuments = quoteDocuments; quoteScans = []; quoteDocuments = []; $('pa').innerHTML = qHtml(q); quoteScans = savedScans; quoteDocuments = savedDocuments; var images = $('pa').querySelectorAll('img'); for (var im of images) try { await im.decode() } catch (er) { } try { window.print() } catch (er) { toast('Printing is blocked here. Use Copy as text.') } return }
+      if (d.qscanRemove) { quoteScans.splice(+d.qscanRemove, 1); renderQuoteScans(); return }
+      if (d.print) { var q = DB.quotes.filter(function (x) { return x.id == d.print })[0], savedScans = quoteScans; quoteScans = []; $('pa').innerHTML = qHtml(q); quoteScans = savedScans; var images = $('pa').querySelectorAll('img'); for (var im of images) try { await im.decode() } catch (er) { } try { window.print() } catch (er) { toast('Printing is blocked here. Use Copy as text.') } return }
       if (d.qrm) { QI.splice(+d.qrm, 1); if (!QI.length) QI.push({ d: '', q: 1, p: 0 }); qItems(); return }
       var id = b.id;
       if (id === 'qscanTake') { $('qscanCamera').click(); return } if (id === 'qscanChoose') { $('qscanFile').click(); return }
@@ -1621,7 +1704,7 @@
       if (id === 'saveletterhead') { var file = $('letterhead').files[0], letterheadName = val('letterheadName'); if (!letterheadName) { toast('Enter a name for this letterhead'); return } if (!file || file.size > 750000 || !['image/png', 'image/jpeg'].includes(file.type)) { toast('Choose a PNG or JPEG under 750 KB'); return } uploadProgress('Preparing letterhead...', b); try { var image = await new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result) }; reader.onerror = reject; reader.readAsDataURL(file) }); uploadProgress('Saving letterhead...', b); if (await change('settings', 'letterhead', { name: letterheadName, image: image })) toast('Letterhead saved') } catch (error) { toast('Could not read letterhead image') } finally { $('uploadOverlay').hidden = true; if (b.isConnected) { b.disabled = false; b.textContent = 'Save as new' } } return }
       if (id === 'renameLetterhead') { var newLetterheadName = prompt('Enter a new name for this letterhead', ((DB.letterheads || []).find(function (h) { return h.id === DB.activeLetterhead }) || {}).name || ''); if (newLetterheadName && await change('settings', 'renameLetterhead', { id: DB.activeLetterhead, name: newLetterheadName })) toast('Letterhead renamed'); return }
       if (id === 'deleteLetterhead') { if (confirm('Delete this letterhead?')) { if (await change('settings', 'deleteLetterhead', { id: DB.activeLetterhead })) toast('Letterhead deleted') } return }
-      if (id === 'qprint') { var dr = qDraft(); if (!val('qc') || !dr.items.length) { toast('Add a customer and at least one line'); return } var draft = { no: 'DRAFT', date: new Date().toISOString().slice(0, 10), valid: $('qv').value, cust: val('qc'), email: val('qe'), phone: val('qt'), addr: val('qa'), items: dr.items, inst: dr.inst, disc: dr.disc, notes: val('qn') }; $('pa').innerHTML = qHtml(draft); var printImages = $('pa').querySelectorAll('img'); for (var printImage of printImages) try { await printImage.decode() } catch (er) { } window.print(); return }
+      if (id === 'qprint') { var dr = qDraft(); if (!val('qc') || !dr.items.length) { toast('Add a customer and at least one line'); return } var draft = qPreviewDraft(); $('pa').innerHTML = qHtml(draft); var printImages = $('pa').querySelectorAll('img'); for (var printImage of printImages) try { await printImage.decode() } catch (er) { } window.print(); return }
       if (id === 'addp') {
         if (productSaving) return; var n2 = val('pn'), pr = parseFloat($('pp').value), stockValue = $('ps').value; if (!n2 || isNaN(pr) || !/^\d+$/.test(stockValue)) { toast('Add a name, price and whole-number stock quantity'); return }
         var files = Array.from($('pi').files), mainIndex = 0;
@@ -1648,12 +1731,13 @@
       if (t.id === 'ibfilter') { IB = t.value; var p = t.selectionStart; show(); var n = $('ibfilter'); n.focus(); n.setSelectionRange(p, p); return }
       if (t.dataset.qi) { var a = t.dataset.qi.split(':'), r = QI[+a[1]]; r[a[0]] = a[0] === 'd' ? t.value : (+t.value || 0); qSum(); return }
       if (t.id === 'qin' || t.id === 'qd') qSum();
+      if (/^(qc|qe|qt|qv|qa|qn)$/.test(t.id)) updateQuotePreview();
       if (/^(dv|wv)$/.test(t.id)) cnv()
     });
     document.addEventListener('change', function (e) {
       var t = e.target;
-      if (t.dataset.qdoc !== undefined) { quoteDocuments[+t.dataset.qdoc].text = t.value; return }
-      if (t.id === 'letterheadSelect') { change('settings', 'selectLetterhead', { id: t.value }).then(function (ok) { if (ok) toast(t.value ? 'Letterhead selected' : 'Letterhead turned off') }); return }
+      if (t.id === 'quoteUseLetterhead') { useQuoteLetterhead = t.checked; $('letterheadSelect').disabled = !useQuoteLetterhead; updateQuotePreview(); return }
+      if (t.id === 'letterheadSelect') { change('settings', 'selectLetterhead', { id: t.value }).then(function (ok) { if (ok) { useQuoteLetterhead = !!t.value; if ($('quoteUseLetterhead')) $('quoteUseLetterhead').checked = useQuoteLetterhead; if ($('letterheadSelect')) $('letterheadSelect').disabled = !useQuoteLetterhead; updateQuotePreview(); toast(t.value ? 'Letterhead selected' : 'Letterhead turned off') } }); return }
       if (t.id === 'qscanCamera' || t.id === 'qscanFile') { var scanFiles = Array.from(t.files || []); if (scanFiles.length > 8 || scanFiles.some(function (f) { return !validImageFile(f) })) { toast('Choose up to eight document photos'); t.value = ''; return } Promise.all(scanFiles.map(enhanceScan)).then(function (scans) { quoteScans = quoteScans.concat(scans).slice(0, 8); renderQuoteScans() }).catch(function (error) { console.error('Document scan enhancement failed:', error); toast('Could not enhance that photo. Try a clearer image.') }).finally(function () { t.value = '' }); return }
       if (t.dataset.metricPeriod) { METRIC_PERIOD[t.dataset.metricPeriod] = t.value; show(); return }
       if (/^(df|dt|wf|wt)$/.test(t.id)) cnv();
