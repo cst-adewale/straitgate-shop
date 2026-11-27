@@ -1,538 +1,1684 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Straitgate – Admin</title>
-<meta name="robots" content="noindex,nofollow">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-/* ── Design-guide tokens (light defaults) ── */
-:root{
-  --bg:#161616; --surface:#ffffff; --tile:#f5f5f5; --ink:#0a0a0a; --mute:#8a8a8a;
-  --line:#dddddd; --field:#ffffff; --field-line:#9a9a9a;
-  --lime:#ccf97c; --on-lime:#0a0a0a; --hover:#0a0a0a; --on-hover:#ffffff;
-  --red:#e5271d; --yel:#f5c20f; --blu:#1f5fe0; --ok:#2e7d12;
-  --pill:#e8e8e8; --pill-warn:#ffe4a3; --pill-bad:#ffc9c4;
-  --fs-xs:10px; --fs-sm:11px; --fs-md:12px; --fs-base:13px;
-  --h-sm:28px; --h-md:34px; --h-lg:40px;
-  --r-pill:999px; --r-sm:8px; --r-md:12px; --r-lg:22px;
-  box-sizing:border-box;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-  color-scheme:light;
-}
-/* Dark mode token overrides */
-:root[data-theme="dark"]{
-  --bg:#0b0b0b; --surface:#161616; --tile:#202020; --ink:#f2f2f2; --mute:#8f8f8f;
-  --line:#2f2f2f; --field:#1d1d1d; --field-line:#4a4a4a;
-  --lime:#ccf97c; --on-lime:#0a0a0a; --hover:#f2f2f2; --on-hover:#0a0a0a;
-  --red:#ff5a4d; --yel:#f5c20f; --blu:#5b8cff; --ok:#8fd45a;
-  --pill:#2c2c2c; --pill-warn:#4a3d12; --pill-bad:#4d1f1b;
-  color-scheme:dark;
-}
-@media(prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#0b0b0b; --surface:#161616; --tile:#202020; --ink:#f2f2f2; --mute:#8f8f8f;
-    --line:#2f2f2f; --field:#1d1d1d; --field-line:#4a4a4a;
-    --lime:#ccf97c; --on-lime:#0a0a0a; --hover:#f2f2f2; --on-hover:#0a0a0a;
-    --red:#ff5a4d; --yel:#f5c20f; --blu:#5b8cff; --ok:#8fd45a;
-    --pill:#2c2c2c; --pill-warn:#4a3d12; --pill-bad:#4d1f1b;
-    color-scheme:dark;
-  }
-}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Straitgate – Admin</title>
+  <meta name="robots" content="noindex,nofollow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    /* ── Design-guide tokens (light defaults) ── */
+    :root {
+      --bg: #161616;
+      --surface: #ffffff;
+      --tile: #f5f5f5;
+      --ink: #0a0a0a;
+      --mute: #8a8a8a;
+      --line: #dddddd;
+      --field: #ffffff;
+      --field-line: #9a9a9a;
+      --lime: #ccf97c;
+      --on-lime: #0a0a0a;
+      --hover: #0a0a0a;
+      --on-hover: #ffffff;
+      --red: #e5271d;
+      --yel: #f5c20f;
+      --blu: #1f5fe0;
+      --ok: #2e7d12;
+      --pill: #e8e8e8;
+      --pill-warn: #ffe4a3;
+      --pill-bad: #ffc9c4;
+      --fs-xs: 10px;
+      --fs-sm: 11px;
+      --fs-md: 12px;
+      --fs-base: 13px;
+      --h-sm: 28px;
+      --h-md: 34px;
+      --h-lg: 40px;
+      --r-pill: 999px;
+      --r-sm: 8px;
+      --r-md: 12px;
+      --r-lg: 22px;
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      color-scheme: light;
+    }
 
-*,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--surface);color:var(--ink);font-family:"Inter Tight","Helvetica Neue",Helvetica,Arial,sans-serif;padding:0;-webkit-font-smoothing:antialiased;font-size:var(--fs-base);overflow-x:hidden}
-a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit;cursor:pointer}
-:focus-visible{outline:2px solid var(--lime);outline-offset:2px}
+    /* Dark mode token overrides */
+    :root[data-theme="dark"] {
+      --bg: #0b0b0b;
+      --surface: #161616;
+      --tile: #202020;
+      --ink: #f2f2f2;
+      --mute: #8f8f8f;
+      --line: #2f2f2f;
+      --field: #1d1d1d;
+      --field-line: #4a4a4a;
+      --lime: #ccf97c;
+      --on-lime: #0a0a0a;
+      --hover: #f2f2f2;
+      --on-hover: #0a0a0a;
+      --red: #ff5a4d;
+      --yel: #f5c20f;
+      --blu: #5b8cff;
+      --ok: #8fd45a;
+      --pill: #2c2c2c;
+      --pill-warn: #4a3d12;
+      --pill-bad: #4d1f1b;
+      color-scheme: dark;
+    }
 
-/* ── Page layout ── */
-.page{min-height:100vh;width:100%;margin:0;background:var(--surface);border-radius:0;padding:clamp(20px,4.5vw,64px) clamp(20px,5.8vw,72px) clamp(24px,4vw,56px)}
-header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
-.logo{font-size:clamp(20px,2.4vw,26px);font-weight:500;letter-spacing:-.04em}
-.logo small{font-size:var(--fs-sm);color:var(--mute);letter-spacing:0;margin-left:8px;font-weight:400}
-.who{font-size:var(--fs-sm);color:var(--mute)}
-h1{font-weight:400;font-size:clamp(44px,8vw,96px);letter-spacing:-.055em;line-height:1;margin:clamp(26px,4.5vw,56px) 0 clamp(16px,2.4vw,26px)}
-h2{font-weight:400;font-size:clamp(20px,2.4vw,28px);letter-spacing:-.03em;margin:0 0 14px}
-h3{font-weight:500;font-size:var(--fs-base);margin:0 0 10px}
+    @media(prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0b0b0b;
+        --surface: #161616;
+        --tile: #202020;
+        --ink: #f2f2f2;
+        --mute: #8f8f8f;
+        --line: #2f2f2f;
+        --field: #1d1d1d;
+        --field-line: #4a4a4a;
+        --lime: #ccf97c;
+        --on-lime: #0a0a0a;
+        --hover: #f2f2f2;
+        --on-hover: #0a0a0a;
+        --red: #ff5a4d;
+        --yel: #f5c20f;
+        --blu: #5b8cff;
+        --ok: #8fd45a;
+        --pill: #2c2c2c;
+        --pill-warn: #4a3d12;
+        --pill-bad: #4d1f1b;
+        color-scheme: dark;
+      }
+    }
 
-/* ── Tabs / chip bar ── */
-.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:clamp(18px,2.6vw,30px)}
+    *,
+    *::before,
+    *::after {
+      box-sizing: inherit
+    }
 
-/* ── Buttons & chips ── */
-.chip,.btn{border:1px solid var(--ink);background:var(--surface);color:var(--ink);border-radius:var(--r-pill);height:var(--h-md);padding:0 clamp(14px,2vw,24px);font-size:var(--fs-sm);white-space:nowrap;display:inline-flex;align-items:center;gap:6px;transition:background .2s,color .2s,border-color .2s}
-.chip[aria-pressed=true],.btn.l{background:var(--lime);border-color:var(--lime);color:var(--on-lime)}
-.btn:hover,.chip:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
-.btn.l:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
-.btn.sm{height:var(--h-sm);padding:0 12px;font-size:var(--fs-xs)}
-.btn.x{border-color:var(--line);color:var(--mute);background:transparent}
-.btn.x:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
 
-/* ── Grid system ── */
-.grid{display:grid;gap:clamp(12px,2vw,24px)}
-.g4{grid-template-columns:repeat(4,minmax(0,1fr))}.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
-.g21{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}.gf{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr)}
+    body {
+      margin: 0;
+      background: var(--surface);
+      color: var(--ink);
+      font-family: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      font-size: var(--fs-base);
+      overflow-x: hidden
+    }
 
-/* ── Tiles ── */
-.tile{background:var(--tile);border-radius:var(--r-md);padding:clamp(14px,1.8vw,22px);min-width:0}
-.browse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(190px,100%),1fr));gap:12px}.browse-card{display:flex;flex-direction:column;gap:6px;padding:14px;position:relative}.browse-card[hidden]{display:none}.browse-card h3,.browse-card p{margin:0}.browse-card .card-link{position:absolute;inset:0;z-index:1;border-radius:inherit}.browse-card .card-link:focus-visible{outline:2px solid var(--lime);outline-offset:2px}.browse-card button,.browse-card input{position:relative;z-index:2}.browse-image{width:100%;aspect-ratio:1.6;max-height:145px;object-fit:cover;border-radius:10px;background:#e9e9e9}.browse-placeholder{display:grid;place-items:center;font-size:36px;color:var(--mute)}.browse-card .bar{margin-top:auto;margin-bottom:0;gap:6px}.browse-card .btn{padding:0 10px}
-.detail-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.detail-gallery>a:first-child{grid-column:1/-1}.detail-gallery img{display:block;width:100%;max-height:420px;aspect-ratio:1.4;object-fit:contain;border-radius:var(--r-sm);background:var(--surface)}.detail-row{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--line)}.detail-row span{color:var(--mute)}.detail-row strong{text-align:right;font-weight:500;overflow-wrap:anywhere}
+    a {
+      color: inherit;
+      text-decoration: none
+    }
 
-/* ── KPI cards ── */
-.kpi .v{font-size:clamp(28px,3.4vw,44px);letter-spacing:-.05em;line-height:1;margin-top:10px;overflow-wrap:anywhere}
-.kpi .l{font-size:var(--fs-sm);color:var(--mute)}
-.kpi .d{font-size:var(--fs-xs);margin-top:8px}
-.up{color:var(--ok)}.dn{color:var(--red)}
+    button {
+      font: inherit;
+      color: inherit;
+      cursor: pointer
+    }
 
-/* ── Notes ── */
-.note{font-size:var(--fs-xs);color:var(--mute);margin:10px 0 0}
+    :focus-visible {
+      outline: 2px solid var(--lime);
+      outline-offset: 2px
+    }
 
-/* ── Charts ── */
-svg.ch{width:100%;height:auto;display:block}
-.leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:var(--fs-xs);margin-top:10px}
-.leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+    /* ── Page layout ── */
+    .page {
+      min-height: 100vh;
+      width: 100%;
+      margin: 0;
+      background: var(--surface);
+      border-radius: 0;
+      padding: clamp(20px, 4.5vw, 64px) clamp(20px, 5.8vw, 72px) clamp(24px, 4vw, 56px)
+    }
 
-/* ── Forms ── */
-label{display:block;font-size:var(--fs-xs);color:var(--mute);margin:0 0 5px}
-input,select,textarea{width:100%;height:var(--h-md);border:1px solid var(--field-line);border-radius:var(--r-pill);padding:0 14px;font:inherit;font-size:var(--fs-md);background:var(--field);color:var(--ink)}
-input::placeholder,textarea::placeholder{color:var(--mute)}
-textarea{height:70px;border-radius:var(--r-md);padding:10px 14px;resize:vertical}
-input[type=file]{padding:6px 14px;height:auto;border-radius:var(--r-sm)}
-.f{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.f>*{min-width:0}.f .w{grid-column:1/-1}
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap
+    }
 
-/* ── Tables ── */
-.tw{overflow-x:auto;max-width:100%;-webkit-overflow-scrolling:touch;overscroll-behavior-inline:contain}
-.usage-return{display:flex;align-items:center;gap:6px;white-space:nowrap}.usage-return input{width:158px;min-width:0;flex:0 0 158px;padding:0 8px}.usage-return .btn{flex:none}
-table{width:100%;border-collapse:collapse;font-size:var(--fs-md)}
-th{font-weight:400;color:var(--mute);font-size:var(--fs-xs);text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:10px 10px 10px 0;border-bottom:1px solid var(--line);vertical-align:middle}
-td.r,th.r{text-align:right}
+    .logo {
+      font-size: clamp(20px, 2.4vw, 26px);
+      font-weight: 500;
+      letter-spacing: -.04em
+    }
 
-/* ── Status pills ── */
-.pill{display:inline-block;border-radius:var(--r-pill);padding:2px 10px;font-size:var(--fs-xs);background:var(--pill);color:var(--ink)}
-.pill.ok{background:var(--lime);color:var(--on-lime)}
-.pill.warn{background:var(--pill-warn)}
-.pill.bad{background:var(--pill-bad)}
+    .logo small {
+      font-size: var(--fs-sm);
+      color: var(--mute);
+      letter-spacing: 0;
+      margin-left: 8px;
+      font-weight: 400
+    }
 
-/* ── Budget panel ── */
-.budget-panel{margin:0 0 clamp(18px,2.6vw,30px)}
-.budget-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
-.budget-metrics div{background:var(--tile);border-radius:var(--r-sm);padding:12px;border:1px solid var(--line)}
-.budget-metrics b{display:block;font-size:clamp(17px,2.5vw,25px);font-weight:500;margin-top:4px;overflow-wrap:anywhere;color:var(--ink)}
-.budget-rate{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px}
-.budget-rate label{margin:0}
-.budget-rate input{width:100px}
+    .who {
+      font-size: var(--fs-sm);
+      color: var(--mute)
+    }
 
-/* ── Health panel ── */
-.health-panel{margin:0 0 clamp(18px,2.6vw,30px)}
-.health-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.health-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
-.health-metrics div{background:var(--tile);border-radius:var(--r-sm);padding:12px;border:1px solid var(--line)}
-.health-metrics b{display:block;font-size:19px;font-weight:500;margin-top:4px;color:var(--ink)}
-.health-chart{display:flex;align-items:end;gap:5px;height:75px;border-bottom:1px solid var(--line);padding-top:8px}
-.health-chart span{flex:1;min-width:5px;border-radius:3px 3px 0 0;background:var(--lime)}
-.health-chart span.bad{background:var(--red)}
+    h1 {
+      font-weight: 400;
+      font-size: clamp(44px, 8vw, 96px);
+      letter-spacing: -.055em;
+      line-height: 1;
+      margin: clamp(26px, 4.5vw, 56px) 0 clamp(16px, 2.4vw, 26px)
+    }
 
-/* ── Product thumbnails ── */
-.thumb{width:44px;height:44px;border-radius:var(--r-sm);background:var(--tile);border:1px solid var(--line);object-fit:cover;display:grid;place-items:center;font-size:14px;color:var(--mute);overflow:hidden}
-.thumb img{width:100%;height:100%;object-fit:cover}
-.pr{display:flex;align-items:center;gap:12px}
+    h2 {
+      font-weight: 400;
+      font-size: clamp(20px, 2.4vw, 28px);
+      letter-spacing: -.03em;
+      margin: 0 0 14px
+    }
 
-/* ── Bars ── */
-.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-.bar input,.bar select{width:auto;min-width:150px}
-.sp{margin-left:auto}
+    h3 {
+      font-weight: 500;
+      font-size: var(--fs-base);
+      margin: 0 0 10px
+    }
 
-/* ── Inventory filter bar ── */
-.inv-filters{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
-.inv-chips{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.inv-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.inv-controls input[type=search]{flex:2;min-width:180px}
-.inv-controls select{flex:1;min-width:140px;width:auto}
-.inv-controls input#ibfilter{flex:1.5;min-width:170px}
+    /* ── Tabs / chip bar ── */
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: clamp(18px, 2.6vw, 30px)
+    }
 
-/* ── Quotation line items ── */
-.qi{display:grid;grid-template-columns:minmax(0,1fr) 70px 100px 28px;gap:8px;margin-bottom:8px;align-items:center}
-.sum div{display:flex;justify-content:space-between;padding:6px 0;font-size:var(--fs-md)}
-.sum .t{border-top:1px solid var(--ink);margin-top:6px;padding-top:12px;font-size:20px;letter-spacing:-.03em}
-.mic-btn{width:36px;height:36px;border-radius:50%;border:1px solid var(--ink);background:var(--surface);color:var(--ink);padding:8px;display:inline-grid;place-items:center;flex:none;transition:background .2s,color .2s,border-color .2s,box-shadow .2s}
-.mic-btn svg{width:16px;height:16px;display:block}
-.mic-btn:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
-.mic-btn.listening{background:var(--red);border-color:var(--red);color:#fff;animation:mic-pulse 1.4s ease-in-out infinite}
-@keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(229,39,29,.45)}50%{box-shadow:0 0 0 8px rgba(229,39,29,0)}}
+    /* ── Buttons & chips ── */
+    .chip,
+    .btn {
+      border: 1px solid var(--ink);
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: var(--r-pill);
+      height: var(--h-md);
+      padding: 0 clamp(14px, 2vw, 24px);
+      font-size: var(--fs-sm);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .2s, color .2s, border-color .2s
+    }
 
-/* ── Converter / calculator ── */
-.res{font-size:clamp(26px,3vw,36px);letter-spacing:-.04em;margin:12px 0 0;color:var(--ink)}
-.cv{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.calc-tile{width:fit-content;max-width:100%;justify-self:start}
-.calc{width:min(390px,100%)}
-.calc .bar{margin-bottom:0}
-.disp{background:var(--ink);color:var(--surface);border-radius:var(--r-md);padding:14px 16px;text-align:right;font-size:30px;letter-spacing:-.03em;min-height:64px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end}
-.disp small{font-size:var(--fs-sm);color:var(--mute);min-height:14px}
-.keys{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
-.keys button{height:46px;border:1px solid var(--line);border-radius:var(--r-pill);background:var(--surface);font-size:16px;color:var(--ink)}
-.keys button:hover{background:var(--tile)}
-.keys .o{background:var(--lime);color:var(--on-lime);border-color:var(--lime)}
-.keys .o:hover{background:var(--hover);color:var(--on-hover);border-color:var(--hover)}
-.keys .z{grid-column:span 2}
+    .chip[aria-pressed=true],
+    .btn.l {
+      background: var(--lime);
+      border-color: var(--lime);
+      color: var(--on-lime)
+    }
 
-/* ── Toast ── */
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--surface);padding:10px 20px;border-radius:var(--r-pill);font-size:var(--fs-md);opacity:0;pointer-events:none;transition:.3s;z-index:9}
-.upload-overlay{position:fixed;inset:0;z-index:20;background:#0009;display:grid;place-items:center;padding:20px}.upload-overlay[hidden]{display:none}.upload-progress{background:var(--surface);color:var(--ink);border-radius:var(--r-md);padding:28px;min-width:min(320px,100%);display:flex;align-items:center;gap:16px;box-shadow:0 16px 48px #0003}.upload-spinner{width:28px;height:28px;border:3px solid var(--line);border-top-color:var(--ink);border-radius:50%;animation:upload-spin .8s linear infinite;flex:none}@keyframes upload-spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.upload-spinner{animation:none}}
-.toast.on{opacity:1;transform:translate(-50%,0)}
+    .btn:hover,
+    .chip:hover {
+      background: var(--hover);
+      color: var(--on-hover);
+      border-color: var(--hover)
+    }
 
-/* ── Misc ── */
-.empty{color:var(--mute);padding:20px 0;font-size:var(--fs-md)}
-footer{border-top:1px solid var(--line)}
-#pa{display:none}
+    .btn.l:hover {
+      background: var(--hover);
+      color: var(--on-hover);
+      border-color: var(--hover)
+    }
 
-/* ── Print ── */
-@page{size:A4;margin:0}
-@media print{html,body{margin:0;background:#fff;padding:0}.page,.toast{display:none!important}#pa{display:block;padding:0;font-size:var(--fs-md);print-color-adjust:exact;-webkit-print-color-adjust:exact}#pa table{font-size:var(--fs-md)}}
+    .btn.sm {
+      height: var(--h-sm);
+      padding: 0 12px;
+      font-size: var(--fs-xs)
+    }
 
-/* ── Responsive breakpoints ── */
-footer{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
-@media(max-width:1000px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g21,.gf{grid-template-columns:1fr}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:768px){
-  .g2,.g3,.f{grid-template-columns:1fr}
-  .detail-gallery{grid-template-columns:1fr}
-  .inv-controls{flex-direction:column;align-items:stretch}
-  .inv-controls input[type=search],.inv-controls select,.inv-controls input#ibfilter,.inv-controls .sg-select-wrap{width:100%!important;min-width:0!important;max-width:none!important;flex:none}
-  .calc-tile{width:fit-content;max-width:100%;justify-self:start}
-  .calc{width:min(390px,100%)}
-}
-@media(max-width:620px){
-  .calc-tile{width:100%;justify-self:stretch}
-  .calc{width:100%;max-width:none}
-  .g2,.g3,.f{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .qi{grid-template-columns:1fr 1fr;gap:8px;padding:10px;background:var(--surface);border-radius:var(--r-sm);border:1px solid var(--line)}
-  .qi input:first-child{grid-column:1/-1}
-  .qi button[data-qrm]{grid-column:1/-1;width:100%;height:30px}
-  .sp{margin-left:0}
-  .bar input,.bar select,.bar .sg-select-wrap{min-width:0!important;max-width:none!important;width:100%!important;flex:1 1 100%}
-  .kpi .d .sg-select-wrap{width:100%!important;min-width:0!important}
-  .browse-grid{grid-template-columns:repeat(auto-fill,minmax(min(155px,100%),1fr))}
-  .browse-card .bar{flex-wrap:wrap}
-  .browse-card .bar input{flex:1 1 70px!important;width:auto!important}
-  .browse-card .bar .btn{flex:1 1 auto}
-  .usage-return{flex-direction:column;align-items:stretch;white-space:normal}
-  .usage-return input{width:100%;flex:none}
-  .health-metrics{grid-template-columns:1fr}
-  .budget-metrics{grid-template-columns:1fr}
-  .page{padding:18px 12px 32px}
-  header{align-items:center}
-  .logo small{display:block;margin:2px 0 0}
-  .who{order:3;width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-  .theme-toggle{margin-left:auto}
-  h1{font-size:clamp(34px,10vw,56px);margin:22px 0 16px;overflow-wrap:anywhere}
-  #tabs,.inv-chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-left:0;margin-right:0;padding:0;overflow:visible}
-  #tabs .chip,.inv-chips .chip{width:100%;justify-content:center;padding:0 10px;text-align:center}
-  #tabs .chip:last-child:nth-child(odd),.inv-chips .chip:last-child:nth-child(odd){grid-column:1/-1}
-  .tile{padding:14px}
-  .tw{margin:0 -4px;padding:0 4px}
-  .tw table:has(thead){min-width:480px}
-  .bar{align-items:stretch}
-  .bar .btn{justify-content:center;flex:1 1 auto}
-  .bar .mic-btn{flex:none;width:36px}
-  .detail-row{flex-direction:column;gap:3px}.detail-row strong{text-align:left}
-  .toast{width:max-content;max-width:calc(100vw - 24px);text-align:center}
-}
-@media(max-width:480px){
-  .g4{grid-template-columns:1fr}
-  .browse-grid{grid-template-columns:1fr}
-  .cv{grid-template-columns:1fr}
-  .budget-rate{align-items:stretch}.budget-rate input{width:100%}
-  .health-head .btn{width:100%;justify-content:center}
-  .health-metrics{gap:8px}
-  .health-metrics div,.budget-metrics div{padding:10px}
-  .health-metrics b{font-size:16px}
-  .disp{font-size:26px}
-  .keys{gap:6px}.keys button{height:42px}
-  .f{gap:10px}
-}
-@media(max-width:380px){
-  .who{font-size:var(--fs-xs)}
-  .who .btn{padding:0 9px}
-}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+    .btn.x {
+      border-color: var(--line);
+      color: var(--mute);
+      background: transparent
+    }
 
-</style>
-<link rel="stylesheet" href="/straitgate-theme.css">
-<script src="/straitgate-theme.js"></script>
+    .btn.x:hover {
+      background: var(--hover);
+      color: var(--on-hover);
+      border-color: var(--hover)
+    }
+
+    /* ── Grid system ── */
+    .grid {
+      display: grid;
+      gap: clamp(12px, 2vw, 24px)
+    }
+
+    .g4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr))
+    }
+
+    .g2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr))
+    }
+
+    .g3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .g21 {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr)
+    }
+
+    .gf {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr)
+    }
+
+    /* ── Tiles ── */
+    .tile {
+      background: var(--tile);
+      border-radius: var(--r-md);
+      padding: clamp(14px, 1.8vw, 22px);
+      min-width: 0
+    }
+
+    .browse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(190px, 100%), 1fr));
+      gap: 12px
+    }
+
+    .browse-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 14px;
+      position: relative
+    }
+
+    .browse-card[hidden] {
+      display: none
+    }
+
+    .browse-card h3,
+    .browse-card p {
+      margin: 0
+    }
+
+    .browse-card .card-link {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: inherit
+    }
+
+    .browse-card .card-link:focus-visible {
+      outline: 2px solid var(--lime);
+      outline-offset: 2px
+    }
+
+    .browse-card button,
+    .browse-card input {
+      position: relative;
+      z-index: 2
+    }
+
+    .browse-image {
+      width: 100%;
+      aspect-ratio: 1.6;
+      max-height: 145px;
+      object-fit: cover;
+      border-radius: 10px;
+      background: #e9e9e9
+    }
+
+    .browse-placeholder {
+      display: grid;
+      place-items: center;
+      font-size: 36px;
+      color: var(--mute)
+    }
+
+    .browse-card .bar {
+      margin-top: auto;
+      margin-bottom: 0;
+      gap: 6px
+    }
+
+    .browse-card .btn {
+      padding: 0 10px
+    }
+
+    .detail-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px
+    }
+
+    .detail-gallery>a:first-child {
+      grid-column: 1/-1
+    }
+
+    .detail-gallery img {
+      display: block;
+      width: 100%;
+      max-height: 420px;
+      aspect-ratio: 1.4;
+      object-fit: contain;
+      border-radius: var(--r-sm);
+      background: var(--surface)
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line)
+    }
+
+    .detail-row span {
+      color: var(--mute)
+    }
+
+    .detail-row strong {
+      text-align: right;
+      font-weight: 500;
+      overflow-wrap: anywhere
+    }
+
+    /* ── KPI cards ── */
+    .kpi .v {
+      font-size: clamp(28px, 3.4vw, 44px);
+      letter-spacing: -.05em;
+      line-height: 1;
+      margin-top: 10px;
+      overflow-wrap: anywhere
+    }
+
+    .kpi .l {
+      font-size: var(--fs-sm);
+      color: var(--mute)
+    }
+
+    .kpi .d {
+      font-size: var(--fs-xs);
+      margin-top: 8px
+    }
+
+    .up {
+      color: var(--ok)
+    }
+
+    .dn {
+      color: var(--red)
+    }
+
+    /* ── Notes ── */
+    .note {
+      font-size: var(--fs-xs);
+      color: var(--mute);
+      margin: 10px 0 0
+    }
+
+    /* ── Charts ── */
+    svg.ch {
+      width: 100%;
+      height: auto;
+      display: block
+    }
+
+    .leg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 14px;
+      font-size: var(--fs-xs);
+      margin-top: 10px
+    }
+
+    .leg i {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px
+    }
+
+    /* ── Forms ── */
+    label {
+      display: block;
+      font-size: var(--fs-xs);
+      color: var(--mute);
+      margin: 0 0 5px
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      height: var(--h-md);
+      border: 1px solid var(--field-line);
+      border-radius: var(--r-pill);
+      padding: 0 14px;
+      font: inherit;
+      font-size: var(--fs-md);
+      background: var(--field);
+      color: var(--ink)
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--mute)
+    }
+
+    textarea {
+      height: 70px;
+      border-radius: var(--r-md);
+      padding: 10px 14px;
+      resize: vertical
+    }
+
+    input[type=file] {
+      padding: 6px 14px;
+      height: auto;
+      border-radius: var(--r-sm)
+    }
+
+    .f {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px
+    }
+
+    .f>* {
+      min-width: 0
+    }
+
+    .f .w {
+      grid-column: 1/-1
+    }
+
+    /* ── Tables ── */
+    .tw {
+      overflow-x: auto;
+      max-width: 100%;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-inline: contain
+    }
+
+    .usage-return {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap
+    }
+
+    .usage-return input {
+      width: 158px;
+      min-width: 0;
+      flex: 0 0 158px;
+      padding: 0 8px
+    }
+
+    .usage-return .btn {
+      flex: none
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--fs-md)
+    }
+
+    th {
+      font-weight: 400;
+      color: var(--mute);
+      font-size: var(--fs-xs);
+      text-align: left;
+      padding: 8px 10px 8px 0;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap
+    }
+
+    td {
+      padding: 10px 10px 10px 0;
+      border-bottom: 1px solid var(--line);
+      vertical-align: middle
+    }
+
+    td.r,
+    th.r {
+      text-align: right
+    }
+
+    /* ── Status pills ── */
+    .pill {
+      display: inline-block;
+      border-radius: var(--r-pill);
+      padding: 2px 10px;
+      font-size: var(--fs-xs);
+      background: var(--pill);
+      color: var(--ink)
+    }
+
+    .pill.ok {
+      background: var(--lime);
+      color: var(--on-lime)
+    }
+
+    .pill.warn {
+      background: var(--pill-warn)
+    }
+
+    .pill.bad {
+      background: var(--pill-bad)
+    }
+
+    /* ── Budget panel ── */
+    .budget-panel {
+      margin: 0 0 clamp(18px, 2.6vw, 30px)
+    }
+
+    .budget-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px
+    }
+
+    .budget-metrics div {
+      background: var(--tile);
+      border-radius: var(--r-sm);
+      padding: 12px;
+      border: 1px solid var(--line)
+    }
+
+    .budget-metrics b {
+      display: block;
+      font-size: clamp(17px, 2.5vw, 25px);
+      font-weight: 500;
+      margin-top: 4px;
+      overflow-wrap: anywhere;
+      color: var(--ink)
+    }
+
+    .budget-rate {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px
+    }
+
+    .budget-rate label {
+      margin: 0
+    }
+
+    .budget-rate input {
+      width: 100px
+    }
+
+    /* ── Health panel ── */
+    .health-panel {
+      margin: 0 0 clamp(18px, 2.6vw, 30px)
+    }
+
+    .health-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .health-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin: 14px 0
+    }
+
+    .health-metrics div {
+      background: var(--tile);
+      border-radius: var(--r-sm);
+      padding: 12px;
+      border: 1px solid var(--line)
+    }
+
+    .health-metrics b {
+      display: block;
+      font-size: 19px;
+      font-weight: 500;
+      margin-top: 4px;
+      color: var(--ink)
+    }
+
+    .health-chart {
+      display: flex;
+      align-items: end;
+      gap: 5px;
+      height: 75px;
+      border-bottom: 1px solid var(--line);
+      padding-top: 8px
+    }
+
+    .health-chart span {
+      flex: 1;
+      min-width: 5px;
+      border-radius: 3px 3px 0 0;
+      background: var(--lime)
+    }
+
+    .health-chart span.bad {
+      background: var(--red)
+    }
+
+    /* ── Product thumbnails ── */
+    .thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--r-sm);
+      background: var(--tile);
+      border: 1px solid var(--line);
+      object-fit: cover;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      color: var(--mute);
+      overflow: hidden
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover
+    }
+
+    .pr {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    /* ── Bars ── */
+    .bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px
+    }
+
+    .bar input,
+    .bar select {
+      width: auto;
+      min-width: 150px
+    }
+
+    .sp {
+      margin-left: auto
+    }
+
+    /* ── Inventory filter bar ── */
+    .inv-filters {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px
+    }
+
+    .inv-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .inv-controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .inv-controls input[type=search] {
+      flex: 2;
+      min-width: 180px
+    }
+
+    .inv-controls select {
+      flex: 1;
+      min-width: 140px;
+      width: auto
+    }
+
+    .inv-controls input#ibfilter {
+      flex: 1.5;
+      min-width: 170px
+    }
+
+    /* ── Quotation line items ── */
+    .qi {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 70px 100px 28px;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: center
+    }
+
+    .sum div {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: var(--fs-md)
+    }
+
+    .sum .t {
+      border-top: 1px solid var(--ink);
+      margin-top: 6px;
+      padding-top: 12px;
+      font-size: 20px;
+      letter-spacing: -.03em
+    }
+
+    .mic-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--ink);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 8px;
+      display: inline-grid;
+      place-items: center;
+      flex: none;
+      transition: background .2s, color .2s, border-color .2s, box-shadow .2s
+    }
+
+    .mic-btn svg {
+      width: 16px;
+      height: 16px;
+      display: block
+    }
+
+    .mic-btn:hover {
+      background: var(--hover);
+      color: var(--on-hover);
+      border-color: var(--hover)
+    }
+
+    .mic-btn.listening {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+      animation: mic-pulse 1.4s ease-in-out infinite
+    }
+
+    @keyframes mic-pulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(229, 39, 29, .45)
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(229, 39, 29, 0)
+      }
+    }
+
+    /* ── Converter / calculator ── */
+    .res {
+      font-size: clamp(26px, 3vw, 36px);
+      letter-spacing: -.04em;
+      margin: 12px 0 0;
+      color: var(--ink)
+    }
+
+    .cv {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px
+    }
+
+    .calc-tile {
+      width: fit-content;
+      max-width: 100%;
+      justify-self: start
+    }
+
+    .calc {
+      width: min(390px, 100%)
+    }
+
+    .calc .bar {
+      margin-bottom: 0
+    }
+
+    .disp {
+      background: var(--ink);
+      color: var(--surface);
+      border-radius: var(--r-md);
+      padding: 14px 16px;
+      text-align: right;
+      font-size: 30px;
+      letter-spacing: -.03em;
+      min-height: 64px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end
+    }
+
+    .disp small {
+      font-size: var(--fs-sm);
+      color: var(--mute);
+      min-height: 14px
+    }
+
+    .keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 10px
+    }
+
+    .keys button {
+      height: 46px;
+      border: 1px solid var(--line);
+      border-radius: var(--r-pill);
+      background: var(--surface);
+      font-size: 16px;
+      color: var(--ink)
+    }
+
+    .keys button:hover {
+      background: var(--tile)
+    }
+
+    .keys .o {
+      background: var(--lime);
+      color: var(--on-lime);
+      border-color: var(--lime)
+    }
+
+    .keys .o:hover {
+      background: var(--hover);
+      color: var(--on-hover);
+      border-color: var(--hover)
+    }
+
+    .keys .z {
+      grid-column: span 2
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      transform: translate(-50%, 20px);
+      background: var(--ink);
+      color: var(--surface);
+      padding: 10px 20px;
+      border-radius: var(--r-pill);
+      font-size: var(--fs-md);
+      opacity: 0;
+      pointer-events: none;
+      transition: .3s;
+      z-index: 9
+    }
+
+    .upload-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      background: #0009;
+      display: grid;
+      place-items: center;
+      padding: 20px
+    }
+
+    .upload-overlay[hidden] {
+      display: none
+    }
+
+    .upload-progress {
+      background: var(--surface);
+      color: var(--ink);
+      border-radius: var(--r-md);
+      padding: 28px;
+      min-width: min(320px, 100%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 16px 48px #0003
+    }
+
+    .upload-spinner {
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--line);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: upload-spin .8s linear infinite;
+      flex: none
+    }
+
+    @keyframes upload-spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      .upload-spinner {
+        animation: none
+      }
+    }
+
+    .toast.on {
+      opacity: 1;
+      transform: translate(-50%, 0)
+    }
+
+    /* ── Misc ── */
+    .empty {
+      color: var(--mute);
+      padding: 20px 0;
+      font-size: var(--fs-md)
+    }
+
+    footer {
+      border-top: 1px solid var(--line)
+    }
+
+    #pa {
+      display: none
+    }
+
+    /* ── Print ── */
+    @page {
+      size: A4;
+      margin: 0
+    }
+
+    @media print {
+
+      html,
+      body {
+        margin: 0;
+        background: #fff;
+        padding: 0
+      }
+
+      .page,
+      .toast {
+        display: none !important
+      }
+
+      #pa {
+        display: block;
+        padding: 0;
+        font-size: var(--fs-md);
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact
+      }
+
+      #pa table {
+        font-size: var(--fs-md)
+      }
+    }
+
+    /* ── Responsive breakpoints ── */
+    footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      align-items: center
+    }
+
+    @media(max-width:1000px) {
+      .g4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .g21,
+      .gf {
+        grid-template-columns: 1fr
+      }
+
+      .g3 {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+    }
+
+    @media(max-width:768px) {
+
+      .g2,
+      .g3,
+      .f {
+        grid-template-columns: 1fr
+      }
+
+      .detail-gallery {
+        grid-template-columns: 1fr
+      }
+
+      .inv-controls {
+        flex-direction: column;
+        align-items: stretch
+      }
+
+      .inv-controls input[type=search],
+      .inv-controls select,
+      .inv-controls input#ibfilter,
+      .inv-controls .sg-select-wrap {
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        flex: none
+      }
+
+      .calc-tile {
+        width: fit-content;
+        max-width: 100%;
+        justify-self: start
+      }
+
+      .calc {
+        width: min(390px, 100%)
+      }
+    }
+
+    @media(max-width:620px) {
+      .calc-tile {
+        width: 100%;
+        justify-self: stretch
+      }
+
+      .calc {
+        width: 100%;
+        max-width: none
+      }
+
+      .g2,
+      .g3,
+      .f {
+        grid-template-columns: 1fr
+      }
+
+      .g4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .qi {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 10px;
+        background: var(--surface);
+        border-radius: var(--r-sm);
+        border: 1px solid var(--line)
+      }
+
+      .qi input:first-child {
+        grid-column: 1/-1
+      }
+
+      .qi button[data-qrm] {
+        grid-column: 1/-1;
+        width: 100%;
+        height: 30px
+      }
+
+      .sp {
+        margin-left: 0
+      }
+
+      .bar input,
+      .bar select,
+      .bar .sg-select-wrap {
+        min-width: 0 !important;
+        max-width: none !important;
+        width: 100% !important;
+        flex: 1 1 100%
+      }
+
+      .kpi .d .sg-select-wrap {
+        width: 100% !important;
+        min-width: 0 !important
+      }
+
+      .browse-grid {
+        grid-template-columns: repeat(auto-fill, minmax(min(155px, 100%), 1fr))
+      }
+
+      .browse-card .bar {
+        flex-wrap: wrap
+      }
+
+      .browse-card .bar input {
+        flex: 1 1 70px !important;
+        width: auto !important
+      }
+
+      .browse-card .bar .btn {
+        flex: 1 1 auto
+      }
+
+      .usage-return {
+        flex-direction: column;
+        align-items: stretch;
+        white-space: normal
+      }
+
+      .usage-return input {
+        width: 100%;
+        flex: none
+      }
+
+      .health-metrics {
+        grid-template-columns: 1fr
+      }
+
+      .budget-metrics {
+        grid-template-columns: 1fr
+      }
+
+      .page {
+        padding: 18px 12px 32px
+      }
+
+      header {
+        align-items: center
+      }
+
+      .logo small {
+        display: block;
+        margin: 2px 0 0
+      }
+
+      .who {
+        order: 3;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap
+      }
+
+      .theme-toggle {
+        margin-left: auto
+      }
+
+      h1 {
+        font-size: clamp(34px, 10vw, 56px);
+        margin: 22px 0 16px;
+        overflow-wrap: anywhere
+      }
+
+      #tabs,
+      .inv-chips {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-left: 0;
+        margin-right: 0;
+        padding: 0;
+        overflow: visible
+      }
+
+      #tabs .chip,
+      .inv-chips .chip {
+        width: 100%;
+        justify-content: center;
+        padding: 0 10px;
+        text-align: center
+      }
+
+      #tabs .chip:last-child:nth-child(odd),
+      .inv-chips .chip:last-child:nth-child(odd) {
+        grid-column: 1/-1
+      }
+
+      .tile {
+        padding: 14px
+      }
+
+      .tw {
+        margin: 0 -4px;
+        padding: 0 4px
+      }
+
+      .tw table:has(thead) {
+        min-width: 480px
+      }
+
+      .bar {
+        align-items: stretch
+      }
+
+      .bar .btn {
+        justify-content: center;
+        flex: 1 1 auto
+      }
+
+      .bar .mic-btn {
+        flex: none;
+        width: 36px
+      }
+
+      .detail-row {
+        flex-direction: column;
+        gap: 3px
+      }
+
+      .detail-row strong {
+        text-align: left
+      }
+
+      .toast {
+        width: max-content;
+        max-width: calc(100vw - 24px);
+        text-align: center
+      }
+    }
+
+    @media(max-width:480px) {
+      .g4 {
+        grid-template-columns: 1fr
+      }
+
+      .browse-grid {
+        grid-template-columns: 1fr
+      }
+
+      .cv {
+        grid-template-columns: 1fr
+      }
+
+      .budget-rate {
+        align-items: stretch
+      }
+
+      .budget-rate input {
+        width: 100%
+      }
+
+      .health-head .btn {
+        width: 100%;
+        justify-content: center
+      }
+
+      .health-metrics {
+        gap: 8px
+      }
+
+      .health-metrics div,
+      .budget-metrics div {
+        padding: 10px
+      }
+
+      .health-metrics b {
+        font-size: 16px
+      }
+
+      .disp {
+        font-size: 26px
+      }
+
+      .keys {
+        gap: 6px
+      }
+
+      .keys button {
+        height: 42px
+      }
+
+      .f {
+        gap: 10px
+      }
+    }
+
+    @media(max-width:380px) {
+      .who {
+        font-size: var(--fs-xs)
+      }
+
+      .who .btn {
+        padding: 0 9px
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      * {
+        transition: none !important
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="/straitgate-theme.css">
+  <script src="/straitgate-theme.js"></script>
 </head>
+
 <body>
-<div class="page">
-<header><span class="logo">Straitgate<small>Admin</small></span><span class="who">Admin dashboard &middot; <span id="today"></span> &middot; <button id="logout" class="btn sm" type="button">Sign out</button></span><button class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark mode">☾</button></header>
-<h1 id="ttl">Dashboard</h1>
-<div class="tabs" role="tablist" id="tabs"></div>
-<div id="view"></div>
-<footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px"><a href="/straitgate-home.html">Home</a><span>·</span><a href="/straitgate-catalog.html">Catalog</a><span>·</span><a href="/admin/products">Products page</a><span>·</span><a href="/admin/inventory">Inventory page</a></footer>
-</div>
-<div id="pa"></div>
-<div class="toast" id="toast" role="status"></div>
-<div class="upload-overlay" id="uploadOverlay" role="status" aria-live="polite" hidden><div class="upload-progress"><span class="upload-spinner" aria-hidden="true"></span><strong id="uploadStatus">Uploading product...</strong></div></div>
+  <div class="page">
+    <header><span class="logo">Straitgate<small>Admin</small></span><span class="who">Admin dashboard &middot; <span
+          id="today"></span> &middot; <button id="logout" class="btn sm" type="button">Sign out</button></span><button
+        class="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark mode">☾</button></header>
+    <h1 id="ttl">Dashboard</h1>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div id="view"></div>
+    <footer style="margin-top:clamp(48px,8vw,100px);padding-top:20px"><a
+        href="/straitgate-home.html">Home</a><span>·</span><a
+        href="/straitgate-catalog.html">Catalog</a><span>·</span><a href="/admin/products">Products
+        page</a><span>·</span><a href="/admin/inventory">Inventory page</a></footer>
+  </div>
+  <div id="pa"></div>
+  <div class="toast" id="toast" role="status"></div>
+  <div class="upload-overlay" id="uploadOverlay" role="status" aria-live="polite" hidden>
+    <div class="upload-progress"><span class="upload-spinner" aria-hidden="true"></span><strong
+        id="uploadStatus">Uploading product...</strong></div>
+  </div>
 
-<script>
-var TABS=[['dashboard','Dashboard'],['products','Products'],['inventory','Inventory'],['quotes','Quotations'],['budget','Budget'],['health','Health'],['tools','Converter & calculator']];
-var CATS=['Security door','Sliding gate','Pedestrian gate','Estate gate','Garden gate','Driveway gate','Accessory'];
-var ITYPES=['Equipment','Tool','Product','Material'];
-var DB={products:[],inv:[],quotes:[]};
-var METRIC_PERIOD={traffic:'day',signups:'day',revenue:'day'};
-function metricCard(kind,title,values){var period=METRIC_PERIOD[kind],value=values?.[period]||0;return '<div class="tile kpi"><div class="l">'+title+'</div><div class="v">'+(kind==='revenue'?gbp(value):value)+'</div><div class="d"><select data-metric-period="'+kind+'" aria-label="'+title+' date range" style="width:auto;min-width:110px"><option value="day"'+(period==='day'?' selected':'')+'>Daily</option><option value="week"'+(period==='week'?' selected':'')+'>Weekly</option><option value="month"'+(period==='month'?' selected':'')+'>Monthly</option></select></div></div>'}
-var dataLoaded=false,dataIssue='';
-var productSaving=false;
-function uploadProgress(message,button){$('uploadStatus').textContent=message;$('uploadOverlay').hidden=false;if(button){button.disabled=true;button.textContent=message}}
-function actionProgress(kind,action){if(kind==='quotes'&&action==='add')return 'Creating quotation...';if(kind==='settings'&&action==='letterhead')return 'Uploading letterhead...';if(action==='remove')return 'Removing item...';if(action==='setStock'||action==='adjust')return 'Saving stock...';if(action==='checkout')return 'Recording equipment use...';if(action==='return')return 'Recording return...';if(action==='status')return 'Updating quotation...';return 'Saving changes...'}
-async function refresh(){var ownsOverlay=$('uploadOverlay').hidden===true;if(ownsOverlay)uploadProgress('Loading admin data...');var ctrl=typeof AbortController!=='undefined'?new AbortController():null,timer=ctrl?setTimeout(function(){ctrl.abort()},20000):0;try{var r=await fetch('/api/admin/data',Object.assign({cache:'no-store'},ctrl?{signal:ctrl.signal}:{})),data=await r.json();if(!r.ok)throw Error(data.error||'Could not load dashboard data');if(!Array.isArray(data.products)||!Array.isArray(data.inv)||!Array.isArray(data.quotes))throw Error('Dashboard data is incomplete');DB=data;dataLoaded=true;dataIssue='';show();return true}catch(e){dataIssue=e.name==='AbortError'?'Database connection timed out. Click Retry connection.':(e.message||'Could not load dashboard data');show();return false}finally{if(timer)clearTimeout(timer);if(ownsOverlay)$('uploadOverlay').hidden=true}}
-async function change(kind,action,data){if(dataIssue){toast('Reconnect to the database before saving');return false}var ownsOverlay=$('uploadOverlay').hidden===true;if(ownsOverlay)uploadProgress(actionProgress(kind,action));if(cur==='quotes')captureQuoteForm();try{var r=await fetch('/api/admin/data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({kind:kind,action:action,data:data})});var result=await r.json();if(!r.ok)throw Error(result.error||'Could not save');DB=result;dataLoaded=true;show();return true}catch(e){toast(e.message);return false}finally{if(ownsOverlay)$('uploadOverlay').hidden=true}}
-function $(i){return document.getElementById(i)}
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function gbp(n){return '₦'+(Math.round(n*100)/100).toLocaleString('en-NG',{minimumFractionDigits:0,maximumFractionDigits:2})}
-function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){t.classList.remove('on')},2200)}
-function nid(a){return a.reduce(function(m,x){return Math.max(m,x.id)},0)+1}
-function totals(q){var sub=q.items.reduce(function(s,i){return s+i.q*i.p},0),d=sub*(q.disc||0)/100,net=sub-d+(+q.inst||0);return{sub:sub,d:d,inst:+q.inst||0,net:net,total:net}}
-var budgetPercent=20;
-function updateBudget(){if(cur!=='budget')return;var accepted=DB.quotes.filter(function(q){return q.status==='Accepted'}),sales=accepted.reduce(function(sum,q){return sum+totals(q).total},0);$('budgetSales').textContent=gbp(sales);$('budgetAmount').textContent=gbp(sales*budgetPercent/100);$('budgetCount').textContent=accepted.length}
-function art(t,c){var s='',i;if(t==='Security door')s='<rect x="56" y="14" width="128" height="176" rx="6" fill="#222"/><rect x="64" y="22" width="112" height="168" fill="'+c+'"/><rect x="146" y="92" width="10" height="26" rx="5" fill="#ddd"/>';else if(t==='Garden gate'){s='<path d="M50 192V84Q120 14 190 84V192" fill="none" stroke="'+c+'" stroke-width="10"/>';for(i=0;i<7;i++)s+='<rect x="'+(66+i*18)+'" y="90" width="6" height="100" fill="'+c+'"/>'}else if(t==='Driveway gate'){s='<rect x="14" y="40" width="10" height="150" fill="#222"/><rect x="34" y="52" width="160" height="14" fill="'+c+'"/><rect x="34" y="176" width="160" height="14" fill="'+c+'"/>';for(i=0;i<9;i++)s+='<rect x="'+(40+i*17)+'" y="66" width="6" height="110" fill="'+c+'"/>'}else s='<circle cx="120" cy="100" r="50" fill="'+c+'"/>';return '<svg viewBox="0 0 240 200" class="ch">'+s+'</svg>'}
+  <script>
+    var TABS = [['dashboard', 'Dashboard'], ['products', 'Products'], ['inventory', 'Inventory'], ['quotes', 'Quotations'], ['budget', 'Budget'], ['health', 'Health'], ['tools', 'Converter & calculator']];
+    var CATS = ['Security door', 'Sliding gate', 'Pedestrian gate', 'Estate gate', 'Garden gate', 'Driveway gate', 'Accessory'];
+    var ITYPES = ['Equipment', 'Tool', 'Product', 'Material'];
+    var DB = { products: [], inv: [], quotes: [] };
+    var METRIC_PERIOD = { traffic: 'day', signups: 'day', revenue: 'day' };
+    function metricCard(kind, title, values) { var period = METRIC_PERIOD[kind], value = values?.[period] || 0; return '<div class="tile kpi"><div class="l">' + title + '</div><div class="v">' + (kind === 'revenue' ? gbp(value) : value) + '</div><div class="d"><select data-metric-period="' + kind + '" aria-label="' + title + ' date range" style="width:auto;min-width:110px"><option value="day"' + (period === 'day' ? ' selected' : '') + '>Daily</option><option value="week"' + (period === 'week' ? ' selected' : '') + '>Weekly</option><option value="month"' + (period === 'month' ? ' selected' : '') + '>Monthly</option></select></div></div>' }
+    var dataLoaded = false, dataIssue = '';
+    var productSaving = false;
+    function uploadProgress(message, button) { $('uploadStatus').textContent = message; $('uploadOverlay').hidden = false; if (button) { button.disabled = true; button.textContent = message } }
+    function actionProgress(kind, action) { if (kind === 'quotes' && action === 'add') return 'Creating quotation...'; if (kind === 'settings' && action === 'letterhead') return 'Uploading letterhead...'; if (action === 'remove') return 'Removing item...'; if (action === 'setStock' || action === 'adjust') return 'Saving stock...'; if (action === 'checkout') return 'Recording equipment use...'; if (action === 'return') return 'Recording return...'; if (action === 'status') return 'Updating quotation...'; return 'Saving changes...' }
+    async function refresh() { var ownsOverlay = $('uploadOverlay').hidden === true; if (ownsOverlay) uploadProgress('Loading admin data...'); var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null, timer = ctrl ? setTimeout(function () { ctrl.abort() }, 20000) : 0; try { var r = await fetch('/api/admin/data', Object.assign({ cache: 'no-store' }, ctrl ? { signal: ctrl.signal } : {})), data = await r.json(); if (!r.ok) throw Error(data.error || 'Could not load dashboard data'); if (!Array.isArray(data.products) || !Array.isArray(data.inv) || !Array.isArray(data.quotes)) throw Error('Dashboard data is incomplete'); DB = data; dataLoaded = true; dataIssue = ''; show(); return true } catch (e) { dataIssue = e.name === 'AbortError' ? 'Database connection timed out. Click Retry connection.' : (e.message || 'Could not load dashboard data'); show(); return false } finally { if (timer) clearTimeout(timer); if (ownsOverlay) $('uploadOverlay').hidden = true } }
+    async function change(kind, action, data) { if (dataIssue) { toast('Reconnect to the database before saving'); return false } var ownsOverlay = $('uploadOverlay').hidden === true; if (ownsOverlay) uploadProgress(actionProgress(kind, action)); if (cur === 'quotes') captureQuoteForm(); try { var r = await fetch('/api/admin/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: kind, action: action, data: data }) }); var result = await r.json(); if (!r.ok) throw Error(result.error || 'Could not save'); DB = result; dataLoaded = true; show(); return true } catch (e) { toast(e.message); return false } finally { if (ownsOverlay) $('uploadOverlay').hidden = true } }
+    function $(i) { return document.getElementById(i) }
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] }) }
+    function gbp(n) { return '₦' + (Math.round(n * 100) / 100).toLocaleString('en-NG', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) }
+    function toast(m) { var t = $('toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove('on') }, 2200) }
+    function nid(a) { return a.reduce(function (m, x) { return Math.max(m, x.id) }, 0) + 1 }
+    function totals(q) { var sub = q.items.reduce(function (s, i) { return s + i.q * i.p }, 0), d = sub * (q.disc || 0) / 100, net = sub - d + (+q.inst || 0); return { sub: sub, d: d, inst: +q.inst || 0, net: net, total: net } }
+    var budgetPercent = 20;
+    function updateBudget() { if (cur !== 'budget') return; var accepted = DB.quotes.filter(function (q) { return q.status === 'Accepted' }), sales = accepted.reduce(function (sum, q) { return sum + totals(q).total }, 0); $('budgetSales').textContent = gbp(sales); $('budgetAmount').textContent = gbp(sales * budgetPercent / 100); $('budgetCount').textContent = accepted.length }
+    function art(t, c) { var s = '', i; if (t === 'Security door') s = '<rect x="56" y="14" width="128" height="176" rx="6" fill="#222"/><rect x="64" y="22" width="112" height="168" fill="' + c + '"/><rect x="146" y="92" width="10" height="26" rx="5" fill="#ddd"/>'; else if (t === 'Garden gate') { s = '<path d="M50 192V84Q120 14 190 84V192" fill="none" stroke="' + c + '" stroke-width="10"/>'; for (i = 0; i < 7; i++)s += '<rect x="' + (66 + i * 18) + '" y="90" width="6" height="100" fill="' + c + '"/>' } else if (t === 'Driveway gate') { s = '<rect x="14" y="40" width="10" height="150" fill="#222"/><rect x="34" y="52" width="160" height="14" fill="' + c + '"/><rect x="34" y="176" width="160" height="14" fill="' + c + '"/>'; for (i = 0; i < 9; i++)s += '<rect x="' + (40 + i * 17) + '" y="66" width="6" height="110" fill="' + c + '"/>' } else s = '<circle cx="120" cy="100" r="50" fill="' + c + '"/>'; return '<svg viewBox="0 0 240 200" class="ch">' + s + '</svg>' }
 
-/* charts */
-function barChart(l,v,hi,caption){var m=Math.max(1,Math.max.apply(null,v)*1.15),w=400,h=190,bw=w/l.length,s='';
- [0,.5,1].forEach(function(f){var y=h-24-(h-40)*f;s+='<line x1="0" x2="'+w+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/>'});
- v.forEach(function(x,i){var bh=(h-40)*x/m,y=h-24-bh;s+='<rect x="'+(i*bw+bw*.18)+'" y="'+y+'" width="'+bw*.64+'" height="'+bh+'" rx="4" fill="'+(i===hi?'#ccf97c':'var(--ink)')+'"><title>'+l[i]+': '+(caption==='Revenue'?gbp(x):x)+'</title></rect><text x="'+(i*bw+bw/2)+'" y="'+(h-8)+'" font-size="9" text-anchor="middle" fill="var(--mute)">'+l[i]+'</text>'});
- return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="'+caption+' by month">'+s+'</svg>'}
-function donut(d){var total=d.reduce(function(s,x){return s+x[1]},0);if(!total)return '<div class="empty">No shop catalog stock value yet.</div>';var r=50,C=2*Math.PI*r,o=0,s='';
- d.forEach(function(x){var len=C*x[1]/total;s+='<circle cx="70" cy="70" r="'+r+'" fill="none" stroke="'+x[2]+'" stroke-width="24" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-o)+'" transform="rotate(-90 70 70)"><title>'+esc(x[0])+': '+gbp(x[1])+'</title></circle>';o+=len});
- return '<svg class="ch" viewBox="0 0 140 140" style="max-width:190px;margin:0 auto" role="img" aria-label="Catalog stock value by category">'+s+'<text x="70" y="75" text-anchor="middle" font-size="13" fill="var(--ink)">'+gbp(total)+'</text></svg><div class="leg">'+d.map(function(x){return '<span><i style="background:'+x[2]+'"></i>'+esc(x[0])+' ('+gbp(x[1])+')</span>'}).join('')+'</div>'}
-function line(l,v){var m=Math.max(1,Math.max.apply(null,v)*1.15),w=400,h=170,p=v.map(function(x,i){return [i*(w-20)/Math.max(1,v.length-1)+10,h-24-(h-40)*x/m]}),s='';
- s+='<polyline points="'+p.map(function(a){return a.join(',')}).join(' ')+'" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>';
- p.forEach(function(a,i){s+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="3.5" fill="'+(i===v.length-1?'#ccf97c':'var(--ink)')+'" stroke="var(--ink)"><title>'+l[i]+': '+v[i]+'</title></circle><text x="'+a[0]+'" y="'+(h-6)+'" font-size="9" text-anchor="middle" fill="var(--mute)">'+l[i]+'</text>'});
- return '<svg class="ch" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Visitor & signup activity">'+s+'</svg>'}
-function dashboardSeries(){
- var catPalette=['#ccf97c','#1f5fe0','#f5c20f','#2e7d12','#e5271d','#8a8a8a','#5b8cff'];
- var catLabels=CATS.map(function(c){return c.split(' ')[0]});
- var catStockUnits=CATS.map(function(c){return DB.products.filter(function(p){return p.cat===c}).reduce(function(s,p){return s+(Number(p.stockQuantity)||0)},0)});
- var catValueDonut=CATS.map(function(c,idx){var val=DB.products.filter(function(p){return p.cat===c}).reduce(function(s,p){return s+(Number(p.price)||0)*Math.max(1,Number(p.stockQuantity)||1)},0);return [c,val,catPalette[idx%catPalette.length]]}).filter(function(x){return x[1]>0});
- var tLabels=['30d avg/wk','7d total','Last 24h'],tTraffic=[Math.round((DB.traffic?.month||0)/4.3),DB.traffic?.week||0,DB.traffic?.day||0],tSignups=[DB.signups?.month||0,DB.signups?.week||0,DB.signups?.day||0];
- return {catLabels:catLabels,catStockUnits:catStockUnits,catValueDonut:catValueDonut,tLabels:tLabels,tTraffic:tTraffic,tSignups:tSignups}
-}
+    /* charts */
+    function barChart(l, v, hi, caption) {
+      var m = Math.max(1, Math.max.apply(null, v) * 1.15), w = 400, h = 190, bw = w / l.length, s = '';
+      [0, .5, 1].forEach(function (f) { var y = h - 24 - (h - 40) * f; s += '<line x1="0" x2="' + w + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)"/>' });
+      v.forEach(function (x, i) { var bh = (h - 40) * x / m, y = h - 24 - bh; s += '<rect x="' + (i * bw + bw * .18) + '" y="' + y + '" width="' + bw * .64 + '" height="' + bh + '" rx="4" fill="' + (i === hi ? '#ccf97c' : 'var(--ink)') + '"><title>' + l[i] + ': ' + (caption === 'Revenue' ? gbp(x) : x) + '</title></rect><text x="' + (i * bw + bw / 2) + '" y="' + (h - 8) + '" font-size="9" text-anchor="middle" fill="var(--mute)">' + l[i] + '</text>' });
+      return '<svg class="ch" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="' + caption + ' by month">' + s + '</svg>'
+    }
+    function donut(d) {
+      var total = d.reduce(function (s, x) { return s + x[1] }, 0); if (!total) return '<div class="empty">No shop catalog stock value yet.</div>'; var r = 50, C = 2 * Math.PI * r, o = 0, s = '';
+      d.forEach(function (x) { var len = C * x[1] / total; s += '<circle cx="70" cy="70" r="' + r + '" fill="none" stroke="' + x[2] + '" stroke-width="24" stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-o) + '" transform="rotate(-90 70 70)"><title>' + esc(x[0]) + ': ' + gbp(x[1]) + '</title></circle>'; o += len });
+      return '<svg class="ch" viewBox="0 0 140 140" style="max-width:190px;margin:0 auto" role="img" aria-label="Catalog stock value by category">' + s + '<text x="70" y="75" text-anchor="middle" font-size="13" fill="var(--ink)">' + gbp(total) + '</text></svg><div class="leg">' + d.map(function (x) { return '<span><i style="background:' + x[2] + '"></i>' + esc(x[0]) + ' (' + gbp(x[1]) + ')</span>' }).join('') + '</div>'
+    }
+    function line(l, v) {
+      var m = Math.max(1, Math.max.apply(null, v) * 1.15), w = 400, h = 170, p = v.map(function (x, i) { return [i * (w - 20) / Math.max(1, v.length - 1) + 10, h - 24 - (h - 40) * x / m] }), s = '';
+      s += '<polyline points="' + p.map(function (a) { return a.join(',') }).join(' ') + '" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>';
+      p.forEach(function (a, i) { s += '<circle cx="' + a[0] + '" cy="' + a[1] + '" r="3.5" fill="' + (i === v.length - 1 ? '#ccf97c' : 'var(--ink)') + '" stroke="var(--ink)"><title>' + l[i] + ': ' + v[i] + '</title></circle><text x="' + a[0] + '" y="' + (h - 6) + '" font-size="9" text-anchor="middle" fill="var(--mute)">' + l[i] + '</text>' });
+      return '<svg class="ch" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="Visitor & signup activity">' + s + '</svg>'
+    }
+    function dashboardSeries() {
+      var catPalette = ['#ccf97c', '#1f5fe0', '#f5c20f', '#2e7d12', '#e5271d', '#8a8a8a', '#5b8cff'];
+      var catLabels = CATS.map(function (c) { return c.split(' ')[0] });
+      var catStockUnits = CATS.map(function (c) { return DB.products.filter(function (p) { return p.cat === c }).reduce(function (s, p) { return s + (Number(p.stockQuantity) || 0) }, 0) });
+      var catValueDonut = CATS.map(function (c, idx) { var val = DB.products.filter(function (p) { return p.cat === c }).reduce(function (s, p) { return s + (Number(p.price) || 0) * Math.max(1, Number(p.stockQuantity) || 1) }, 0); return [c, val, catPalette[idx % catPalette.length]] }).filter(function (x) { return x[1] > 0 });
+      var tLabels = ['30d avg/wk', '7d total', 'Last 24h'], tTraffic = [Math.round((DB.traffic?.month || 0) / 4.3), DB.traffic?.week || 0, DB.traffic?.day || 0], tSignups = [DB.signups?.month || 0, DB.signups?.week || 0, DB.signups?.day || 0];
+      return { catLabels: catLabels, catStockUnits: catStockUnits, catValueDonut: catValueDonut, tLabels: tLabels, tTraffic: tTraffic, tSignups: tSignups }
+    }
 
-/* views */
-var V={};
-function inventoryRows(){return DB.inv.map(function(i){return i.type==='Product'?Object.assign({},i,{sku:'Inventory product'+(i.sku?' · '+i.sku:'')}):i}).concat(DB.products.map(function(p){return {id:p.id,product:true,name:p.name,type:'Product',sku:'',qty:p.stockQuantity,unit:'units',min:2,loc:'Shop catalog',cost:0,createdAt:p.createdAt,img:p.img,price:p.price,desc:p.desc,cat:p.cat}}))}
-function isLowStock(i){return i.qty!==null&&i.qty<=Math.max(i.min,2)}
-V.budget=function(){return '<section class="tile budget-panel" aria-label="Sales-based budget calculator"><h2>Sales-based budget</h2><p class="note">Uses accepted quotations as an estimate of sales. This is not confirmed cash received or profit.</p><div class="budget-rate"><label for="budgetPercent">Allocate from net quotation value</label><input id="budgetPercent" type="number" min="0" max="100" step="0.1" value="'+budgetPercent+'"><span>%</span></div><div class="budget-metrics"><div><span class="note">Accepted quotations</span><b id="budgetSales">₦0</b></div><div><span class="note">Budget allocation</span><b id="budgetAmount">₦0</b></div><div><span class="note">Accepted quotes counted</span><b id="budgetCount">0</b></div></div><p class="note">Budget = accepted quotation totals after discounts × allocation percentage. The percentage is a calculator setting for this open tab.</p></section>'}
-V.health=function(){return '<section class="tile health-panel" aria-label="Backend health"><div class="health-head"><div><h2 style="margin-bottom:4px">Backend health</h2><span class="note" id="healthStatus">Checking Neon database and server…</span></div><button class="btn sm" id="healthRefresh" type="button">Check now</button></div><div class="health-metrics"><div><span class="note">Response time</span><b id="healthResponse">—</b></div><div><span class="note">Neon database</span><b id="healthDatabase">—</b></div><div><span class="note">Server uptime</span><b id="healthUptime">—</b></div></div><div class="note">Response time history (this open tab)</div><div class="health-chart" id="healthChart" role="img" aria-label="No health samples yet"></div><p class="note" id="pingStatus">Random-signal ping every 10 minutes (plus server-side and GitHub Actions background keep-alive).</p></section>'}
-V.dashboard=function(){
- var qs=DB.quotes,inv=inventoryRows(),low=inv.filter(isLowStock).length,activeTools=(DB.usage||[]).filter(function(u){return !u.returnedAt}).length,ds=dashboardSeries();
- return '<div class="grid g4">'+
- metricCard('traffic','Unique visitors',DB.traffic)+metricCard('signups','New signups',DB.signups)+metricCard('revenue','Revenue',DB.revenue)+'<div class="tile kpi"><div class="l">Top product</div><div class="v">'+esc(DB.topProduct?.name||'—')+'</div><div class="d">'+(DB.topProduct?.views||0)+' views</div></div></div>'+
- '<div class="grid g3" style="margin-top:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Products</div><div class="v">'+DB.products.length+'</div><div class="d">In shop catalog</div></div><div class="tile kpi"><div class="l">Low stock alerts</div><div class="v'+(low?' dn':'')+'">'+low+'</div><div class="d">'+(low?'Items at or below reorder level':'All stock levels healthy')+'</div></div><div class="tile kpi"><div class="l">Tools checked out</div><div class="v">'+activeTools+'</div><div class="d">'+(activeTools?'Currently in field use':'All equipment returned')+'</div></div></div>'+
- '<div class="grid g3" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Shop stock units by category</h3>'+barChart(ds.catLabels,ds.catStockUnits,0,'Units in stock')+'</div><div class="tile"><h3>Catalog value by category</h3>'+donut(ds.catValueDonut)+'</div><div class="tile"><h3>Shop visitor velocity</h3>'+line(ds.tLabels,ds.tTraffic)+'<div class="note">Customer signups — 30d: '+(DB.signups?.month||0)+' · 7d: '+(DB.signups?.week||0)+' · 24h: '+(DB.signups?.day||0)+'</div></div></div>'+
- '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h3>Recent quotations</h3>'+quoteTable(qs.slice(-4).reverse(),true)+'</div>'};
+    /* views */
+    var V = {};
+    function inventoryRows() { return DB.inv.map(function (i) { return i.type === 'Product' ? Object.assign({}, i, { sku: 'Inventory product' + (i.sku ? ' · ' + i.sku : '') }) : i }).concat(DB.products.map(function (p) { return { id: p.id, product: true, name: p.name, type: 'Product', sku: '', qty: p.stockQuantity, unit: 'units', min: 2, loc: 'Shop catalog', cost: 0, createdAt: p.createdAt, img: p.img, price: p.price, desc: p.desc, cat: p.cat } })) }
+    function isLowStock(i) { return i.qty !== null && i.qty <= Math.max(i.min, 2) }
+    V.budget = function () { return '<section class="tile budget-panel" aria-label="Sales-based budget calculator"><h2>Sales-based budget</h2><p class="note">Uses accepted quotations as an estimate of sales. This is not confirmed cash received or profit.</p><div class="budget-rate"><label for="budgetPercent">Allocate from net quotation value</label><input id="budgetPercent" type="number" min="0" max="100" step="0.1" value="' + budgetPercent + '"><span>%</span></div><div class="budget-metrics"><div><span class="note">Accepted quotations</span><b id="budgetSales">₦0</b></div><div><span class="note">Budget allocation</span><b id="budgetAmount">₦0</b></div><div><span class="note">Accepted quotes counted</span><b id="budgetCount">0</b></div></div><p class="note">Budget = accepted quotation totals after discounts × allocation percentage. The percentage is a calculator setting for this open tab.</p></section>' }
+    V.health = function () { return '<section class="tile health-panel" aria-label="Backend health"><div class="health-head"><div><h2 style="margin-bottom:4px">Backend health</h2><span class="note" id="healthStatus">Checking Neon database and server…</span></div><button class="btn sm" id="healthRefresh" type="button">Check now</button></div><div class="health-metrics"><div><span class="note">Response time</span><b id="healthResponse">—</b></div><div><span class="note">Neon database</span><b id="healthDatabase">—</b></div><div><span class="note">Server uptime</span><b id="healthUptime">—</b></div></div><div class="note">Response time history (this open tab)</div><div class="health-chart" id="healthChart" role="img" aria-label="No health samples yet"></div><p class="note" id="pingStatus">Random-signal ping every 10 minutes (plus server-side and GitHub Actions background keep-alive).</p></section>' }
+    V.dashboard = function () {
+      var qs = DB.quotes, inv = inventoryRows(), low = inv.filter(isLowStock).length, activeTools = (DB.usage || []).filter(function (u) { return !u.returnedAt }).length, ds = dashboardSeries();
+      return '<div class="grid g4">' +
+        metricCard('traffic', 'Unique visitors', DB.traffic) + metricCard('signups', 'New signups', DB.signups) + metricCard('revenue', 'Revenue', DB.revenue) + '<div class="tile kpi"><div class="l">Top product</div><div class="v">' + esc(DB.topProduct?.name || '—') + '</div><div class="d">' + (DB.topProduct?.views || 0) + ' views</div></div></div>' +
+        '<div class="grid g3" style="margin-top:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Products</div><div class="v">' + DB.products.length + '</div><div class="d">In shop catalog</div></div><div class="tile kpi"><div class="l">Low stock alerts</div><div class="v' + (low ? ' dn' : '') + '">' + low + '</div><div class="d">' + (low ? 'Items at or below reorder level' : 'All stock levels healthy') + '</div></div><div class="tile kpi"><div class="l">Tools checked out</div><div class="v">' + activeTools + '</div><div class="d">' + (activeTools ? 'Currently in field use' : 'All equipment returned') + '</div></div></div>' +
+        '<div class="grid g3" style="margin-top:clamp(12px,2vw,24px)"><div class="tile"><h3>Shop stock units by category</h3>' + barChart(ds.catLabels, ds.catStockUnits, 0, 'Units in stock') + '</div><div class="tile"><h3>Catalog value by category</h3>' + donut(ds.catValueDonut) + '</div><div class="tile"><h3>Shop visitor velocity</h3>' + line(ds.tLabels, ds.tTraffic) + '<div class="note">Customer signups — 30d: ' + (DB.signups?.month || 0) + ' · 7d: ' + (DB.signups?.week || 0) + ' · 24h: ' + (DB.signups?.day || 0) + '</div></div></div>' +
+        '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h3>Recent quotations</h3>' + quoteTable(qs.slice(-4).reverse(), true) + '</div>'
+    };
 
-V.products=function(){
- return '<div class="tile"><div class="bar" style="justify-content:space-between"><h2>Upload a product</h2><button class="btn sm" type="button" data-tab="product-browser">Browse products ('+DB.products.length+') →</button></div><div class="f">'+
- '<div><label for="pn">Product name</label><input id="pn" placeholder="e.g. Fortis Red"></div>'+
- '<div><label for="pc">Category</label><select id="pc">'+CATS.map(function(c){return '<option>'+c+'</option>'}).join('')+'</select></div>'+
- '<div><label for="po">Operation</label><select id="po"><option value="">Not specified</option><option>Pivot</option><option>Hinged</option><option>Sliding</option><option>Automated</option></select></div>'+
- '<div><label for="pp">Price (₦)</label><input id="pp" type="number" min="0" step="0.01" placeholder="0.00"></div>'+
- '<div><label for="ps">Units in stock</label><input id="ps" type="number" min="0" step="1" placeholder="0" required></div>'+
- '<div class="w"><label for="pd">Short description</label><textarea id="pd" placeholder="Shown under the product name in the catalog"></textarea></div>'+
- '<div class="w"><label for="pi">Product images (up to 5 pictures — any image format)</label><input id="pi" type="file" accept="image/*" multiple><small>Automatically converted to high-definition, ultra-sharp WebP images for fast page loading.</small></div>'+
- '<div class="w"><label><input id="removebg" type="checkbox" style="width:auto;height:auto"> Remove background from uploaded images</label><small>Uses the configured remove.bg API key.</small></div></div>'+
- '<div class="bar" style="margin:14px 0 0"><button class="btn l" id="addp">Save product</button></div></div>'};
-function browseImage(src,name){return src?'<img class="browse-image" src="'+esc(src)+'" alt="'+esc(name)+'" loading="lazy">':'<div class="browse-image browse-placeholder" aria-hidden="true">'+esc((name||'?').charAt(0).toUpperCase())+'</div>'}
-function browseSearch(){return '<div class="bar"><input id="browseSearch" type="search" placeholder="Search items..." aria-label="Search items"></div>'}
-V['product-browser']=function(){return browseSearch()+'<div class="browse-grid" id="browseGrid">'+(DB.products.length?DB.products.map(function(p){return '<article class="tile browse-card"><a class="card-link" href="/admin/products/'+p.id+'" aria-label="View details for '+esc(p.name)+'"></a>'+browseImage(p.img,p.name)+'<h3>'+esc(p.name)+'</h3><p>'+gbp(p.price)+'</p><p>'+(p.stockQuantity===null?'Stock not set':p.stockQuantity+' in stock')+'</p><div class="bar"><button class="btn l" type="button" data-quote-product="'+p.id+'">Add to quotation</button></div><div class="bar"><input id="stock-'+p.id+'" type="number" min="0" step="1" value="'+(p.stockQuantity===null?'':p.stockQuantity)+'" placeholder="Stock" aria-label="Units in stock for '+esc(p.name)+'" style="width:78px"><button class="btn sm" type="button" data-stock="'+p.id+'">Save stock</button></div><div class="bar"><button class="btn sm x" type="button" data-del="p:'+p.id+'">Remove product</button></div></article>'}).join(''):'<div class="tile empty">No shop products yet.</div>')+'</div>'};
-V['inventory-browser']=function(){var items=inventoryRows().filter(function(i){return (IF==='All'||i.type===IF)&&(!IS||(i.name+i.sku+i.loc).toLowerCase().includes(IS.toLowerCase()))&&(!IB||i.type!=='Material'||(i.broughtBy||'').toLowerCase().includes(IB.toLowerCase()))}).sort(function(a,b){if(IORDER==='broughtBy')return (a.broughtBy||'').localeCompare(b.broughtBy||'');var x=new Date(a.acquiredAt||a.createdAt||0).getTime(),y=new Date(b.acquiredAt||b.createdAt||0).getTime();return IORDER==='oldest'?x-y:y-x});
- return '<div class="tile inv-filters"><div class="inv-chips">'+['All'].concat(ITYPES).map(function(t){return '<button class="chip" data-if="'+t+'" aria-pressed="'+(IF===t)+'">'+t+'</button>'}).join('')+'</div><div class="inv-controls"><input id="isr" type="search" placeholder="Search item, SKU, location..." value="'+esc(IS)+'" aria-label="Search inventory"><select id="iorder" aria-label="Sort inventory"><option value="newest"'+(IORDER==='newest'?' selected':'')+'>Newest first</option><option value="oldest"'+(IORDER==='oldest'?' selected':'')+'>Oldest first</option><option value="broughtBy"'+(IORDER==='broughtBy'?' selected':'')+'>Brought by</option></select><input id="ibfilter" type="search" placeholder="Materials brought by..." value="'+esc(IB)+'" aria-label="Materials brought by"></div></div>'+
- '<div class="browse-grid" id="browseGrid">'+(items.length?items.map(function(i){var active=i.product?[]:(DB.usage||[]).filter(function(u){return u.itemId===i.id&&!u.returnedAt});return '<article class="tile browse-card"><a class="card-link" href="/admin/'+(i.product?'products':'inventory')+'/'+i.id+'" aria-label="View details for '+esc(i.name)+'"></a>'+browseImage(i.img,i.name)+((i.images||[]).length>1?'<div class="bar">'+i.images.map(function(src){return '<img src="'+esc(src)+'" alt="Picture of '+esc(i.name)+'" loading="lazy" style="width:36px;height:36px;object-fit:cover;border-radius:5px">'}).join('')+'</div>':'')+'<h3>'+esc(i.name)+'</h3><p>'+esc(i.product?'Shop product':i.type==='Product'?'Inventory product':i.type)+' · '+esc(i.loc)+'</p><p>'+esc(i.sku||'')+'</p><p>'+(i.qty===null?'Stock not set':i.qty+' '+esc(i.unit))+'</p><p class="note">'+esc(i.acquiredAt||i.createdAt?new Date(i.acquiredAt||i.createdAt).toLocaleString():'Date not set')+(i.broughtBy?' · Brought by '+esc(i.broughtBy):'')+'</p>'+(!i.product&&['Equipment','Tool'].includes(i.type)?'':'<div class="bar"><button class="btn l" type="button" data-quote-'+(i.product?'product':'inventory')+'="'+i.id+'">Add to quotation</button></div>')+(i.product?'<div class="bar"><button class="btn sm" data-tab="product-browser">Manage stock</button></div>':'<div class="bar"><button class="btn sm" data-adj="'+i.id+':-1" aria-label="Decrease stock">−</button><button class="btn sm" data-adj="'+i.id+':1" aria-label="Increase stock">+</button><button class="btn sm x" data-del="i:'+i.id+'">Remove</button></div>')+(!i.product&&['Equipment','Tool'].includes(i.type)?'<div class="bar"><button class="btn sm" data-use-item="'+i.id+'">Use in form</button></div>'+active.map(function(u){return '<div class="bar">'+esc(u.usedBy)+' <button class="btn sm" data-return="'+u.id+'">Returned</button></div>'}).join(''):'')+'</article>'}).join(''):'<div class="tile empty">Nothing matches.</div>')+'</div>'};
-function detailImages(item){var images=item.images?.length?item.images:(item.img?[item.img]:[]);return '<div class="detail-gallery">'+(images.length?images.map(function(src,index){return '<a href="'+esc(src)+'" target="_blank" rel="noopener" aria-label="Open picture '+(index+1)+' of '+esc(item.name)+'"><img src="'+esc(src)+'" alt="'+esc(item.name)+' picture '+(index+1)+'" loading="lazy"></a>'}).join(''):browseImage('',item.name))+'</div>'}
-function detailRow(label,value){return '<div class="detail-row"><span>'+esc(label)+'</span><strong>'+esc(value==null||value===''?'—':value)+'</strong></div>'}
-function localDateTime(value){if(!value)return '';var date=new Date(value);return new Date(date.getTime()-date.getTimezoneOffset()*60000).toISOString().slice(0,16)}
-V['product-detail']=function(){var id=Number(location.pathname.split('/').pop()),p=DB.products.find(function(item){return item.id===id});if(!p)return '<div class="tile"><h2>Product not found</h2><a class="btn" href="/admin/products">Back to products</a></div>';return '<div class="bar"><a class="btn sm" href="/admin/products">← All products</a></div><div class="grid g2 detail-layout"><div class="tile">'+detailImages(p)+'</div><div class="tile"><h2>Edit product</h2><div class="f"><div class="w"><label for="editName">Name</label><input id="editName" value="'+esc(p.name)+'"></div><div><label for="editCategory">Category</label><select id="editCategory">'+CATS.map(function(cat){return '<option'+(cat===p.cat?' selected':'')+'>'+esc(cat)+'</option>'}).join('')+'</select></div><div><label for="editOperation">Operation</label><input id="editOperation" value="'+esc(p.operation)+'"></div><div><label for="editPrice">Price (₦)</label><input id="editPrice" type="number" min="0" step="0.01" value="'+p.price+'"></div><div><label for="editStock">Amount in stock</label><input id="editStock" type="number" min="0" step="1" value="'+(p.stockQuantity===null?'':p.stockQuantity)+'"></div><div class="w"><label for="editDescription">Description</label><textarea id="editDescription">'+esc(p.desc)+'</textarea></div><div class="w"><label for="editImages">New pictures (optional, any image format — converted to sharp WebP)</label><input id="editImages" type="file" accept="image/*" multiple></div></div><div class="bar" style="margin-top:16px"><button class="btn l" type="button" id="saveProductDetails">Save changes</button><button class="btn" type="button" data-quote-product="'+p.id+'">Add to quotation</button><button class="btn sm x" type="button" data-del="p:'+p.id+'">Remove product</button></div></div></div>'};
-V['inventory-detail']=function(){var id=Number(location.pathname.split('/').pop()),i=DB.inv.find(function(item){return item.id===id});if(!i)return '<div class="tile"><h2>Inventory item not found</h2><a class="btn" href="/admin/inventory">Back to inventory</a></div>';var usage=(DB.usage||[]).filter(function(u){return u.itemId===id});return '<div class="bar"><a class="btn sm" href="/admin/inventory">← All inventory</a></div><div class="grid g2 detail-layout"><div class="tile">'+detailImages(i)+'</div><div class="tile"><h2>Edit inventory item</h2><div class="f"><div class="w"><label for="editName">Name</label><input id="editName" value="'+esc(i.name)+'"></div><div><label for="editType">Type</label><select id="editType">'+ITYPES.map(function(type){return '<option'+(type===i.type?' selected':'')+'>'+esc(type)+'</option>'}).join('')+'</select></div><div><label for="editSku">SKU</label><input id="editSku" value="'+esc(i.sku)+'"></div><div><label for="editQty">Quantity</label><input id="editQty" type="number" min="0" step="0.01" value="'+i.qty+'"></div><div><label for="editUnit">Unit</label><input id="editUnit" value="'+esc(i.unit)+'"></div><div><label for="editMin">Reorder level</label><input id="editMin" type="number" min="0" step="0.01" value="'+i.min+'"></div><div><label for="editCost">Unit cost (₦)</label><input id="editCost" type="number" min="0" step="0.01" value="'+i.cost+'"></div><div class="w"><label for="editLocation">Location</label><input id="editLocation" value="'+esc(i.loc)+'"></div><div><label for="editBroughtBy">Brought by</label><input id="editBroughtBy" value="'+esc(i.broughtBy)+'"></div><div><label for="editAcquired">Acquired date and time</label><input id="editAcquired" type="datetime-local" value="'+localDateTime(i.acquiredAt)+'"></div><div class="w"><label for="editImages">New pictures (optional, any image format — converted to sharp WebP)</label><input id="editImages" type="file" accept="image/*" multiple></div></div><div class="bar" style="margin-top:16px"><button class="btn l" type="button" id="saveInventoryDetails">Save changes</button>'+(['Equipment','Tool'].includes(i.type)?'':'<button class="btn" type="button" data-quote-inventory="'+i.id+'">Add to quotation</button>')+''+(['Equipment','Tool'].includes(i.type)?'<button class="btn sm" type="button" data-use-item="'+i.id+'">Use in form</button>':'')+'<button class="btn sm x" type="button" data-del="i:'+i.id+'">Remove item</button></div></div></div>'+(usage.length?'<div class="tile" style="margin-top:16px"><h2>Usage history</h2><div class="tw"><table><thead><tr><th>Used by</th><th>Taken</th><th>Returned</th></tr></thead><tbody>'+usage.map(function(u){return '<tr><td>'+esc(u.usedBy)+'</td><td>'+esc(new Date(u.takenAt).toLocaleString())+'</td><td>'+esc(u.returnedAt?new Date(u.returnedAt).toLocaleString():'Not returned')+'</td></tr>'}).join('')+'</tbody></table></div></div>':'')};
-function usageForm(){var available=DB.inv.filter(function(i){return ['Equipment','Tool'].includes(i.type)});return '<div class="tile"><h2>Equipment and tool usage</h2><div class="f"><div><label for="usageItem">Equipment or tool</label><select id="usageItem"><option value="">Select an item</option>'+available.map(function(i){return '<option value="'+i.id+'">'+esc(i.name)+(i.sku?' · '+esc(i.sku):'')+'</option>'}).join('')+'</select></div><div><label for="usageBy">Used by</label><input id="usageBy" placeholder="Person’s name"></div><div><label for="usageTaken">Time taken</label><input id="usageTaken" type="datetime-local"></div></div><div class="bar" style="margin:14px 0"><button class="btn l" id="usageSave" type="button">Record use</button><button class="btn sm" type="button" data-tab="inventory-browser">Choose from inventory page</button></div></div>';}
-function selectUsageItem(itemId){var item=DB.inv.find(function(i){return i.id===itemId&&['Equipment','Tool'].includes(i.type)});if(!item){toast('Choose equipment or a tool');return}navigate('inventory');$('usageItem').value=String(item.id);$('usageBy').focus()}
-function usageTable(){return '<div class="tile" style="margin-top:16px"><h2>Usage history</h2><div class="tw"><table><thead><tr><th>Item</th><th>Used by</th><th>Taken</th><th>Returned</th><th>Action</th></tr></thead><tbody>'+(DB.usage||[]).map(function(u){var item=DB.inv.find(function(i){return i.id===u.itemId});return '<tr><td>'+esc(item?.name||'Removed item')+'</td><td>'+esc(u.usedBy)+'</td><td>'+esc(new Date(u.takenAt).toLocaleString())+'</td><td>'+esc(u.returnedAt?new Date(u.returnedAt).toLocaleString():'Not returned')+'</td><td>'+(u.returnedAt?'—':'<div class="usage-return"><input id="usageReturn-'+u.id+'" type="datetime-local" aria-label="Return time for '+esc(item?.name||'item')+'"><button class="btn sm" type="button" data-return="'+u.id+'">Mark returned</button></div>')+'</td></tr>'}).join('')+'</tbody></table></div></div>';}
+    V.products = function () {
+      return '<div class="tile"><div class="bar" style="justify-content:space-between"><h2>Upload a product</h2><button class="btn sm" type="button" data-tab="product-browser">Browse products (' + DB.products.length + ') →</button></div><div class="f">' +
+        '<div><label for="pn">Product name</label><input id="pn" placeholder="e.g. Fortis Red"></div>' +
+        '<div><label for="pc">Category</label><select id="pc">' + CATS.map(function (c) { return '<option>' + c + '</option>' }).join('') + '</select></div>' +
+        '<div><label for="po">Operation</label><select id="po"><option value="">Not specified</option><option>Pivot</option><option>Hinged</option><option>Sliding</option><option>Automated</option></select></div>' +
+        '<div><label for="pp">Price (₦)</label><input id="pp" type="number" min="0" step="0.01" placeholder="0.00"></div>' +
+        '<div><label for="ps">Units in stock</label><input id="ps" type="number" min="0" step="1" placeholder="0" required></div>' +
+        '<div class="w"><label for="pd">Short description</label><textarea id="pd" placeholder="Shown under the product name in the catalog"></textarea></div>' +
+        '<div class="w"><label for="pi">Product images (up to 5 pictures — any image format)</label><input id="pi" type="file" accept="image/*" multiple><small>Automatically converted to high-definition, ultra-sharp WebP images for fast page loading.</small></div>' +
+        '<div class="w"><label><input id="removebg" type="checkbox" style="width:auto;height:auto"> Remove background from uploaded images</label><small>Uses the configured remove.bg API key.</small></div></div>' +
+        '<div class="bar" style="margin:14px 0 0"><button class="btn l" id="addp">Save product</button></div></div>'
+    };
+    function browseImage(src, name) { return src ? '<img class="browse-image" src="' + esc(src) + '" alt="' + esc(name) + '" loading="lazy">' : '<div class="browse-image browse-placeholder" aria-hidden="true">' + esc((name || '?').charAt(0).toUpperCase()) + '</div>' }
+    function browseSearch() { return '<div class="bar"><input id="browseSearch" type="search" placeholder="Search items..." aria-label="Search items"></div>' }
+    V['product-browser'] = function () { return browseSearch() + '<div class="browse-grid" id="browseGrid">' + (DB.products.length ? DB.products.map(function (p) { return '<article class="tile browse-card"><a class="card-link" href="/admin/products/' + p.id + '" aria-label="View details for ' + esc(p.name) + '"></a>' + browseImage(p.img, p.name) + '<h3>' + esc(p.name) + '</h3><p>' + gbp(p.price) + '</p><p>' + (p.stockQuantity === null ? 'Stock not set' : p.stockQuantity + ' in stock') + '</p><div class="bar"><button class="btn l" type="button" data-quote-product="' + p.id + '">Add to quotation</button></div><div class="bar"><input id="stock-' + p.id + '" type="number" min="0" step="1" value="' + (p.stockQuantity === null ? '' : p.stockQuantity) + '" placeholder="Stock" aria-label="Units in stock for ' + esc(p.name) + '" style="width:78px"><button class="btn sm" type="button" data-stock="' + p.id + '">Save stock</button></div><div class="bar"><button class="btn sm x" type="button" data-del="p:' + p.id + '">Remove product</button></div></article>' }).join('') : '<div class="tile empty">No shop products yet.</div>') + '</div>' };
+    V['inventory-browser'] = function () {
+      var items = inventoryRows().filter(function (i) { return (IF === 'All' || i.type === IF) && (!IS || (i.name + i.sku + i.loc).toLowerCase().includes(IS.toLowerCase())) && (!IB || i.type !== 'Material' || (i.broughtBy || '').toLowerCase().includes(IB.toLowerCase())) }).sort(function (a, b) { if (IORDER === 'broughtBy') return (a.broughtBy || '').localeCompare(b.broughtBy || ''); var x = new Date(a.acquiredAt || a.createdAt || 0).getTime(), y = new Date(b.acquiredAt || b.createdAt || 0).getTime(); return IORDER === 'oldest' ? x - y : y - x });
+      return '<div class="tile inv-filters"><div class="inv-chips">' + ['All'].concat(ITYPES).map(function (t) { return '<button class="chip" data-if="' + t + '" aria-pressed="' + (IF === t) + '">' + t + '</button>' }).join('') + '</div><div class="inv-controls"><input id="isr" type="search" placeholder="Search item, SKU, location..." value="' + esc(IS) + '" aria-label="Search inventory"><select id="iorder" aria-label="Sort inventory"><option value="newest"' + (IORDER === 'newest' ? ' selected' : '') + '>Newest first</option><option value="oldest"' + (IORDER === 'oldest' ? ' selected' : '') + '>Oldest first</option><option value="broughtBy"' + (IORDER === 'broughtBy' ? ' selected' : '') + '>Brought by</option></select><input id="ibfilter" type="search" placeholder="Materials brought by..." value="' + esc(IB) + '" aria-label="Materials brought by"></div></div>' +
+        '<div class="browse-grid" id="browseGrid">' + (items.length ? items.map(function (i) { var active = i.product ? [] : (DB.usage || []).filter(function (u) { return u.itemId === i.id && !u.returnedAt }); return '<article class="tile browse-card"><a class="card-link" href="/admin/' + (i.product ? 'products' : 'inventory') + '/' + i.id + '" aria-label="View details for ' + esc(i.name) + '"></a>' + browseImage(i.img, i.name) + ((i.images || []).length > 1 ? '<div class="bar">' + i.images.map(function (src) { return '<img src="' + esc(src) + '" alt="Picture of ' + esc(i.name) + '" loading="lazy" style="width:36px;height:36px;object-fit:cover;border-radius:5px">' }).join('') + '</div>' : '') + '<h3>' + esc(i.name) + '</h3><p>' + esc(i.product ? 'Shop product' : i.type === 'Product' ? 'Inventory product' : i.type) + ' · ' + esc(i.loc) + '</p><p>' + esc(i.sku || '') + '</p><p>' + (i.qty === null ? 'Stock not set' : i.qty + ' ' + esc(i.unit)) + '</p><p class="note">' + esc(i.acquiredAt || i.createdAt ? new Date(i.acquiredAt || i.createdAt).toLocaleString() : 'Date not set') + (i.broughtBy ? ' · Brought by ' + esc(i.broughtBy) : '') + '</p>' + (!i.product && ['Equipment', 'Tool'].includes(i.type) ? '' : '<div class="bar"><button class="btn l" type="button" data-quote-' + (i.product ? 'product' : 'inventory') + '="' + i.id + '">Add to quotation</button></div>') + (i.product ? '<div class="bar"><button class="btn sm" data-tab="product-browser">Manage stock</button></div>' : '<div class="bar"><button class="btn sm" data-adj="' + i.id + ':-1" aria-label="Decrease stock">−</button><button class="btn sm" data-adj="' + i.id + ':1" aria-label="Increase stock">+</button><button class="btn sm x" data-del="i:' + i.id + '">Remove</button></div>') + (!i.product && ['Equipment', 'Tool'].includes(i.type) ? '<div class="bar"><button class="btn sm" data-use-item="' + i.id + '">Use in form</button></div>' + active.map(function (u) { return '<div class="bar">' + esc(u.usedBy) + ' <button class="btn sm" data-return="' + u.id + '">Returned</button></div>' }).join('') : '') + '</article>' }).join('') : '<div class="tile empty">Nothing matches.</div>') + '</div>'
+    };
+    function detailImages(item) { var images = item.images?.length ? item.images : (item.img ? [item.img] : []); return '<div class="detail-gallery">' + (images.length ? images.map(function (src, index) { return '<a href="' + esc(src) + '" target="_blank" rel="noopener" aria-label="Open picture ' + (index + 1) + ' of ' + esc(item.name) + '"><img src="' + esc(src) + '" alt="' + esc(item.name) + ' picture ' + (index + 1) + '" loading="lazy"></a>' }).join('') : browseImage('', item.name)) + '</div>' }
+    function detailRow(label, value) { return '<div class="detail-row"><span>' + esc(label) + '</span><strong>' + esc(value == null || value === '' ? '—' : value) + '</strong></div>' }
+    function localDateTime(value) { if (!value) return ''; var date = new Date(value); return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16) }
+    V['product-detail'] = function () { var id = Number(location.pathname.split('/').pop()), p = DB.products.find(function (item) { return item.id === id }); if (!p) return '<div class="tile"><h2>Product not found</h2><a class="btn" href="/admin/products">Back to products</a></div>'; return '<div class="bar"><a class="btn sm" href="/admin/products">← All products</a></div><div class="grid g2 detail-layout"><div class="tile">' + detailImages(p) + '</div><div class="tile"><h2>Edit product</h2><div class="f"><div class="w"><label for="editName">Name</label><input id="editName" value="' + esc(p.name) + '"></div><div><label for="editCategory">Category</label><select id="editCategory">' + CATS.map(function (cat) { return '<option' + (cat === p.cat ? ' selected' : '') + '>' + esc(cat) + '</option>' }).join('') + '</select></div><div><label for="editOperation">Operation</label><input id="editOperation" value="' + esc(p.operation) + '"></div><div><label for="editPrice">Price (₦)</label><input id="editPrice" type="number" min="0" step="0.01" value="' + p.price + '"></div><div><label for="editStock">Amount in stock</label><input id="editStock" type="number" min="0" step="1" value="' + (p.stockQuantity === null ? '' : p.stockQuantity) + '"></div><div class="w"><label for="editDescription">Description</label><textarea id="editDescription">' + esc(p.desc) + '</textarea></div><div class="w"><label for="editImages">New pictures (optional, any image format — converted to sharp WebP)</label><input id="editImages" type="file" accept="image/*" multiple></div></div><div class="bar" style="margin-top:16px"><button class="btn l" type="button" id="saveProductDetails">Save changes</button><button class="btn" type="button" data-quote-product="' + p.id + '">Add to quotation</button><button class="btn sm x" type="button" data-del="p:' + p.id + '">Remove product</button></div></div></div>' };
+    V['inventory-detail'] = function () { var id = Number(location.pathname.split('/').pop()), i = DB.inv.find(function (item) { return item.id === id }); if (!i) return '<div class="tile"><h2>Inventory item not found</h2><a class="btn" href="/admin/inventory">Back to inventory</a></div>'; var usage = (DB.usage || []).filter(function (u) { return u.itemId === id }); return '<div class="bar"><a class="btn sm" href="/admin/inventory">← All inventory</a></div><div class="grid g2 detail-layout"><div class="tile">' + detailImages(i) + '</div><div class="tile"><h2>Edit inventory item</h2><div class="f"><div class="w"><label for="editName">Name</label><input id="editName" value="' + esc(i.name) + '"></div><div><label for="editType">Type</label><select id="editType">' + ITYPES.map(function (type) { return '<option' + (type === i.type ? ' selected' : '') + '>' + esc(type) + '</option>' }).join('') + '</select></div><div><label for="editSku">SKU</label><input id="editSku" value="' + esc(i.sku) + '"></div><div><label for="editQty">Quantity</label><input id="editQty" type="number" min="0" step="0.01" value="' + i.qty + '"></div><div><label for="editUnit">Unit</label><input id="editUnit" value="' + esc(i.unit) + '"></div><div><label for="editMin">Reorder level</label><input id="editMin" type="number" min="0" step="0.01" value="' + i.min + '"></div><div><label for="editCost">Unit cost (₦)</label><input id="editCost" type="number" min="0" step="0.01" value="' + i.cost + '"></div><div class="w"><label for="editLocation">Location</label><input id="editLocation" value="' + esc(i.loc) + '"></div><div><label for="editBroughtBy">Brought by</label><input id="editBroughtBy" value="' + esc(i.broughtBy) + '"></div><div><label for="editAcquired">Acquired date and time</label><input id="editAcquired" type="datetime-local" value="' + localDateTime(i.acquiredAt) + '"></div><div class="w"><label for="editImages">New pictures (optional, any image format — converted to sharp WebP)</label><input id="editImages" type="file" accept="image/*" multiple></div></div><div class="bar" style="margin-top:16px"><button class="btn l" type="button" id="saveInventoryDetails">Save changes</button>' + (['Equipment', 'Tool'].includes(i.type) ? '' : '<button class="btn" type="button" data-quote-inventory="' + i.id + '">Add to quotation</button>') + '' + (['Equipment', 'Tool'].includes(i.type) ? '<button class="btn sm" type="button" data-use-item="' + i.id + '">Use in form</button>' : '') + '<button class="btn sm x" type="button" data-del="i:' + i.id + '">Remove item</button></div></div></div>' + (usage.length ? '<div class="tile" style="margin-top:16px"><h2>Usage history</h2><div class="tw"><table><thead><tr><th>Used by</th><th>Taken</th><th>Returned</th></tr></thead><tbody>' + usage.map(function (u) { return '<tr><td>' + esc(u.usedBy) + '</td><td>' + esc(new Date(u.takenAt).toLocaleString()) + '</td><td>' + esc(u.returnedAt ? new Date(u.returnedAt).toLocaleString() : 'Not returned') + '</td></tr>' }).join('') + '</tbody></table></div></div>' : '') };
+    function usageForm() { var available = DB.inv.filter(function (i) { return ['Equipment', 'Tool'].includes(i.type) }); return '<div class="tile"><h2>Equipment and tool usage</h2><div class="f"><div><label for="usageItem">Equipment or tool</label><select id="usageItem"><option value="">Select an item</option>' + available.map(function (i) { return '<option value="' + i.id + '">' + esc(i.name) + (i.sku ? ' · ' + esc(i.sku) : '') + '</option>' }).join('') + '</select></div><div><label for="usageBy">Used by</label><input id="usageBy" placeholder="Person’s name"></div><div><label for="usageTaken">Time taken</label><input id="usageTaken" type="datetime-local"></div></div><div class="bar" style="margin:14px 0"><button class="btn l" id="usageSave" type="button">Record use</button><button class="btn sm" type="button" data-tab="inventory-browser">Choose from inventory page</button></div></div>'; }
+    function selectUsageItem(itemId) { var item = DB.inv.find(function (i) { return i.id === itemId && ['Equipment', 'Tool'].includes(i.type) }); if (!item) { toast('Choose equipment or a tool'); return } navigate('inventory'); $('usageItem').value = String(item.id); $('usageBy').focus() }
+    function usageTable() { return '<div class="tile" style="margin-top:16px"><h2>Usage history</h2><div class="tw"><table><thead><tr><th>Item</th><th>Used by</th><th>Taken</th><th>Returned</th><th>Action</th></tr></thead><tbody>' + (DB.usage || []).map(function (u) { var item = DB.inv.find(function (i) { return i.id === u.itemId }); return '<tr><td>' + esc(item?.name || 'Removed item') + '</td><td>' + esc(u.usedBy) + '</td><td>' + esc(new Date(u.takenAt).toLocaleString()) + '</td><td>' + esc(u.returnedAt ? new Date(u.returnedAt).toLocaleString() : 'Not returned') + '</td><td>' + (u.returnedAt ? '—' : '<div class="usage-return"><input id="usageReturn-' + u.id + '" type="datetime-local" aria-label="Return time for ' + esc(item?.name || 'item') + '"><button class="btn sm" type="button" data-return="' + u.id + '">Mark returned</button></div>') + '</td></tr>' }).join('') + '</tbody></table></div></div>'; }
 
-function quoteTable(a,ro){if(!a.length)return '<div class="empty">No quotations yet.</div>';
- return '<div class="tw"><table><thead><tr><th>No.</th><th>Customer</th><th>Date</th><th class="r">Total</th><th>Status</th>'+(ro?'':'<th></th>')+'</tr></thead><tbody>'+a.map(function(q){var c={Accepted:'ok',Sent:'warn',Declined:'bad'}[q.status]||'';
- return '<tr><td>'+q.no+'</td><td>'+esc(q.cust)+'</td><td>'+q.date+'</td><td class="r">'+gbp(totals(q).total)+'</td><td>'+(ro?'<span class="pill '+c+'">'+q.status+'</span>':'<select data-qs="'+q.id+'" style="width:auto;height:28px;font-size:10px">'+['Draft','Sent','Accepted','Declined'].map(function(s){return '<option'+(s===q.status?' selected':'')+'>'+s+'</option>'}).join('')+'</select>')+'</td>'+(ro?'':'<td class="r"><button class="btn sm" data-edit-quote="'+q.id+'">Edit</button> <button class="btn sm" data-print="'+q.id+'">Print</button> <button class="btn sm x" data-del="q:'+q.id+'">Delete</button></td>')+'</tr>'}).join('')+'</tbody></table></div>'}
+    function quoteTable(a, ro) {
+      if (!a.length) return '<div class="empty">No quotations yet.</div>';
+      return '<div class="tw"><table><thead><tr><th>No.</th><th>Customer</th><th>Date</th><th class="r">Total</th><th>Status</th>' + (ro ? '' : '<th></th>') + '</tr></thead><tbody>' + a.map(function (q) {
+        var c = { Accepted: 'ok', Sent: 'warn', Declined: 'bad' }[q.status] || '';
+        return '<tr><td>' + q.no + '</td><td>' + esc(q.cust) + '</td><td>' + q.date + '</td><td class="r">' + gbp(totals(q).total) + '</td><td>' + (ro ? '<span class="pill ' + c + '">' + q.status + '</span>' : '<select data-qs="' + q.id + '" style="width:auto;height:28px;font-size:10px">' + ['Draft', 'Sent', 'Accepted', 'Declined'].map(function (s) { return '<option' + (s === q.status ? ' selected' : '') + '>' + s + '</option>' }).join('') + '</select>') + '</td>' + (ro ? '' : '<td class="r"><button class="btn sm" data-edit-quote="' + q.id + '">Edit</button> <button class="btn sm" data-print="' + q.id + '">Print</button> <button class="btn sm x" data-del="q:' + q.id + '">Delete</button></td>') + '</tr>'
+      }).join('') + '</tbody></table></div>'
+    }
 
-var QI=[{d:'',q:1,p:0}],QFORM=null,editingQuoteId=0,quoteScans=[],quoteDocuments=[];
-function editQuote(q){editingQuoteId=q.id;QI=q.items.map(function(i){return {d:i.d,q:i.q,p:i.p}});QFORM={qc:q.cust,qe:q.email,qt:q.phone,qv:q.valid,qa:q.addr,qin:q.inst,qd:q.disc,qn:q.notes,qprompt:''};navigate('quotes')}
-function captureQuoteForm(){QFORM={};['qc','qe','qt','qv','qa','qin','qd','qn','qprompt'].forEach(function(id){if($(id))QFORM[id]=$(id).value})}
-V.quotes=function(){
- return '<div class="grid gf"><div class="tile"><h2>'+(editingQuoteId?'Edit quotation '+esc(DB.quotes.find(function(q){return q.id===editingQuoteId})?.no||''):'New quotation')+'</h2><div class="f">'+
- '<div><label for="qc">Customer name</label><input id="qc"></div><div><label for="qe">Email</label><input id="qe" type="email"></div>'+
- '<div><label for="qt">Phone</label><input id="qt"></div><div><label for="qv">Valid until</label><input id="qv" type="date"></div>'+
- '<div class="w"><label for="qa">Site address</label><input id="qa"></div></div>'+
- '<h3 style="margin-top:18px">Line items</h3><div id="qi"></div>'+
- '<div class="bar"><select id="qp" style="max-width:240px"><option value="">Add shop product...</option>'+DB.products.map(function(p){return '<option value="'+p.id+'">'+esc(p.name)+' ('+gbp(p.price)+')</option>'}).join('')+'</select><button class="btn sm" id="qadd">+ Custom line</button><button class="btn sm" type="button" data-tab="product-browser">Browse products</button><button class="btn sm" type="button" data-tab="inventory-browser">Browse inventory</button></div>'+
- '<div class="f"><div><label for="qin">Installation (₦)</label><input id="qin" type="number" min="0" value="0"></div><div><label for="qd">Discount (%)</label><input id="qd" type="number" min="0" max="100" value="0"></div>'+
- '<div class="w"><h3>Document scanner</h3><p class="note">Take a clear photo or choose an image. Enhance it, then convert it into editable text with AI. Review the text and print it on your company letterhead.</p><input id="qscanCamera" type="file" accept="image/*" capture="environment" hidden><input id="qscanFile" type="file" accept="image/*" hidden><div class="bar"><button class="btn sm" id="qscanTake" type="button">Scan with camera</button><button class="btn sm" id="qscanChoose" type="button">Choose photo</button></div><div id="qscanPreview" class="bar" style="margin-top:10px;flex-wrap:wrap"></div></div>'+
- '<div class="w"><label for="qn">Notes and terms</label><textarea id="qn" placeholder="Enter your terms"></textarea></div><div class="w"><label for="qprompt">Ask AI to draft quotation notes and items</label><textarea id="qprompt" placeholder="For example: Add two custom steel railings at ₦125,000 each and include a 12-month warranty"></textarea><p class="note">Use shop products when you name them, or ask for custom items that are not in the store. You can also ask for notes only. Review suggestions before saving.</p><div class="bar" style="margin:8px 0 0"><button class="btn sm" id="qai" type="button">Draft notes and items with AI</button><button class="mic-btn" id="qmic" type="button" aria-label="Speak to transcribe into AI prompt" title="Speak to transcribe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button><span class="note" id="qmicStatus" style="margin:0">Tap mic to speak</span></div></div></div></div>'+
- '<div><div class="tile"><h2>Summary</h2><div class="sum" id="qs"></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="qsave">'+(editingQuoteId?'Save changes':'Save quotation')+'</button>'+(editingQuoteId?'<button class="btn sm" id="qcancel" type="button">Cancel editing</button>':'')+'<button class="btn" id="qcopy">Copy as text</button><button class="btn" id="qprint">Print draft</button></div></div><div class="tile" style="margin-top:16px"><h2>Company letterheads</h2><p class="note">Save named letterheads and choose which one appears behind quotations and converted documents.</p><label for="letterheadSelect">Use letterhead</label><select id="letterheadSelect"><option value="">No letterhead</option>'+(DB.letterheads||[]).map(function(h){return '<option value="'+esc(h.id)+'"'+(h.id===DB.activeLetterhead?' selected':'')+'>'+esc(h.name)+'</option>'}).join('')+'</select><div class="bar"><input id="letterheadName" maxlength="80" placeholder="Name for this letterhead" aria-label="Name for this letterhead"><input id="letterhead" type="file" accept="image/png,image/jpeg"><button class="btn sm" id="saveletterhead" type="button">Save as new</button></div><div class="bar">'+(DB.activeLetterhead&&DB.activeLetterhead!=='default'?'<button class="btn sm" id="renameLetterhead" type="button">Rename selected</button><button class="btn sm x" id="deleteLetterhead" type="button">Delete selected</button>':'')+'</div></div></div></div>'+
- '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h2>All quotations ('+DB.quotes.length+')</h2>'+quoteTable(DB.quotes.slice().reverse())+'</div>'};
-function qItems(){$('qi').innerHTML=QI.map(function(i,n){return '<div class="qi"><input data-qi="d:'+n+'" value="'+esc(i.d)+'" placeholder="Description" aria-label="Description"><input data-qi="q:'+n+'" type="number" min="1" value="'+i.q+'" aria-label="Qty"><input data-qi="p:'+n+'" type="number" min="0" step="0.01" value="'+i.p+'" aria-label="Unit price"><button class="btn sm x" data-qrm="'+n+'" aria-label="Remove line" style="padding:0">&times;</button></div>'}).join('');qSum()}
-function qDraft(){return{items:QI.filter(function(i){return i.d||i.p}),inst:+$('qin').value||0,disc:+$('qd').value||0}}
-function qSum(){var t=totals(qDraft());$('qs').innerHTML='<div>Subtotal<span>'+gbp(t.sub)+'</span></div><div>Discount<span>-'+gbp(t.d)+'</span></div><div>Installation<span>'+gbp(t.inst)+'</span></div><div class="t">Total<span>'+gbp(t.total)+'</span></div>'}
-function qText(q){var t=totals(q);return 'QUOTATION '+q.no+'\nStraitgate – Gates & security doors\nDate: '+q.date+(q.valid?'   Valid until: '+q.valid:'')+'\n\nCustomer: '+q.cust+'\n'+(q.email?q.email+'\n':'')+(q.phone?q.phone+'\n':'')+(q.addr?q.addr+'\n':'')+'\n'+q.items.map(function(i){return i.q+' x '+i.d+' @ '+gbp(i.p)+' = '+gbp(i.q*i.p)}).join('\n')+'\n\nSubtotal: '+gbp(t.sub)+'\nDiscount: -'+gbp(t.d)+'\nInstallation: '+gbp(t.inst)+'\nTOTAL: '+gbp(t.total)+'\n\n'+(q.notes||'')}
-function qHtml(q){var t=totals(q);return '<div style="min-height:90vh;position:relative">'+(DB.letterhead?'<img src="'+DB.letterhead+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill">':'')+'<div style="position:relative;padding:150px 45px 70px"><h2 style="font-size:28px;margin:0">Straitgate</h2><p>Gates &amp; security doors</p><h3>Quotation '+esc(q.no)+'</h3><p>Date: '+esc(q.date)+(q.valid?' &middot; Valid until: '+esc(q.valid):'')+'</p><p><b>'+esc(q.cust)+'</b><br>'+esc(q.email)+' '+esc(q.phone)+'<br>'+esc(q.addr)+'</p><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr></thead><tbody>'+q.items.map(function(i){return '<tr><td>'+esc(i.d)+'</td><td class="r">'+i.q+'</td><td class="r">'+gbp(i.p)+'</td><td class="r">'+gbp(i.q*i.p)+'</td></tr>'}).join('')+'</tbody></table><p style="text-align:right">Subtotal '+gbp(t.sub)+'<br>Discount -'+gbp(t.d)+'<br>Installation '+gbp(t.inst)+'<br><b style="font-size:18px">Total '+gbp(t.total)+'</b></p><p>'+esc(q.notes)+'</p></div></div>'+quoteDocuments.map(function(doc,n){return '<div style="page-break-before:always;min-height:95vh;position:relative">'+(DB.letterhead?'<img src="'+DB.letterhead+'" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill">':'')+'<div style="position:relative;padding:42mm 24mm 25mm;white-space:pre-wrap;font:12pt/1.55 Arial,sans-serif">'+esc(doc.text)+'</div></div>'}).join('')+quoteScans.map(function(src,n){return '<div style="page-break-before:always;text-align:center;padding:12mm"><p>Attached document '+(n+1)+'</p><img src="'+src+'" alt="Scanned document" style="max-width:100%;max-height:250mm;object-fit:contain"></div>'}).join('')}
+    var QI = [{ d: '', q: 1, p: 0 }], QFORM = null, editingQuoteId = 0, quoteScans = [], quoteDocuments = [];
+    function editQuote(q) { editingQuoteId = q.id; QI = q.items.map(function (i) { return { d: i.d, q: i.q, p: i.p } }); QFORM = { qc: q.cust, qe: q.email, qt: q.phone, qv: q.valid, qa: q.addr, qin: q.inst, qd: q.disc, qn: q.notes, qprompt: '' }; navigate('quotes') }
+    function captureQuoteForm() { QFORM = {};['qc', 'qe', 'qt', 'qv', 'qa', 'qin', 'qd', 'qn', 'qprompt'].forEach(function (id) { if ($(id)) QFORM[id] = $(id).value }) }
+    V.quotes = function () {
+      return '<div class="grid gf"><div class="tile"><h2>' + (editingQuoteId ? 'Edit quotation ' + esc(DB.quotes.find(function (q) { return q.id === editingQuoteId })?.no || '') : 'New quotation') + '</h2><div class="f">' +
+        '<div><label for="qc">Customer name</label><input id="qc"></div><div><label for="qe">Email</label><input id="qe" type="email"></div>' +
+        '<div><label for="qt">Phone</label><input id="qt"></div><div><label for="qv">Valid until</label><input id="qv" type="date"></div>' +
+        '<div class="w"><label for="qa">Site address</label><input id="qa"></div></div>' +
+        '<h3 style="margin-top:18px">Line items</h3><div id="qi"></div>' +
+        '<div class="bar"><select id="qp" style="max-width:240px"><option value="">Add shop product...</option>' + DB.products.map(function (p) { return '<option value="' + p.id + '">' + esc(p.name) + ' (' + gbp(p.price) + ')</option>' }).join('') + '</select><button class="btn sm" id="qadd">+ Custom line</button><button class="btn sm" type="button" data-tab="product-browser">Browse products</button><button class="btn sm" type="button" data-tab="inventory-browser">Browse inventory</button></div>' +
+        '<div class="f"><div><label for="qin">Installation (₦)</label><input id="qin" type="number" min="0" value="0"></div><div><label for="qd">Discount (%)</label><input id="qd" type="number" min="0" max="100" value="0"></div>' +
+        '<div class="w"><h3>Document scanner</h3><p class="note">Take a clear photo or choose an image. Enhance it, then convert it into editable text with AI. Review the text and print it on your company letterhead.</p><input id="qscanCamera" type="file" accept="image/*" capture="environment" hidden><input id="qscanFile" type="file" accept="image/*" hidden><div class="bar"><button class="btn sm" id="qscanTake" type="button">Scan with camera</button><button class="btn sm" id="qscanChoose" type="button">Choose photo</button></div><div id="qscanPreview" class="bar" style="margin-top:10px;flex-wrap:wrap"></div></div>' +
+        '<div class="w"><label for="qn">Notes and terms</label><textarea id="qn" placeholder="Enter your terms"></textarea></div><div class="w"><label for="qprompt">Ask AI to draft quotation notes and items</label><textarea id="qprompt" placeholder="For example: Add two Fortis Red gates at ₦250,000 each and include a 12-month warranty"></textarea><p class="note">Use shop products when you name them, or ask for custom items that are not in the store. You can also ask for notes only. Review suggestions before saving.</p><div class="bar" style="margin:8px 0 0"><button class="btn sm" id="qai" type="button">Draft notes and items with AI</button><button class="mic-btn" id="qmic" type="button" aria-label="Speak to transcribe into AI prompt" title="Speak to transcribe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10v1a7 7 0 0 0 14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/></svg></button><span class="note" id="qmicStatus" style="margin:0">Tap mic to speak</span></div></div></div></div>' +
+        '<div><div class="tile"><h2>Summary</h2><div class="sum" id="qs"></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="qsave">' + (editingQuoteId ? 'Save changes' : 'Save quotation') + '</button>' + (editingQuoteId ? '<button class="btn sm" id="qcancel" type="button">Cancel editing</button>' : '') + '<button class="btn" id="qcopy">Copy as text</button><button class="btn" id="qprint">Print draft</button></div></div><div class="tile" style="margin-top:16px"><h2>Company letterheads</h2><p class="note">Save named letterheads and choose which one appears behind quotations and converted documents.</p><label for="letterheadSelect">Use letterhead</label><select id="letterheadSelect"><option value="">No letterhead</option>' + (DB.letterheads || []).map(function (h) { return '<option value="' + esc(h.id) + '"' + (h.id === DB.activeLetterhead ? ' selected' : '') + '>' + esc(h.name) + '</option>' }).join('') + '</select><div class="bar"><input id="letterheadName" maxlength="80" placeholder="Name for this letterhead" aria-label="Name for this letterhead"><input id="letterhead" type="file" accept="image/png,image/jpeg"><button class="btn sm" id="saveletterhead" type="button">Save as new</button></div><div class="bar">' + (DB.activeLetterhead && DB.activeLetterhead !== 'default' ? '<button class="btn sm" id="renameLetterhead" type="button">Rename selected</button><button class="btn sm x" id="deleteLetterhead" type="button">Delete selected</button>' : '') + '</div></div></div></div>' +
+        '<div class="tile" style="margin-top:clamp(12px,2vw,24px)"><h2>All quotations (' + DB.quotes.length + ')</h2>' + quoteTable(DB.quotes.slice().reverse()) + '</div>'
+    };
+    function qItems() { $('qi').innerHTML = QI.map(function (i, n) { return '<div class="qi"><input data-qi="d:' + n + '" value="' + esc(i.d) + '" placeholder="Description" aria-label="Description"><input data-qi="q:' + n + '" type="number" min="1" value="' + i.q + '" aria-label="Qty"><input data-qi="p:' + n + '" type="number" min="0" step="0.01" value="' + i.p + '" aria-label="Unit price"><button class="btn sm x" data-qrm="' + n + '" aria-label="Remove line" style="padding:0">&times;</button></div>' }).join(''); qSum() }
+    function qDraft() { return { items: QI.filter(function (i) { return i.d || i.p }), inst: +$('qin').value || 0, disc: +$('qd').value || 0 } }
+    function qSum() { var t = totals(qDraft()); $('qs').innerHTML = '<div>Subtotal<span>' + gbp(t.sub) + '</span></div><div>Discount<span>-' + gbp(t.d) + '</span></div><div>Installation<span>' + gbp(t.inst) + '</span></div><div class="t">Total<span>' + gbp(t.total) + '</span></div>' }
+    function qText(q) { var t = totals(q); return 'QUOTATION ' + q.no + '\nStraitgate – Gates & security doors\nDate: ' + q.date + (q.valid ? '   Valid until: ' + q.valid : '') + '\n\nCustomer: ' + q.cust + '\n' + (q.email ? q.email + '\n' : '') + (q.phone ? q.phone + '\n' : '') + (q.addr ? q.addr + '\n' : '') + '\n' + q.items.map(function (i) { return i.q + ' x ' + i.d + ' @ ' + gbp(i.p) + ' = ' + gbp(i.q * i.p) }).join('\n') + '\n\nSubtotal: ' + gbp(t.sub) + '\nDiscount: -' + gbp(t.d) + '\nInstallation: ' + gbp(t.inst) + '\nTOTAL: ' + gbp(t.total) + '\n\n' + (q.notes || '') }
+    function qHtml(q) { var t = totals(q); return '<div style="min-height:90vh;position:relative">' + (DB.letterhead ? '<img src="' + DB.letterhead + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill">' : '') + '<div style="position:relative;padding:150px 45px 70px"><h2 style="font-size:28px;margin:0">Straitgate</h2><p>Gates &amp; security doors</p><h3>Quotation ' + esc(q.no) + '</h3><p>Date: ' + esc(q.date) + (q.valid ? ' &middot; Valid until: ' + esc(q.valid) : '') + '</p><p><b>' + esc(q.cust) + '</b><br>' + esc(q.email) + ' ' + esc(q.phone) + '<br>' + esc(q.addr) + '</p><table><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit</th><th class="r">Amount</th></tr></thead><tbody>' + q.items.map(function (i) { return '<tr><td>' + esc(i.d) + '</td><td class="r">' + i.q + '</td><td class="r">' + gbp(i.p) + '</td><td class="r">' + gbp(i.q * i.p) + '</td></tr>' }).join('') + '</tbody></table><p style="text-align:right">Subtotal ' + gbp(t.sub) + '<br>Discount -' + gbp(t.d) + '<br>Installation ' + gbp(t.inst) + '<br><b style="font-size:18px">Total ' + gbp(t.total) + '</b></p><p>' + esc(q.notes) + '</p></div></div>' + quoteDocuments.map(function (doc, n) { return '<div style="page-break-before:always;min-height:95vh;position:relative">' + (DB.letterhead ? '<img src="' + DB.letterhead + '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill">' : '') + '<div style="position:relative;padding:42mm 24mm 25mm;white-space:pre-wrap;font:12pt/1.55 Arial,sans-serif">' + esc(doc.text) + '</div></div>' }).join('') + quoteScans.map(function (src, n) { return '<div style="page-break-before:always;text-align:center;padding:12mm"><p>Attached document ' + (n + 1) + '</p><img src="' + src + '" alt="Scanned document" style="max-width:100%;max-height:250mm;object-fit:contain"></div>' }).join('') }
 
-var IF='All',IS='',IORDER='newest',IB='';
-V.inventory=function(){
- var inventory=inventoryRows(),val=inventory.reduce(function(s,i){return s+(Number(i.qty)||0)*(i.product?(Number(i.price)||0):(Number(i.cost)||0))},0);
- return '<div class="grid g3" style="margin-bottom:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Items tracked</div><div class="v">'+inventory.length+'</div></div><div class="tile kpi"><div class="l">Total inventory value</div><div class="v">'+gbp(val)+'</div><div class="d">Shop products at listed price; other items at unit cost</div></div><div class="tile kpi"><div class="l">Low stock</div><div class="v">'+inventory.filter(isLowStock).length+'</div></div></div>'+
- '<div class="grid g2" style="align-items:start"><div class="tile"><div class="bar" style="justify-content:space-between"><h2>Add inventory</h2><button class="btn sm" type="button" data-tab="inventory-browser">Browse inventory ('+inventory.length+') →</button></div><div class="f"><div class="w"><label for="in">Item name</label><input id="in"></div>'+
- '<div><label for="it">Type</label><select id="it">'+ITYPES.map(function(t){return '<option>'+t+'</option>'}).join('')+'</select></div><div><label for="is">SKU</label><input id="is"></div>'+
- '<div><label for="iq">Quantity</label><input id="iq" type="number" min="0" value="1"></div><div><label for="iu">Unit</label><input id="iu" value="pcs"></div>'+
- '<div><label for="im">Reorder level</label><input id="im" type="number" min="0" value="1"></div><div><label for="ic">Unit cost (₦)</label><input id="ic" type="number" min="0" step="0.01" value="0"></div>'+
- '<div class="w"><label for="il">Location</label><input id="il" placeholder="Workshop, van, warehouse..."></div><div><label for="ib">Brought by (materials)</label><input id="ib"></div><div><label for="ia">Acquired date and time</label><input id="ia" type="datetime-local"></div><div class="w"><label for="iimages">Pictures (up to five — any image format)</label><input id="iimages" type="file" accept="image/*" multiple></div></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="iadd">Add item</button></div></div>'+usageForm()+'</div>'+usageTable()};
-var DU={mm:.001,cm:.01,m:1,km:1000,in:.0254,ft:.3048},WU={kg:1,lb:.45359237,g:.001,oz:.028349523125};
-function opts(o,s){return Object.keys(o).map(function(k){return '<option'+(k===s?' selected':'')+'>'+k+'</option>'}).join('')}
-V.tools=function(){
- return '<div class="grid g2" style="align-items:start"><div style="display:grid;gap:clamp(12px,2vw,24px)">'+
- '<div class="tile"><h2>Distance</h2><div class="cv"><div><label for="dv">Value</label><input id="dv" type="number" value="1" step="any"></div><div><label for="df">From</label><select id="df">'+opts(DU,'m')+'</select></div></div><div class="cv"><div><label for="dt">To</label><select id="dt">'+opts(DU,'ft')+'</select></div><div style="align-self:end"><button class="btn" id="dsw">&#8646; Swap</button></div></div><div class="res" id="dr"></div><div class="tw" style="margin-top:12px"><table><tbody id="dall"></tbody></table></div></div>'+
- '<div class="tile"><h2>Weight</h2><div class="cv"><div><label for="wv">Value</label><input id="wv" type="number" value="1" step="any"></div><div><label for="wf">From</label><select id="wf">'+opts(WU,'kg')+'</select></div></div><div class="cv"><div><label for="wt">To</label><select id="wt">'+opts(WU,'lb')+'</select></div><div style="align-self:end"><button class="btn" id="wsw">&#8646; Swap</button></div></div><div class="res" id="wr"></div></div></div>'+
- '<div class="tile calc-tile"><h2>Calculator</h2><div class="calc" id="calc" tabindex="0" aria-label="Calculator"><div class="disp"><small id="cs"></small><span id="cd">0</span></div><div class="keys">'+
- [['C','o'],['&plusmn;','o'],['%','o'],['&divide;','o'],['7'],['8'],['9'],['&times;','o'],['4'],['5'],['6'],['&minus;','o'],['1'],['2'],['3'],['+','o'],['0','z'],['.'],['=','o']].map(function(k){return '<button class="'+(k[1]||'')+(k[1]==='z'?'':'')+'" data-k="'+k[0]+'"'+(k[1]==='z'?' style="grid-column:span 2"':'')+'>'+k[0]+'</button>'}).join('')+'</div><div class="bar" style="margin-top:10px"><button class="btn sm" data-k="bs">&#9003; Delete</button></div></div></div></div>'};
-function cnv(){var d=+$('dv').value||0,m=d*DU[$('df').value];$('dr').textContent=fmt(m/DU[$('dt').value])+' '+$('dt').value;
- $('dall').innerHTML=Object.keys(DU).map(function(k){return '<tr><td>'+k+'</td><td class="r">'+fmt(m/DU[k])+'</td></tr>'}).join('');
- var w=(+$('wv').value||0)*WU[$('wf').value];$('wr').textContent=fmt(w/WU[$('wt').value])+' '+$('wt').value}
-function fmt(n){return String(+n.toPrecision(10))}
-var C={cur:'0',prev:null,op:null,fresh:true};
-function calc(a,b,o){return o==='+'?a+b:o==='−'?a-b:o==='×'?a*b:b===0?NaN:a/b}
-function ck(k){var x=C;
- if(k==='bs'){x.cur=x.cur.length>1?x.cur.slice(0,-1):'0'}
- else if(/^[0-9]$/.test(k)){x.cur=(x.fresh||x.cur==='0')?k:x.cur+k;x.fresh=false}
- else if(k==='.'){if(x.fresh){x.cur='0.';x.fresh=false}else if(x.cur.indexOf('.')<0)x.cur+='.'}
- else if(k==='C'){x.cur='0';x.prev=null;x.op=null;x.fresh=true}
- else if(k==='±'){x.cur=x.cur[0]==='-'?x.cur.slice(1):(x.cur==='0'?'0':'-'+x.cur)}
- else if(k==='%'){x.cur=fmt(parseFloat(x.cur)/100)}
- else if(k==='='){if(x.op!==null){var r=calc(x.prev,parseFloat(x.cur),x.op);$('cs').textContent=fmt(x.prev)+' '+x.op+' '+x.cur+' =';x.cur=isNaN(r)?'Error':fmt(r);x.prev=null;x.op=null;x.fresh=true}}
- else{if(x.op!==null&&!x.fresh){var r2=calc(x.prev,parseFloat(x.cur),x.op);x.prev=r2;x.cur=isNaN(r2)?'Error':fmt(r2)}else x.prev=parseFloat(x.cur)||0;x.op=k;x.fresh=true;$('cs').textContent=fmt(x.prev)+' '+k}
- if(x.cur==='Error'){x.prev=null;x.op=null;x.fresh=true}
- $('cd').textContent=x.cur}
+    var IF = 'All', IS = '', IORDER = 'newest', IB = '';
+    V.inventory = function () {
+      var inventory = inventoryRows(), val = inventory.reduce(function (s, i) { return s + (Number(i.qty) || 0) * (i.product ? (Number(i.price) || 0) : (Number(i.cost) || 0)) }, 0);
+      return '<div class="grid g3" style="margin-bottom:clamp(12px,2vw,24px)"><div class="tile kpi"><div class="l">Items tracked</div><div class="v">' + inventory.length + '</div></div><div class="tile kpi"><div class="l">Total inventory value</div><div class="v">' + gbp(val) + '</div><div class="d">Shop products at listed price; other items at unit cost</div></div><div class="tile kpi"><div class="l">Low stock</div><div class="v">' + inventory.filter(isLowStock).length + '</div></div></div>' +
+        '<div class="grid g2" style="align-items:start"><div class="tile"><div class="bar" style="justify-content:space-between"><h2>Add inventory</h2><button class="btn sm" type="button" data-tab="inventory-browser">Browse inventory (' + inventory.length + ') →</button></div><div class="f"><div class="w"><label for="in">Item name</label><input id="in"></div>' +
+        '<div><label for="it">Type</label><select id="it">' + ITYPES.map(function (t) { return '<option>' + t + '</option>' }).join('') + '</select></div><div><label for="is">SKU</label><input id="is"></div>' +
+        '<div><label for="iq">Quantity</label><input id="iq" type="number" min="0" value="1"></div><div><label for="iu">Unit</label><input id="iu" value="pcs"></div>' +
+        '<div><label for="im">Reorder level</label><input id="im" type="number" min="0" value="1"></div><div><label for="ic">Unit cost (₦)</label><input id="ic" type="number" min="0" step="0.01" value="0"></div>' +
+        '<div class="w"><label for="il">Location</label><input id="il" placeholder="Workshop, van, warehouse..."></div><div><label for="ib">Brought by (materials)</label><input id="ib"></div><div><label for="ia">Acquired date and time</label><input id="ia" type="datetime-local"></div><div class="w"><label for="iimages">Pictures (up to five — any image format)</label><input id="iimages" type="file" accept="image/*" multiple></div></div><div class="bar" style="margin:14px 0 0"><button class="btn l" id="iadd">Add item</button></div></div>' + usageForm() + '</div>' + usageTable()
+    };
+    var DU = { mm: .001, cm: .01, m: 1, km: 1000, in: .0254, ft: .3048 }, WU = { kg: 1, lb: .45359237, g: .001, oz: .028349523125 };
+    function opts(o, s) { return Object.keys(o).map(function (k) { return '<option' + (k === s ? ' selected' : '') + '>' + k + '</option>' }).join('') }
+    V.tools = function () {
+      return '<div class="grid g2" style="align-items:start"><div style="display:grid;gap:clamp(12px,2vw,24px)">' +
+        '<div class="tile"><h2>Distance</h2><div class="cv"><div><label for="dv">Value</label><input id="dv" type="number" value="1" step="any"></div><div><label for="df">From</label><select id="df">' + opts(DU, 'm') + '</select></div></div><div class="cv"><div><label for="dt">To</label><select id="dt">' + opts(DU, 'ft') + '</select></div><div style="align-self:end"><button class="btn" id="dsw">&#8646; Swap</button></div></div><div class="res" id="dr"></div><div class="tw" style="margin-top:12px"><table><tbody id="dall"></tbody></table></div></div>' +
+        '<div class="tile"><h2>Weight</h2><div class="cv"><div><label for="wv">Value</label><input id="wv" type="number" value="1" step="any"></div><div><label for="wf">From</label><select id="wf">' + opts(WU, 'kg') + '</select></div></div><div class="cv"><div><label for="wt">To</label><select id="wt">' + opts(WU, 'lb') + '</select></div><div style="align-self:end"><button class="btn" id="wsw">&#8646; Swap</button></div></div><div class="res" id="wr"></div></div></div>' +
+        '<div class="tile calc-tile"><h2>Calculator</h2><div class="calc" id="calc" tabindex="0" aria-label="Calculator"><div class="disp"><small id="cs"></small><span id="cd">0</span></div><div class="keys">' +
+        [['C', 'o'], ['&plusmn;', 'o'], ['%', 'o'], ['&divide;', 'o'], ['7'], ['8'], ['9'], ['&times;', 'o'], ['4'], ['5'], ['6'], ['&minus;', 'o'], ['1'], ['2'], ['3'], ['+', 'o'], ['0', 'z'], ['.'], ['=', 'o']].map(function (k) { return '<button class="' + (k[1] || '') + (k[1] === 'z' ? '' : '') + '" data-k="' + k[0] + '"' + (k[1] === 'z' ? ' style="grid-column:span 2"' : '') + '>' + k[0] + '</button>' }).join('') + '</div><div class="bar" style="margin-top:10px"><button class="btn sm" data-k="bs">&#9003; Delete</button></div></div></div></div>'
+    };
+    function cnv() {
+      var d = +$('dv').value || 0, m = d * DU[$('df').value]; $('dr').textContent = fmt(m / DU[$('dt').value]) + ' ' + $('dt').value;
+      $('dall').innerHTML = Object.keys(DU).map(function (k) { return '<tr><td>' + k + '</td><td class="r">' + fmt(m / DU[k]) + '</td></tr>' }).join('');
+      var w = (+$('wv').value || 0) * WU[$('wf').value]; $('wr').textContent = fmt(w / WU[$('wt').value]) + ' ' + $('wt').value
+    }
+    function fmt(n) { return String(+n.toPrecision(10)) }
+    var C = { cur: '0', prev: null, op: null, fresh: true };
+    function calc(a, b, o) { return o === '+' ? a + b : o === '−' ? a - b : o === '×' ? a * b : b === 0 ? NaN : a / b }
+    function ck(k) {
+      var x = C;
+      if (k === 'bs') { x.cur = x.cur.length > 1 ? x.cur.slice(0, -1) : '0' }
+      else if (/^[0-9]$/.test(k)) { x.cur = (x.fresh || x.cur === '0') ? k : x.cur + k; x.fresh = false }
+      else if (k === '.') { if (x.fresh) { x.cur = '0.'; x.fresh = false } else if (x.cur.indexOf('.') < 0) x.cur += '.' }
+      else if (k === 'C') { x.cur = '0'; x.prev = null; x.op = null; x.fresh = true }
+      else if (k === '±') { x.cur = x.cur[0] === '-' ? x.cur.slice(1) : (x.cur === '0' ? '0' : '-' + x.cur) }
+      else if (k === '%') { x.cur = fmt(parseFloat(x.cur) / 100) }
+      else if (k === '=') { if (x.op !== null) { var r = calc(x.prev, parseFloat(x.cur), x.op); $('cs').textContent = fmt(x.prev) + ' ' + x.op + ' ' + x.cur + ' ='; x.cur = isNaN(r) ? 'Error' : fmt(r); x.prev = null; x.op = null; x.fresh = true } }
+      else { if (x.op !== null && !x.fresh) { var r2 = calc(x.prev, parseFloat(x.cur), x.op); x.prev = r2; x.cur = isNaN(r2) ? 'Error' : fmt(r2) } else x.prev = parseFloat(x.cur) || 0; x.op = k; x.fresh = true; $('cs').textContent = fmt(x.prev) + ' ' + k }
+      if (x.cur === 'Error') { x.prev = null; x.op = null; x.fresh = true }
+      $('cd').textContent = x.cur
+    }
 
-/* nav + events */
-var cur='dashboard';
-function navigate(tab){var path=tab==='product-browser'?'/admin/products':tab==='inventory-browser'?'/admin/inventory':'/admin#'+tab;history.pushState(null,'',path);show()}
-function show(){var detail=location.pathname.match(/^\/admin\/(products|inventory)\/\d+$/),page=detail?(detail[1]==='products'?'product-detail':'inventory-detail'):location.pathname==='/admin/products'?'product-browser':location.pathname==='/admin/inventory'?'inventory-browser':'dashboard',h=location.hash.replace('#','')||page;cur=TABS.some(function(t){return t[0]===h})||['product-browser','inventory-browser','product-detail','inventory-detail'].includes(h)?h:'dashboard';
- $('ttl').textContent={dashboard:'Dashboard',products:'Products',inventory:'Inventory',quotes:'Quotations',budget:'Budget',health:'Backend health',tools:'Tools','product-browser':'Products page','inventory-browser':'Inventory page','product-detail':'Product details','inventory-detail':'Inventory details'}[cur];
- $('tabs').innerHTML=TABS.map(function(t){return '<button type="button" class="chip" role="tab" data-tab="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+t[1]+'</button>'}).join('');
- if(cur!=='tools'&&!dataLoaded){$('view').innerHTML='<div class="tile" role="status"><h2>'+(dataIssue?'Database data unavailable':'Loading dashboard data…')+'</h2><p>'+(dataIssue?esc(dataIssue):'Connecting to Neon…')+'</p>'+(dataIssue?'<button class="btn" id="dataRetry" type="button">Retry connection</button>':'')+'</div>';return}
- $('view').innerHTML=(dataIssue&&cur!=='tools'?'<div class="tile" role="status" style="margin-bottom:16px"><h3>Showing previously loaded data</h3><p class="note">The database is currently unavailable. Figures may be outdated; saving is paused.</p><button class="btn sm" id="dataRetry" type="button">Retry connection</button></div>':'')+V[cur]();
- if(cur==='budget')updateBudget();if(cur==='health'){renderHealth();if(!healthSamples.length)checkHealth();}
- if(cur==='quotes'){qItems();renderQuoteScans();if(QFORM){Object.keys(QFORM).forEach(function(id){if($(id))$(id).value=QFORM[id]});qSum()}}if(cur==='tools'){cnv();C={cur:'0',prev:null,op:null,fresh:true}}}
-function val(i){return $(i).value.trim()}
-var speechRec=null,speechListening=false,speechShouldListen=false,speechBaseText='',speechFinalText='',speechResultSegments=[],speechRestartTimer=0;
-async function toggleMic(){
- var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){toast('Voice transcription is not supported in this browser. Try Chrome or Edge.');return}
- var field=$('qprompt');
- if(speechShouldListen&&speechRec){speechShouldListen=false;if(speechRestartTimer)clearTimeout(speechRestartTimer);try{speechRec.stop()}catch(e){}return}
- if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-  try{var stream=await navigator.mediaDevices.getUserMedia({audio:true});stream.getTracks().forEach(function(t){t.stop()})}
-  catch(err){toast(err&&err.name==='NotAllowedError'?'Please allow microphone access in your browser address bar.':'Could not access microphone: '+(err.message||err.name||'check device'));return}
- }
- speechBaseText=field&&field.value.trim()?field.value.trim()+' ':'';speechFinalText='';speechShouldListen=true;
- if(!speechRec){
-  speechRec=new SR();
-  speechRec.lang='en-US';
-  speechRec.continuous=true;
-  speechRec.interimResults=true;
-  speechRec.onstart=function(){speechListening=true;if($('qmic'))$('qmic').classList.add('listening');if($('qmicStatus'))$('qmicStatus').textContent='Listening… tap mic to stop'};
-  speechRec.onresult=function(ev){for(var i=0;i<ev.results.length;i++)speechResultSegments[i]={text:ev.results[i][0].transcript,final:ev.results[i].isFinal};var liveText=speechResultSegments.map(function(segment){return segment&&segment.text||''}).join(' '),box=$('qprompt');if(box){box.value=(speechBaseText+speechFinalText+liveText).trim();box.scrollTop=box.scrollHeight}};
-  speechRec.onerror=function(ev){if(ev.error==='not-allowed'||ev.error==='service-not-allowed'){speechShouldListen=false;toast('Please allow microphone access in your browser address bar.')}else if(ev.error==='audio-capture'){speechShouldListen=false;toast('Could not access the microphone. Check your device.')}else if(ev.error!=='aborted'&&ev.error!=='no-speech')console.warn('Speech recognition paused:',ev.error)};
-  speechRec.onend=function(){speechListening=false;speechFinalText+=speechResultSegments.filter(function(segment){return segment&&segment.final}).map(function(segment){return segment.text}).join(' ');speechResultSegments=[];if(speechShouldListen){if($('qmicStatus'))$('qmicStatus').textContent='Pausing… reconnecting microphone';speechRestartTimer=setTimeout(function(){if(!speechShouldListen)return;try{speechRec.start()}catch(e){speechRestartTimer=setTimeout(function(){if(speechShouldListen)try{speechRec.start()}catch(er){}},500)}},250);return}if($('qmic'))$('qmic').classList.remove('listening');if($('qmicStatus'))$('qmicStatus').textContent='Tap mic to speak'};
- }
- try{if(field)field.focus();speechRec.start()}catch(e){speechShouldListen=false;speechListening=false;if($('qmicStatus'))$('qmicStatus').textContent='Tap mic to speak';toast('Could not start voice transcription. Tap the microphone and try again.')}
-}
-function validImageFile(f){return f&&(/^image\//i.test(f.type)||/\.(jpe?g|png|webp|avif|gif|bmp|svg|tiff?|heic|heif|ico)$/i.test(f.name||''))}
-function enhanceScan(file){return encodeImage(file).then(function(data){return new Promise(function(resolve,reject){var image=new Image();image.onload=function(){var cv=document.createElement('canvas');cv.width=image.naturalWidth;cv.height=image.naturalHeight;var cx=cv.getContext('2d');cx.drawImage(image,0,0);var pixels=cx.getImageData(0,0,cv.width,cv.height),d=pixels.data;for(var i=0;i<d.length;i+=4){var gray=d[i]*.299+d[i+1]*.587+d[i+2]*.114,enhanced=Math.max(0,Math.min(255,(gray-128)*1.45+145));d[i]=d[i+1]=d[i+2]=enhanced}cx.putImageData(pixels,0,0);resolve(cv.toDataURL('image/jpeg',.9))};image.onerror=reject;image.src=data})})}
-function renderQuoteScans(){var box=$('qscanPreview');if(!box)return;box.innerHTML=quoteScans.map(function(src,index){return '<div class="tile" style="padding:8px;max-width:220px"><img src="'+src+'" alt="Enhanced scan '+(index+1)+'" style="display:block;max-width:100%;max-height:220px;object-fit:contain"><p class="note">Photo '+(index+1)+'</p><button class="btn sm" type="button" data-qscan-convert="'+index+'">Convert to letterhead document</button> <button class="btn sm x" type="button" data-qscan-remove="'+index+'">Remove</button></div>'}).join('')+quoteDocuments.map(function(doc,index){return '<div class="tile" style="padding:10px;width:100%"><label for="qdoc-'+index+'">Document '+(index+1)+' — edit the text before printing</label><textarea id="qdoc-'+index+'" data-qdoc="'+index+'" style="min-height:200px">'+esc(doc.text)+'</textarea><button class="btn sm x" type="button" data-qdoc-remove="'+index+'">Remove document</button></div>'}).join('')}
-function encodeImage(f){return new Promise(function(resolve,reject){var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var maxDim=2560,scale=Math.min(1,maxDim/Math.max(im.width||1,im.height||1)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round((im.width||800)*scale));cv.height=Math.max(1,Math.round((im.height||600)*scale));var cx=cv.getContext('2d');cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';cx.clearRect(0,0,cv.width,cv.height);cx.drawImage(im,0,0,cv.width,cv.height);var mime='image/webp',result=cv.toDataURL(mime,0.92);if(!/^data:image\/webp/i.test(result)){mime='image/jpeg';cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(im,0,0,cv.width,cv.height);result=cv.toDataURL(mime,0.92)}for(var attempt=1;attempt<7&&result.length>1500000;attempt++){var q=Math.max(0.78,0.92-attempt*0.03);if(attempt>=3){cv.width=Math.max(1,Math.round(cv.width*0.88));cv.height=Math.max(1,Math.round(cv.height*0.88));cx=cv.getContext('2d');cx.imageSmoothingEnabled=true;cx.imageSmoothingQuality='high';if(mime==='image/jpeg'){cx.fillStyle='#fff';cx.fillRect(0,0,cv.width,cv.height)}cx.drawImage(im,0,0,cv.width,cv.height)}result=cv.toDataURL(mime,q)}if(result.length>1800000)reject(Error('Image is too large'));else resolve(result)};im.onerror=function(){reject(Error('Unsupported image format'))};im.src=rd.result};rd.onerror=reject;rd.readAsDataURL(f)})}
-document.addEventListener('click',async function(e){if(e.target.closest('.sg-select-wrap'))return;var b=e.target.closest('button,[data-k]');if(!b)return;var d=b.dataset;
- if(d.tab){e.preventDefault();if(cur==='quotes')captureQuoteForm();navigate(d.tab);return}
- if(d.quoteProduct||d.quoteInventory){var isShop=!!d.quoteProduct,id=+(d.quoteProduct||d.quoteInventory),item=isShop?DB.products.find(function(p){return p.id===id}):DB.inv.find(function(i){return i.id===id});if(!item){toast('Item unavailable');return}if(!isShop&&['Equipment','Tool'].includes(item.type)){toast('Equipment and tools cannot be added to quotations');return}if(QI.length===1&&!QI[0].d&&!QI[0].p)QI=[];QI.push({d:item.name+(isShop&&item.cat?' – '+item.cat.toLowerCase():''),q:1,p:isShop?item.price:0,productId:isShop?item.id:null});navigate('quotes');toast(isShop?'Product added to quotation':'Inventory item added; enter its selling price');return}
- if(d.k){ck(d.k);return}
- if(d.if){IF=d.if;show();return}
- if(d.editQuote){var selectedQuote=DB.quotes.find(function(q){return q.id===+d.editQuote});if(selectedQuote)editQuote(selectedQuote);return}
- if(d.useItem){selectUsageItem(+d.useItem);return}
+    /* nav + events */
+    var cur = 'dashboard';
+    function navigate(tab) { var path = tab === 'product-browser' ? '/admin/products' : tab === 'inventory-browser' ? '/admin/inventory' : '/admin#' + tab; history.pushState(null, '', path); show() }
+    function show() {
+      var detail = location.pathname.match(/^\/admin\/(products|inventory)\/\d+$/), page = detail ? (detail[1] === 'products' ? 'product-detail' : 'inventory-detail') : location.pathname === '/admin/products' ? 'product-browser' : location.pathname === '/admin/inventory' ? 'inventory-browser' : 'dashboard', h = location.hash.replace('#', '') || page; cur = TABS.some(function (t) { return t[0] === h }) || ['product-browser', 'inventory-browser', 'product-detail', 'inventory-detail'].includes(h) ? h : 'dashboard';
+      $('ttl').textContent = { dashboard: 'Dashboard', products: 'Products', inventory: 'Inventory', quotes: 'Quotations', budget: 'Budget', health: 'Backend health', tools: 'Tools', 'product-browser': 'Products page', 'inventory-browser': 'Inventory page', 'product-detail': 'Product details', 'inventory-detail': 'Inventory details' }[cur];
+      $('tabs').innerHTML = TABS.map(function (t) { return '<button type="button" class="chip" role="tab" data-tab="' + t[0] + '" aria-pressed="' + (t[0] === cur) + '">' + t[1] + '</button>' }).join('');
+      if (cur !== 'tools' && !dataLoaded) { $('view').innerHTML = '<div class="tile" role="status"><h2>' + (dataIssue ? 'Database data unavailable' : 'Loading dashboard data…') + '</h2><p>' + (dataIssue ? esc(dataIssue) : 'Connecting to Neon…') + '</p>' + (dataIssue ? '<button class="btn" id="dataRetry" type="button">Retry connection</button>' : '') + '</div>'; return }
+      $('view').innerHTML = (dataIssue && cur !== 'tools' ? '<div class="tile" role="status" style="margin-bottom:16px"><h3>Showing previously loaded data</h3><p class="note">The database is currently unavailable. Figures may be outdated; saving is paused.</p><button class="btn sm" id="dataRetry" type="button">Retry connection</button></div>' : '') + V[cur]();
+      if (cur === 'budget') updateBudget(); if (cur === 'health') { renderHealth(); if (!healthSamples.length) checkHealth(); }
+      if (cur === 'quotes') { qItems(); renderQuoteScans(); if (QFORM) { Object.keys(QFORM).forEach(function (id) { if ($(id)) $(id).value = QFORM[id] }); qSum() } } if (cur === 'tools') { cnv(); C = { cur: '0', prev: null, op: null, fresh: true } }
+    }
+    function val(i) { return $(i).value.trim() }
+    var speechRec = null, speechListening = false, speechShouldListen = false, speechBaseText = '', speechFinalText = '', speechResultSegments = [], speechRestartTimer = 0;
+    async function toggleMic() {
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { toast('Voice transcription is not supported in this browser. Try Chrome or Edge.'); return }
+      var field = $('qprompt');
+      if (speechShouldListen && speechRec) { speechShouldListen = false; if (speechRestartTimer) clearTimeout(speechRestartTimer); try { speechRec.stop() } catch (e) { } return }
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try { var stream = await navigator.mediaDevices.getUserMedia({ audio: true }); stream.getTracks().forEach(function (t) { t.stop() }) }
+        catch (err) { toast(err && err.name === 'NotAllowedError' ? 'Please allow microphone access in your browser address bar.' : 'Could not access microphone: ' + (err.message || err.name || 'check device')); return }
+      }
+      speechBaseText = field && field.value.trim() ? field.value.trim() + ' ' : ''; speechFinalText = ''; speechResultSegments = []; speechShouldListen = true;
+      if (!speechRec) {
+        speechRec = new SR();
+        speechRec.lang = 'en-US';
+        speechRec.continuous = true;
+        speechRec.interimResults = true;
+        speechRec.onstart = function () { speechListening = true; if ($('qmic')) $('qmic').classList.add('listening'); if ($('qmicStatus')) $('qmicStatus').textContent = 'Listening… tap mic to stop' };
+        speechRec.onresult = function (ev) { for (var i = 0; i < ev.results.length; i++) speechResultSegments[i] = { text: ev.results[i][0].transcript, final: ev.results[i].isFinal }; var liveText = speechResultSegments.map(function (segment) { return segment && segment.text || '' }).join(' '), box = $('qprompt'); if (box) { box.value = (speechBaseText + speechFinalText + liveText).trim(); box.scrollTop = box.scrollHeight } };
+        speechRec.onerror = function (ev) { if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') { speechShouldListen = false; toast('Please allow microphone access in your browser address bar.') } else if (ev.error === 'audio-capture') { speechShouldListen = false; toast('Could not access the microphone. Check your device.') } else if (ev.error !== 'aborted' && ev.error !== 'no-speech') console.warn('Speech recognition paused:', ev.error) };
+        speechRec.onend = function () { speechListening = false; speechFinalText += speechResultSegments.filter(function (segment) { return segment && segment.final }).map(function (segment) { return segment.text }).join(' '); speechResultSegments = []; if (speechShouldListen) { if ($('qmicStatus')) $('qmicStatus').textContent = 'Pausing… reconnecting microphone'; speechRestartTimer = setTimeout(function () { if (!speechShouldListen) return; try { speechRec.start() } catch (e) { speechRestartTimer = setTimeout(function () { if (speechShouldListen) try { speechRec.start() } catch (er) { } }, 500) } }, 250); return } if ($('qmic')) $('qmic').classList.remove('listening'); if ($('qmicStatus')) $('qmicStatus').textContent = 'Tap mic to speak' };
+      }
+      try { if (field) field.focus(); speechRec.start() } catch (e) { speechShouldListen = false; speechListening = false; if ($('qmicStatus')) $('qmicStatus').textContent = 'Tap mic to speak'; toast('Could not start voice transcription. Tap the microphone and try again.') }
+    }
+    function validImageFile(f) { return f && (/^image\//i.test(f.type) || /\.(jpe?g|png|webp|avif|gif|bmp|svg|tiff?|heic|heif|ico)$/i.test(f.name || '')) }
+    function enhanceScan(file) { return encodeImage(file).then(function (data) { return new Promise(function (resolve, reject) { var image = new Image(); image.onload = function () { var cv = document.createElement('canvas'); cv.width = image.naturalWidth; cv.height = image.naturalHeight; var cx = cv.getContext('2d'); cx.drawImage(image, 0, 0); var pixels = cx.getImageData(0, 0, cv.width, cv.height), d = pixels.data; for (var i = 0; i < d.length; i += 4) { var gray = d[i] * .299 + d[i + 1] * .587 + d[i + 2] * .114, enhanced = Math.max(0, Math.min(255, (gray - 128) * 1.45 + 145)); d[i] = d[i + 1] = d[i + 2] = enhanced } cx.putImageData(pixels, 0, 0); resolve(cv.toDataURL('image/jpeg', .9)) }; image.onerror = reject; image.src = data }) }) }
+    function renderQuoteScans() { var box = $('qscanPreview'); if (!box) return; box.innerHTML = quoteScans.map(function (src, index) { return '<div class="tile" style="padding:8px;max-width:220px"><img src="' + src + '" alt="Enhanced scan ' + (index + 1) + '" style="display:block;max-width:100%;max-height:220px;object-fit:contain"><p class="note">Photo ' + (index + 1) + '</p><button class="btn sm" type="button" data-qscan-convert="' + index + '">Convert to letterhead document</button> <button class="btn sm x" type="button" data-qscan-remove="' + index + '">Remove</button></div>' }).join('') + quoteDocuments.map(function (doc, index) { return '<div class="tile" style="padding:10px;width:100%"><label for="qdoc-' + index + '">Document ' + (index + 1) + ' — edit the text before printing</label><textarea id="qdoc-' + index + '" data-qdoc="' + index + '" style="min-height:200px">' + esc(doc.text) + '</textarea><button class="btn sm x" type="button" data-qdoc-remove="' + index + '">Remove document</button></div>' }).join('') }
+    function encodeImage(f) { return new Promise(function (resolve, reject) { var rd = new FileReader(); rd.onload = function () { var im = new Image(); im.onload = function () { var maxDim = 2560, scale = Math.min(1, maxDim / Math.max(im.width || 1, im.height || 1)), cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round((im.width || 800) * scale)); cv.height = Math.max(1, Math.round((im.height || 600) * scale)); var cx = cv.getContext('2d'); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high'; cx.clearRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height); var mime = 'image/webp', result = cv.toDataURL(mime, 0.92); if (!/^data:image\/webp/i.test(result)) { mime = 'image/jpeg'; cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0, cv.width, cv.height); result = cv.toDataURL(mime, 0.92) } for (var attempt = 1; attempt < 7 && result.length > 1500000; attempt++) { var q = Math.max(0.78, 0.92 - attempt * 0.03); if (attempt >= 3) { cv.width = Math.max(1, Math.round(cv.width * 0.88)); cv.height = Math.max(1, Math.round(cv.height * 0.88)); cx = cv.getContext('2d'); cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high'; if (mime === 'image/jpeg') { cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height) } cx.drawImage(im, 0, 0, cv.width, cv.height) } result = cv.toDataURL(mime, q) } if (result.length > 1800000) reject(Error('Image is too large')); else resolve(result) }; im.onerror = function () { reject(Error('Unsupported image format')) }; im.src = rd.result }; rd.onerror = reject; rd.readAsDataURL(f) }) }
+    document.addEventListener('click', async function (e) {
+      if (e.target.closest('.sg-select-wrap')) return; var b = e.target.closest('button,[data-k]'); if (!b) return; var d = b.dataset;
+      if (d.tab) { e.preventDefault(); if (cur === 'quotes') captureQuoteForm(); navigate(d.tab); return }
+      if (d.quoteProduct || d.quoteInventory) { var isShop = !!d.quoteProduct, id = +(d.quoteProduct || d.quoteInventory), item = isShop ? DB.products.find(function (p) { return p.id === id }) : DB.inv.find(function (i) { return i.id === id }); if (!item) { toast('Item unavailable'); return } if (!isShop && ['Equipment', 'Tool'].includes(item.type)) { toast('Equipment and tools cannot be added to quotations'); return } if (QI.length === 1 && !QI[0].d && !QI[0].p) QI = []; QI.push({ d: item.name + (isShop && item.cat ? ' – ' + item.cat.toLowerCase() : ''), q: 1, p: isShop ? item.price : 0, productId: isShop ? item.id : null }); navigate('quotes'); toast(isShop ? 'Product added to quotation' : 'Inventory item added; enter its selling price'); return }
+      if (d.k) { ck(d.k); return }
+      if (d.if) { IF = d.if; show(); return }
+      if (d.editQuote) { var selectedQuote = DB.quotes.find(function (q) { return q.id === +d.editQuote }); if (selectedQuote) editQuote(selectedQuote); return }
+      if (d.useItem) { selectUsageItem(+d.useItem); return }
 
- if(d.del){var p=d.del.split(':'),map={p:'products',q:'quotes',i:'inventory'};if(confirm('Remove this item?')){var onDetail=cur==='product-detail'||cur==='inventory-detail';change(map[p[0]],'remove',{id:+p[1]}).then(function(ok){if(ok&&onDetail)location.href=p[0]==='p'?'/admin/products':'/admin/inventory'})}return}
- if(d.stock){var stockValue=$('stock-'+d.stock).value;if(!/^\d+$/.test(stockValue)){toast('Enter a whole-number stock quantity');return}change('products','setStock',{id:+d.stock,stockQuantity:+stockValue}).then(function(ok){if(ok)toast('Stock updated')});return}
- if(d.adj){var a=d.adj.split(':');change('inventory','adjust',{id:+a[0],delta:+a[1]});return}
- if(d.return){var returnField=$('usageReturn-'+d.return),returnValue=returnField?.value,returnDate=returnValue?new Date(returnValue):null;if(returnDate&&(!Number.isFinite(returnDate.getTime())||returnDate.getTime()>Date.now())){toast('Enter a valid return time that is not in the future');return}change('inventory','return',{id:+d.return,returnedAt:returnDate?returnDate.toISOString():''}).then(function(ok){if(ok)toast('Return recorded')});return}
- if(d.qscanConvert!==undefined){var scanIndex=+d.qscanConvert,scanImage=quoteScans[scanIndex],convertButton=b;if(!scanImage)return;convertButton.disabled=true;convertButton.textContent='Converting photo…';try{var convertResponse=await fetch('/api/admin/quote-document',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:scanImage})}),convertResult=await convertResponse.json();if(!convertResponse.ok){console.error('AI document conversion request failed: '+JSON.stringify({status:convertResponse.status,...(convertResult.debug||{}),message:convertResult.error||'Unknown server error'}));throw Error(convertResult.error||'Could not convert this photo')}console.info('AI document transcription completed with Gemini model:',convertResult.model);quoteDocuments.push({text:convertResult.document});renderQuoteScans()}catch(error){toast(error.message||'Could not convert this photo')}finally{if(convertButton.isConnected){convertButton.disabled=false;convertButton.textContent='Convert to letterhead document'}}return}
- if(d.qscanRemove){quoteScans.splice(+d.qscanRemove,1);renderQuoteScans();return}if(d.qdocRemove){quoteDocuments.splice(+d.qdocRemove,1);renderQuoteScans();return}
- if(d.print){var q=DB.quotes.filter(function(x){return x.id==d.print})[0],savedScans=quoteScans,savedDocuments=quoteDocuments;quoteScans=[];quoteDocuments=[];$('pa').innerHTML=qHtml(q);quoteScans=savedScans;quoteDocuments=savedDocuments;var images=$('pa').querySelectorAll('img');for(var im of images)try{await im.decode()}catch(er){}try{window.print()}catch(er){toast('Printing is blocked here. Use Copy as text.')}return}
- if(d.qrm){QI.splice(+d.qrm,1);if(!QI.length)QI.push({d:'',q:1,p:0});qItems();return}
- var id=b.id;
- if(id==='qscanTake'){$('qscanCamera').click();return}if(id==='qscanChoose'){$('qscanFile').click();return}
- if(id==='dataRetry'){refresh();return}
- if(id==='qcancel'){editingQuoteId=0;QI=[{d:'',q:1,p:0}];QFORM=null;show();return}
- if(id==='saveProductDetails'||id==='saveInventoryDetails'){var isProduct=id==='saveProductDetails',itemId=Number(location.pathname.split('/').pop()),files=Array.from($('editImages').files),name=val('editName');if(!name||files.length>5||files.some(function(f){return !validImageFile(f)})){toast('Enter a name and choose up to five image files');return}var details=isProduct?{id:itemId,name:name,cat:val('editCategory'),operation:val('editOperation'),price:+val('editPrice'),stockQuantity:+val('editStock'),desc:val('editDescription')}:{id:itemId,name:name,type:val('editType'),sku:val('editSku'),qty:+val('editQty'),unit:val('editUnit'),min:+val('editMin'),cost:+val('editCost'),loc:val('editLocation'),broughtBy:val('editBroughtBy'),acquiredAt:val('editAcquired')&&Number.isFinite(new Date(val('editAcquired')).getTime())?new Date(val('editAcquired')).toISOString():''};if(isProduct&&(!/^\d+$/.test(val('editStock'))||!val('editPrice'))){toast('Enter a price and whole-number stock amount');return}if(!isProduct&&(!val('editQty')||!val('editMin')||!val('editCost'))){toast('Enter quantity, reorder level and unit cost');return}uploadProgress(files.length?'Converting pictures to sharp WebP...':'Saving changes...',b);try{details.images=await Promise.all(files.map(encodeImage));uploadProgress(files.length?'Uploading WebP pictures and saving...':'Saving changes...',b);if(await change(isProduct?'products':'inventory','edit',details))toast('Details saved')}catch(error){toast(error.message||'Could not save details')}finally{$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Save changes'}}return}
- if(id==='usageSave'){var usageItem=+$('usageItem').value,usageBy=val('usageBy'),takenValue=val('usageTaken'),takenDate=takenValue?new Date(takenValue):null;if(!usageItem||!usageBy){toast('Choose equipment or a tool and enter who used it');return}if(takenDate&&(!Number.isFinite(takenDate.getTime())||takenDate.getTime()>Date.now())){toast('Enter a valid time taken that is not in the future');return}b.disabled=true;try{if(await change('inventory','checkout',{id:usageItem,usedBy:usageBy,takenAt:takenDate?takenDate.toISOString():''}))toast('Equipment or tool use recorded')}finally{if(b.isConnected)b.disabled=false}return}
- if(id==='healthRefresh'){checkHealth();return}
- if(id==='qmic'){toggleMic();return}
- if(id==='qai'){if(speechRec){speechShouldListen=false;if(speechRestartTimer)clearTimeout(speechRestartTimer);if(speechListening)try{speechRec.stop()}catch(er){}}var promptText=val('qprompt');if(!promptText){toast('Describe the wording, products, quantities or prices you want');return}uploadProgress('Drafting quotation notes and items...',b);try{var response=await fetch('/api/admin/quote-draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:promptText,context:JSON.stringify({customer:val('qc'),items:QI,installation:val('qin'),discount:val('qd'),existingNotes:val('qn')})})}),result=await response.json();if(!response.ok){console.error('AI quotation drafting request failed: '+JSON.stringify({status:response.status,...(result.debug||{}),message:result.error||'Unknown server error'}));throw Error('The AI assistant is temporarily unavailable. Please try again later or contact support.')}if(typeof result.draft!=='string'||!Array.isArray(result.items))throw Error('The AI could not prepare the quotation. Please try again.');console.info('AI quotation draft completed with Gemini model:',result.model);$('qn').value=result.draft;QI=result.items.map(function(i){return{d:i.d,q:i.q,p:i.p,productId:i.productId}});if(!QI.length)QI=[{d:'',q:1,p:0}];qItems();toast('AI suggestions added. Review items, prices and notes before saving.')}catch(error){if(error instanceof TypeError)console.error('AI quotation drafting network error:',error);toast(error.message==='Failed to fetch'?'The AI assistant is temporarily unavailable. Please try again later or contact support.':error.message||'The AI assistant is temporarily unavailable. Please try again later or contact support.')}finally{$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Draft notes and items with AI'}}return}
- if(id==='saveletterhead'){var file=$('letterhead').files[0],letterheadName=val('letterheadName');if(!letterheadName){toast('Enter a name for this letterhead');return}if(!file||file.size>750000||!['image/png','image/jpeg'].includes(file.type)){toast('Choose a PNG or JPEG under 750 KB');return}uploadProgress('Preparing letterhead...',b);try{var image=await new Promise(function(resolve,reject){var reader=new FileReader();reader.onload=function(){resolve(reader.result)};reader.onerror=reject;reader.readAsDataURL(file)});uploadProgress('Saving letterhead...',b);if(await change('settings','letterhead',{name:letterheadName,image:image}))toast('Letterhead saved')}catch(error){toast('Could not read letterhead image')}finally{$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Save as new'}}return}
- if(id==='renameLetterhead'){var newLetterheadName=prompt('Enter a new name for this letterhead',((DB.letterheads||[]).find(function(h){return h.id===DB.activeLetterhead})||{}).name||'');if(newLetterheadName&&await change('settings','renameLetterhead',{id:DB.activeLetterhead,name:newLetterheadName}))toast('Letterhead renamed');return}
- if(id==='deleteLetterhead'){if(confirm('Delete this letterhead?')){if(await change('settings','deleteLetterhead',{id:DB.activeLetterhead}))toast('Letterhead deleted')}return}
- if(id==='qprint'){var dr=qDraft();if(!val('qc')||!dr.items.length){toast('Add a customer and at least one line');return}var draft={no:'DRAFT',date:new Date().toISOString().slice(0,10),valid:$('qv').value,cust:val('qc'),email:val('qe'),phone:val('qt'),addr:val('qa'),items:dr.items,inst:dr.inst,disc:dr.disc,notes:val('qn')};$('pa').innerHTML=qHtml(draft);var printImages=$('pa').querySelectorAll('img');for(var printImage of printImages)try{await printImage.decode()}catch(er){}window.print();return}
- if(id==='addp'){if(productSaving)return;var n2=val('pn'),pr=parseFloat($('pp').value),stockValue=$('ps').value;if(!n2||isNaN(pr)||!/^\d+$/.test(stockValue)){toast('Add a name, price and whole-number stock quantity');return}
-  var files=Array.from($('pi').files),mainIndex=0;
-  if(files.length>5||files.some(function(f){return !validImageFile(f)})){toast('Choose up to five image files');return}
-  productSaving=true;uploadProgress(files.length?'Converting images to sharp WebP...':'Uploading product...',b);
-  try{var removeBackground=$('removebg').checked,images=await Promise.all(files.map(encodeImage));uploadProgress(removeBackground&&files.length?'Removing background and uploading...':'Uploading WebP product images...',b);if(await change('products','add',{name:n2,cat:$('pc').value,operation:$('po').value,price:pr,stockQuantity:+stockValue,desc:val('pd'),images:images,mainImageIndex:mainIndex,removeBackground:removeBackground}))toast(n2+' added to shop')}catch(er){toast('Could not convert an image. Choose another picture.')}finally{productSaving=false;$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Save product'}}return}
- if(id==='qadd'){QI.push({d:'',q:1,p:0});qItems();return}
- if(id==='qsave'||id==='qcopy'){var dr=qDraft();if(!val('qc')||!dr.items.length){toast('Add a customer and at least one line');return}
-  var existingQuote=editingQuoteId?DB.quotes.find(function(item){return item.id===editingQuoteId}):null,q={id:editingQuoteId||nid(DB.quotes),no:existingQuote?.no||'Q-'+('000'+nid(DB.quotes)).slice(-4),cust:val('qc'),email:val('qe'),phone:val('qt'),addr:val('qa'),items:dr.items,inst:dr.inst,disc:dr.disc,valid:$('qv').value,notes:val('qn'),status:existingQuote?.status||'Draft',date:existingQuote?.date||new Date().toISOString().slice(0,10)};
-  if(id==='qcopy'){var tx=qText(q);try{navigator.clipboard.writeText(tx).then(function(){toast('Quotation copied')},function(){toast('Copy blocked by the browser')})}catch(er){toast('Copy blocked by the browser')}return}
-  change('quotes',editingQuoteId?'edit':'add',q).then(function(ok){if(ok){editingQuoteId=0;QI=[{d:'',q:1,p:0}];QFORM=null;show();toast('Quotation saved')}});return}
- if(id==='iadd'){if(b.disabled)return;if(!val('in')){toast('Add an item name');return}var inventoryFiles=Array.from($('iimages').files);if(inventoryFiles.length>5||inventoryFiles.some(function(f){return !validImageFile(f)})){toast('Choose up to five image files');return}var itemData={name:val('in'),type:$('it').value,sku:val('is'),qty:+$('iq').value||0,unit:val('iu')||'pcs',min:+$('im').value||0,loc:val('il'),cost:+$('ic').value||0,broughtBy:val('ib'),acquiredAt:val('ia')?new Date(val('ia')).toISOString():''};uploadProgress(inventoryFiles.length?'Converting pictures to sharp WebP...':'Adding item...',b);try{itemData.images=await Promise.all(inventoryFiles.map(encodeImage));uploadProgress(inventoryFiles.length?'Uploading WebP pictures...':'Adding item...',b);if(await change('inventory','add',itemData))toast('Item added')}catch(er){toast('Could not convert a picture. Choose another image.')}finally{$('uploadOverlay').hidden=true;if(b.isConnected){b.disabled=false;b.textContent='Add item'}}return}
- if(id==='dsw'){var t=$('df').value;$('df').value=$('dt').value;$('dt').value=t;cnv();return}
- if(id==='wsw'){var u=$('wf').value;$('wf').value=$('wt').value;$('wt').value=u;cnv()}
-});
-document.addEventListener('input',function(e){var t=e.target;
- if(t.id==='browseSearch'){var query=t.value.trim().toLowerCase();$('browseGrid').querySelectorAll('.browse-card').forEach(function(card){card.hidden=!card.textContent.toLowerCase().includes(query)});return}
- if(t.id==='budgetPercent'){var rate=Number(t.value);if(t.value!==''&&Number.isFinite(rate)&&rate>=0&&rate<=100){budgetPercent=rate;updateBudget()}return}
- if(t.id==='isr'){IS=t.value;var p=t.selectionStart;show();var n=$('isr');n.focus();n.setSelectionRange(p,p);return}
- if(t.id==='ibfilter'){IB=t.value;var p=t.selectionStart;show();var n=$('ibfilter');n.focus();n.setSelectionRange(p,p);return}
- if(t.dataset.qi){var a=t.dataset.qi.split(':'),r=QI[+a[1]];r[a[0]]=a[0]==='d'?t.value:(+t.value||0);qSum();return}
- if(t.id==='qin'||t.id==='qd')qSum();
- if(/^(dv|wv)$/.test(t.id))cnv()});
-document.addEventListener('change',function(e){var t=e.target;
- if(t.dataset.qdoc!==undefined){quoteDocuments[+t.dataset.qdoc].text=t.value;return}
- if(t.id==='letterheadSelect'){change('settings','selectLetterhead',{id:t.value}).then(function(ok){if(ok)toast(t.value?'Letterhead selected':'Letterhead turned off')});return}
- if(t.id==='qscanCamera'||t.id==='qscanFile'){var scanFiles=Array.from(t.files||[]);if(scanFiles.length>8||scanFiles.some(function(f){return !validImageFile(f)})){toast('Choose up to eight document photos');t.value='';return}Promise.all(scanFiles.map(enhanceScan)).then(function(scans){quoteScans=quoteScans.concat(scans).slice(0,8);renderQuoteScans()}).catch(function(error){console.error('Document scan enhancement failed:',error);toast('Could not enhance that photo. Try a clearer image.')}).finally(function(){t.value=''});return}
- if(t.dataset.metricPeriod){METRIC_PERIOD[t.dataset.metricPeriod]=t.value;show();return}
- if(/^(df|dt|wf|wt)$/.test(t.id))cnv();
- if(t.id==='iorder'){IORDER=t.value;show();return}
- if(t.id==='qp'&&t.value){var p=DB.products.filter(function(x){return x.id==t.value})[0];if(QI.length===1&&!QI[0].d&&!QI[0].p)QI=[];QI.push({d:p.name+' – '+p.cat.toLowerCase(),q:1,p:p.price,productId:p.id});qItems()}
- if(t.dataset.qs){change('quotes','status',{id:+t.dataset.qs,status:t.value}).then(function(ok){if(ok)toast('Status updated')})}});
-document.addEventListener('keydown',function(e){if(cur!=='tools'||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName))return;
- var k=e.key,m={'*':'×','/':'÷','-':'−','Enter':'=','Escape':'C','Backspace':'bs'};
- if(/^[0-9.+%]$/.test(k)||m[k]){e.preventDefault();ck(m[k]||k)}});
-window.addEventListener('hashchange',show);
-window.addEventListener('popstate',show);
-$('today').textContent=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-var healthSamples=[],healthPending=false;
-var healthState={status:'Checking Neon database and server…',response:'—',database:'—',uptime:'—',ping:'Random-signal ping every 10 minutes (plus server-side and GitHub Actions background keep-alive).'};
-function renderHealth(){if(cur!=='health')return;$('healthStatus').textContent=healthState.status;$('healthResponse').textContent=healthState.response;$('healthDatabase').textContent=healthState.database;$('healthUptime').textContent=healthState.uptime;$('pingStatus').textContent=healthState.ping;var max=Math.max(300,...healthSamples.map(function(s){return s.ms||0}));$('healthChart').innerHTML=healthSamples.map(function(s){return '<span class="'+(s.ok?'':'bad')+'" style="height:'+Math.max(8,Math.round((s.ms||max)/max*100))+'%" title="'+(s.ok?s.ms+' ms':'Unavailable')+'"></span>'}).join('');$('healthChart').setAttribute('aria-label',healthSamples.length?healthSamples.map(function(s){return s.ok?s.ms+' milliseconds':'unavailable'}).join(', '):'No health samples yet')}
-async function checkHealth(){if(healthPending)return;healthPending=true;var started=performance.now();try{var r=await fetch('/api/admin/health',{cache:'no-store'}),data=await r.json(),ms=Math.round(performance.now()-started),ok=r.ok&&data.ok;healthSamples.push({ok:ok,ms:ms});if(healthSamples.length>12)healthSamples.shift();healthState.status=ok?'Checked '+new Date().toLocaleTimeString():'Backend or Neon database unavailable';healthState.response=ms+' ms';healthState.database=data.database?.ok?data.database.latencyMs+' ms':'Unavailable';healthState.uptime=data.server?Math.floor(data.server.uptimeSeconds/60)+' min':'—'}catch(e){healthSamples.push({ok:false,ms:0});if(healthSamples.length>12)healthSamples.shift();healthState.status='Could not reach the server';healthState.response='—';healthState.database='—';healthState.uptime='—'}healthPending=false;renderHealth()}
-async function pingBackend(){try{var r=await fetch('/api/admin/ping?signal='+encodeURIComponent(crypto.randomUUID()),{cache:'no-store'});if(!r.ok)throw Error('Ping failed');healthState.ping='Last random-signal ping: '+new Date().toLocaleTimeString()+'. Next in about 10 minutes (server & GitHub Actions also ping in background).'}catch(e){healthState.ping='Ping failed at '+new Date().toLocaleTimeString()+'. Server-side and external keep-alive remain active.'}checkHealth()}
-show();
-setInterval(pingBackend,10*60*1000);
-refresh();
-$('logout').onclick=async function(){await fetch('/api/admin/logout',{method:'POST'});location.replace('/straitgate-admin-login.html')};
-</script>
+      if (d.del) { var p = d.del.split(':'), map = { p: 'products', q: 'quotes', i: 'inventory' }; if (confirm('Remove this item?')) { var onDetail = cur === 'product-detail' || cur === 'inventory-detail'; change(map[p[0]], 'remove', { id: +p[1] }).then(function (ok) { if (ok && onDetail) location.href = p[0] === 'p' ? '/admin/products' : '/admin/inventory' }) } return }
+      if (d.stock) { var stockValue = $('stock-' + d.stock).value; if (!/^\d+$/.test(stockValue)) { toast('Enter a whole-number stock quantity'); return } change('products', 'setStock', { id: +d.stock, stockQuantity: +stockValue }).then(function (ok) { if (ok) toast('Stock updated') }); return }
+      if (d.adj) { var a = d.adj.split(':'); change('inventory', 'adjust', { id: +a[0], delta: +a[1] }); return }
+      if (d.return) { var returnField = $('usageReturn-' + d.return), returnValue = returnField?.value, returnDate = returnValue ? new Date(returnValue) : null; if (returnDate && (!Number.isFinite(returnDate.getTime()) || returnDate.getTime() > Date.now())) { toast('Enter a valid return time that is not in the future'); return } change('inventory', 'return', { id: +d.return, returnedAt: returnDate ? returnDate.toISOString() : '' }).then(function (ok) { if (ok) toast('Return recorded') }); return }
+      if (d.qscanConvert !== undefined) { var scanIndex = +d.qscanConvert, scanImage = quoteScans[scanIndex], convertButton = b; if (!scanImage) return; convertButton.disabled = true; convertButton.textContent = 'Converting photo…'; try { var convertResponse = await fetch('/api/admin/quote-document', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ image: scanImage }) }), convertResult = await convertResponse.json(); if (!convertResponse.ok) { console.error('AI document conversion request failed: ' + JSON.stringify({ status: convertResponse.status, ...(convertResult.debug || {}), message: convertResult.error || 'Unknown server error' })); throw Error(convertResult.error || 'Could not convert this photo') } quoteDocuments.push({ text: convertResult.document }); renderQuoteScans() } catch (error) { toast(error.message || 'Could not convert this photo') } finally { if (convertButton.isConnected) { convertButton.disabled = false; convertButton.textContent = 'Convert to letterhead document' } } return }
+      if (d.qscanRemove) { quoteScans.splice(+d.qscanRemove, 1); renderQuoteScans(); return } if (d.qdocRemove) { quoteDocuments.splice(+d.qdocRemove, 1); renderQuoteScans(); return }
+      if (d.print) { var q = DB.quotes.filter(function (x) { return x.id == d.print })[0], savedScans = quoteScans, savedDocuments = quoteDocuments; quoteScans = []; quoteDocuments = []; $('pa').innerHTML = qHtml(q); quoteScans = savedScans; quoteDocuments = savedDocuments; var images = $('pa').querySelectorAll('img'); for (var im of images) try { await im.decode() } catch (er) { } try { window.print() } catch (er) { toast('Printing is blocked here. Use Copy as text.') } return }
+      if (d.qrm) { QI.splice(+d.qrm, 1); if (!QI.length) QI.push({ d: '', q: 1, p: 0 }); qItems(); return }
+      var id = b.id;
+      if (id === 'qscanTake') { $('qscanCamera').click(); return } if (id === 'qscanChoose') { $('qscanFile').click(); return }
+      if (id === 'dataRetry') { refresh(); return }
+      if (id === 'qcancel') { editingQuoteId = 0; QI = [{ d: '', q: 1, p: 0 }]; QFORM = null; show(); return }
+      if (id === 'saveProductDetails' || id === 'saveInventoryDetails') { var isProduct = id === 'saveProductDetails', itemId = Number(location.pathname.split('/').pop()), files = Array.from($('editImages').files), name = val('editName'); if (!name || files.length > 5 || files.some(function (f) { return !validImageFile(f) })) { toast('Enter a name and choose up to five image files'); return } var details = isProduct ? { id: itemId, name: name, cat: val('editCategory'), operation: val('editOperation'), price: +val('editPrice'), stockQuantity: +val('editStock'), desc: val('editDescription') } : { id: itemId, name: name, type: val('editType'), sku: val('editSku'), qty: +val('editQty'), unit: val('editUnit'), min: +val('editMin'), cost: +val('editCost'), loc: val('editLocation'), broughtBy: val('editBroughtBy'), acquiredAt: val('editAcquired') && Number.isFinite(new Date(val('editAcquired')).getTime()) ? new Date(val('editAcquired')).toISOString() : '' }; if (isProduct && (!/^\d+$/.test(val('editStock')) || !val('editPrice'))) { toast('Enter a price and whole-number stock amount'); return } if (!isProduct && (!val('editQty') || !val('editMin') || !val('editCost'))) { toast('Enter quantity, reorder level and unit cost'); return } uploadProgress(files.length ? 'Converting pictures to sharp WebP...' : 'Saving changes...', b); try { details.images = await Promise.all(files.map(encodeImage)); uploadProgress(files.length ? 'Uploading WebP pictures and saving...' : 'Saving changes...', b); if (await change(isProduct ? 'products' : 'inventory', 'edit', details)) toast('Details saved') } catch (error) { toast(error.message || 'Could not save details') } finally { $('uploadOverlay').hidden = true; if (b.isConnected) { b.disabled = false; b.textContent = 'Save changes' } } return }
+      if (id === 'usageSave') { var usageItem = +$('usageItem').value, usageBy = val('usageBy'), takenValue = val('usageTaken'), takenDate = takenValue ? new Date(takenValue) : null; if (!usageItem || !usageBy) { toast('Choose equipment or a tool and enter who used it'); return } if (takenDate && (!Number.isFinite(takenDate.getTime()) || takenDate.getTime() > Date.now())) { toast('Enter a valid time taken that is not in the future'); return } b.disabled = true; try { if (await change('inventory', 'checkout', { id: usageItem, usedBy: usageBy, takenAt: takenDate ? takenDate.toISOString() : '' })) toast('Equipment or tool use recorded') } finally { if (b.isConnected) b.disabled = false } return }
+      if (id === 'healthRefresh') { checkHealth(); return }
+      if (id === 'qmic') { toggleMic(); return }
+      if (id === 'qai') { if (speechRec) { speechShouldListen = false; if (speechRestartTimer) clearTimeout(speechRestartTimer); if (speechListening) try { speechRec.stop() } catch (er) { } } var promptText = val('qprompt'); if (!promptText) { toast('Describe the wording, products, quantities or prices you want'); return } uploadProgress('Drafting quotation notes and items...', b); try { var response = await fetch('/api/admin/quote-draft', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: promptText, context: JSON.stringify({ customer: val('qc'), items: QI, installation: val('qin'), discount: val('qd'), existingNotes: val('qn') }) }) }), result = await response.json(); if (!response.ok) { console.error('AI quotation drafting request failed: ' + JSON.stringify({ status: response.status, ...(result.debug || {}), message: result.error || 'Unknown server error' })); throw Error('The AI assistant is temporarily unavailable. Please try again later or contact support.') } if (typeof result.draft !== 'string' || !Array.isArray(result.items)) throw Error('The AI could not prepare the quotation. Please try again.'); $('qn').value = result.draft; QI = result.items.map(function (i) { return { d: i.d, q: i.q, p: i.p, productId: i.productId } }); if (!QI.length) QI = [{ d: '', q: 1, p: 0 }]; qItems(); toast('AI suggestions added. Review items, prices and notes before saving.') } catch (error) { if (error instanceof TypeError) console.error('AI quotation drafting network error:', error); toast(error.message === 'Failed to fetch' ? 'The AI assistant is temporarily unavailable. Please try again later or contact support.' : error.message || 'The AI assistant is temporarily unavailable. Please try again later or contact support.') } finally { $('uploadOverlay').hidden = true; if (b.isConnected) { b.disabled = false; b.textContent = 'Draft notes and items with AI' } } return }
+      if (id === 'saveletterhead') { var file = $('letterhead').files[0], letterheadName = val('letterheadName'); if (!letterheadName) { toast('Enter a name for this letterhead'); return } if (!file || file.size > 750000 || !['image/png', 'image/jpeg'].includes(file.type)) { toast('Choose a PNG or JPEG under 750 KB'); return } uploadProgress('Preparing letterhead...', b); try { var image = await new Promise(function (resolve, reject) { var reader = new FileReader(); reader.onload = function () { resolve(reader.result) }; reader.onerror = reject; reader.readAsDataURL(file) }); uploadProgress('Saving letterhead...', b); if (await change('settings', 'letterhead', { name: letterheadName, image: image })) toast('Letterhead saved') } catch (error) { toast('Could not read letterhead image') } finally { $('uploadOverlay').hidden = true; if (b.isConnected) { b.disabled = false; b.textContent = 'Save as new' } } return }
+      if (id === 'renameLetterhead') { var newLetterheadName = prompt('Enter a new name for this letterhead', ((DB.letterheads || []).find(function (h) { return h.id === DB.activeLetterhead }) || {}).name || ''); if (newLetterheadName && await change('settings', 'renameLetterhead', { id: DB.activeLetterhead, name: newLetterheadName })) toast('Letterhead renamed'); return }
+      if (id === 'deleteLetterhead') { if (confirm('Delete this letterhead?')) { if (await change('settings', 'deleteLetterhead', { id: DB.activeLetterhead })) toast('Letterhead deleted') } return }
+      if (id === 'qprint') { var dr = qDraft(); if (!val('qc') || !dr.items.length) { toast('Add a customer and at least one line'); return } var draft = { no: 'DRAFT', date: new Date().toISOString().slice(0, 10), valid: $('qv').value, cust: val('qc'), email: val('qe'), phone: val('qt'), addr: val('qa'), items: dr.items, inst: dr.inst, disc: dr.disc, notes: val('qn') }; $('pa').innerHTML = qHtml(draft); var printImages = $('pa').querySelectorAll('img'); for (var printImage of printImages) try { await printImage.decode() } catch (er) { } window.print(); return }
+      if (id === 'addp') {
+        if (productSaving) return; var n2 = val('pn'), pr = parseFloat($('pp').value), stockValue = $('ps').value; if (!n2 || isNaN(pr) || !/^\d+$/.test(stockValue)) { toast('Add a name, price and whole-number stock quantity'); return }
+        var files = Array.from($('pi').files), mainIndex = 0;
+        if (files.length > 5 || files.some(function (f) { return !validImageFile(f) })) { toast('Choose up to five image files'); return }
+        productSaving = true; uploadProgress(files.length ? 'Converting images to sharp WebP...' : 'Uploading product...', b);
+        try { var removeBackground = $('removebg').checked, images = await Promise.all(files.map(encodeImage)); uploadProgress(removeBackground && files.length ? 'Removing background and uploading...' : 'Uploading WebP product images...', b); if (await change('products', 'add', { name: n2, cat: $('pc').value, operation: $('po').value, price: pr, stockQuantity: +stockValue, desc: val('pd'), images: images, mainImageIndex: mainIndex, removeBackground: removeBackground })) toast(n2 + ' added to shop') } catch (er) { toast('Could not convert an image. Choose another picture.') } finally { productSaving = false; $('uploadOverlay').hidden = true; if (b.isConnected) { b.disabled = false; b.textContent = 'Save product' } } return
+      }
+      if (id === 'qadd') { QI.push({ d: '', q: 1, p: 0 }); qItems(); return }
+      if (id === 'qsave' || id === 'qcopy') {
+        var dr = qDraft(); if (!val('qc') || !dr.items.length) { toast('Add a customer and at least one line'); return }
+        var existingQuote = editingQuoteId ? DB.quotes.find(function (item) { return item.id === editingQuoteId }) : null, q = { id: editingQuoteId || nid(DB.quotes), no: existingQuote?.no || 'Q-' + ('000' + nid(DB.quotes)).slice(-4), cust: val('qc'), email: val('qe'), phone: val('qt'), addr: val('qa'), items: dr.items, inst: dr.inst, disc: dr.disc, valid: $('qv').value, notes: val('qn'), status: existingQuote?.status || 'Draft', date: existingQuote?.date || new Date().toISOString().slice(0, 10) };
+        if (id === 'qcopy') { var tx = qText(q); try { navigator.clipboard.writeText(tx).then(function () { toast('Quotation copied') }, function () { toast('Copy blocked by the browser') }) } catch (er) { toast('Copy blocked by the browser') } return }
+        change('quotes', editingQuoteId ? 'edit' : 'add', q).then(function (ok) { if (ok) { editingQuoteId = 0; QI = [{ d: '', q: 1, p: 0 }]; QFORM = null; show(); toast('Quotation saved') } }); return
+      }
+      if (id === 'iadd') { if (b.disabled) return; if (!val('in')) { toast('Add an item name'); return } var inventoryFiles = Array.from($('iimages').files); if (inventoryFiles.length > 5 || inventoryFiles.some(function (f) { return !validImageFile(f) })) { toast('Choose up to five image files'); return } var itemData = { name: val('in'), type: $('it').value, sku: val('is'), qty: +$('iq').value || 0, unit: val('iu') || 'pcs', min: +$('im').value || 0, loc: val('il'), cost: +$('ic').value || 0, broughtBy: val('ib'), acquiredAt: val('ia') ? new Date(val('ia')).toISOString() : '' }; uploadProgress(inventoryFiles.length ? 'Converting pictures to sharp WebP...' : 'Adding item...', b); try { itemData.images = await Promise.all(inventoryFiles.map(encodeImage)); uploadProgress(inventoryFiles.length ? 'Uploading WebP pictures...' : 'Adding item...', b); if (await change('inventory', 'add', itemData)) toast('Item added') } catch (er) { toast('Could not convert a picture. Choose another image.') } finally { $('uploadOverlay').hidden = true; if (b.isConnected) { b.disabled = false; b.textContent = 'Add item' } } return }
+      if (id === 'dsw') { var t = $('df').value; $('df').value = $('dt').value; $('dt').value = t; cnv(); return }
+      if (id === 'wsw') { var u = $('wf').value; $('wf').value = $('wt').value; $('wt').value = u; cnv() }
+    });
+    document.addEventListener('input', function (e) {
+      var t = e.target;
+      if (t.id === 'browseSearch') { var query = t.value.trim().toLowerCase(); $('browseGrid').querySelectorAll('.browse-card').forEach(function (card) { card.hidden = !card.textContent.toLowerCase().includes(query) }); return }
+      if (t.id === 'budgetPercent') { var rate = Number(t.value); if (t.value !== '' && Number.isFinite(rate) && rate >= 0 && rate <= 100) { budgetPercent = rate; updateBudget() } return }
+      if (t.id === 'isr') { IS = t.value; var p = t.selectionStart; show(); var n = $('isr'); n.focus(); n.setSelectionRange(p, p); return }
+      if (t.id === 'ibfilter') { IB = t.value; var p = t.selectionStart; show(); var n = $('ibfilter'); n.focus(); n.setSelectionRange(p, p); return }
+      if (t.dataset.qi) { var a = t.dataset.qi.split(':'), r = QI[+a[1]]; r[a[0]] = a[0] === 'd' ? t.value : (+t.value || 0); qSum(); return }
+      if (t.id === 'qin' || t.id === 'qd') qSum();
+      if (/^(dv|wv)$/.test(t.id)) cnv()
+    });
+    document.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t.dataset.qdoc !== undefined) { quoteDocuments[+t.dataset.qdoc].text = t.value; return }
+      if (t.id === 'letterheadSelect') { change('settings', 'selectLetterhead', { id: t.value }).then(function (ok) { if (ok) toast(t.value ? 'Letterhead selected' : 'Letterhead turned off') }); return }
+      if (t.id === 'qscanCamera' || t.id === 'qscanFile') { var scanFiles = Array.from(t.files || []); if (scanFiles.length > 8 || scanFiles.some(function (f) { return !validImageFile(f) })) { toast('Choose up to eight document photos'); t.value = ''; return } Promise.all(scanFiles.map(enhanceScan)).then(function (scans) { quoteScans = quoteScans.concat(scans).slice(0, 8); renderQuoteScans() }).catch(function (error) { console.error('Document scan enhancement failed:', error); toast('Could not enhance that photo. Try a clearer image.') }).finally(function () { t.value = '' }); return }
+      if (t.dataset.metricPeriod) { METRIC_PERIOD[t.dataset.metricPeriod] = t.value; show(); return }
+      if (/^(df|dt|wf|wt)$/.test(t.id)) cnv();
+      if (t.id === 'iorder') { IORDER = t.value; show(); return }
+      if (t.id === 'qp' && t.value) { var p = DB.products.filter(function (x) { return x.id == t.value })[0]; if (QI.length === 1 && !QI[0].d && !QI[0].p) QI = []; QI.push({ d: p.name + ' – ' + p.cat.toLowerCase(), q: 1, p: p.price, productId: p.id }); qItems() }
+      if (t.dataset.qs) { change('quotes', 'status', { id: +t.dataset.qs, status: t.value }).then(function (ok) { if (ok) toast('Status updated') }) }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (cur !== 'tools' || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+      var k = e.key, m = { '*': '×', '/': '÷', '-': '−', 'Enter': '=', 'Escape': 'C', 'Backspace': 'bs' };
+      if (/^[0-9.+%]$/.test(k) || m[k]) { e.preventDefault(); ck(m[k] || k) }
+    });
+    window.addEventListener('hashchange', show);
+    window.addEventListener('popstate', show);
+    $('today').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    var healthSamples = [], healthPending = false;
+    var healthState = { status: 'Checking Neon database and server…', response: '—', database: '—', uptime: '—', ping: 'Random-signal ping every 10 minutes (plus server-side and GitHub Actions background keep-alive).' };
+    function renderHealth() { if (cur !== 'health') return; $('healthStatus').textContent = healthState.status; $('healthResponse').textContent = healthState.response; $('healthDatabase').textContent = healthState.database; $('healthUptime').textContent = healthState.uptime; $('pingStatus').textContent = healthState.ping; var max = Math.max(300, ...healthSamples.map(function (s) { return s.ms || 0 })); $('healthChart').innerHTML = healthSamples.map(function (s) { return '<span class="' + (s.ok ? '' : 'bad') + '" style="height:' + Math.max(8, Math.round((s.ms || max) / max * 100)) + '%" title="' + (s.ok ? s.ms + ' ms' : 'Unavailable') + '"></span>' }).join(''); $('healthChart').setAttribute('aria-label', healthSamples.length ? healthSamples.map(function (s) { return s.ok ? s.ms + ' milliseconds' : 'unavailable' }).join(', ') : 'No health samples yet') }
+    async function checkHealth() { if (healthPending) return; healthPending = true; var started = performance.now(); try { var r = await fetch('/api/admin/health', { cache: 'no-store' }), data = await r.json(), ms = Math.round(performance.now() - started), ok = r.ok && data.ok; healthSamples.push({ ok: ok, ms: ms }); if (healthSamples.length > 12) healthSamples.shift(); healthState.status = ok ? 'Checked ' + new Date().toLocaleTimeString() : 'Backend or Neon database unavailable'; healthState.response = ms + ' ms'; healthState.database = data.database?.ok ? data.database.latencyMs + ' ms' : 'Unavailable'; healthState.uptime = data.server ? Math.floor(data.server.uptimeSeconds / 60) + ' min' : '—' } catch (e) { healthSamples.push({ ok: false, ms: 0 }); if (healthSamples.length > 12) healthSamples.shift(); healthState.status = 'Could not reach the server'; healthState.response = '—'; healthState.database = '—'; healthState.uptime = '—' } healthPending = false; renderHealth() }
+    async function pingBackend() { try { var r = await fetch('/api/admin/ping?signal=' + encodeURIComponent(crypto.randomUUID()), { cache: 'no-store' }); if (!r.ok) throw Error('Ping failed'); healthState.ping = 'Last random-signal ping: ' + new Date().toLocaleTimeString() + '. Next in about 10 minutes (server & GitHub Actions also ping in background).' } catch (e) { healthState.ping = 'Ping failed at ' + new Date().toLocaleTimeString() + '. Server-side and external keep-alive remain active.' } checkHealth() }
+    show();
+    setInterval(pingBackend, 10 * 60 * 1000);
+    refresh();
+    $('logout').onclick = async function () { await fetch('/api/admin/logout', { method: 'POST' }); location.replace('/straitgate-admin-login.html') };
+  </script>
 </body>
+
 </html>
